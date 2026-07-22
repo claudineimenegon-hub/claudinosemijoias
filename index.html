@@ -3127,7 +3127,7 @@
           <div class="afield full">
             <label>Token de Acesso (Bearer Token)</label>
             <div style="position:relative;display:flex;gap:6px;align-items:center">
-              <input type="text" id="cfg-me-token" placeholder="Seu token do Melhor Envio"
+              <input type="text" id="cfg-me-token" placeholder="Opcional se usar variável de ambiente"
                 style="flex:1;font-family:monospace;font-size:12px;letter-spacing:.5px"
                 autocomplete="off" spellcheck="false">
               <button type="button" onclick="toggleMETokenVisibility()"
@@ -3136,8 +3136,15 @@
                 title="Mostrar/ocultar token">👁️</button>
             </div>
             <p style="font-size:11px;color:var(--muted);margin-top:5px">
-              Obtenha em: <a href="https://melhorenvio.com.br/painel/gerenciar/tokens" target="_blank" style="color:var(--gold)">melhorenvio.com.br → Painel → Tokens</a><br>
-              Crie um token com a permissão <strong>shipping-calculate</strong> e cole aqui.
+              <strong>Recomendado (mais seguro):</strong> configure o token como variável de ambiente
+              <code style="background:#F0EAD8;padding:1px 5px;border-radius:3px">MELHOR_ENVIO_TOKEN</code>
+              no painel da Netlify (Site settings → Environment variables). Assim o token nunca fica
+              exposto no navegador e o cálculo funciona para todos os clientes.<br>
+              Opcionalmente defina também <code style="background:#F0EAD8;padding:1px 5px;border-radius:3px">MELHOR_ENVIO_CEP_ORIGEM</code>
+              e <code style="background:#F0EAD8;padding:1px 5px;border-radius:3px">MELHOR_ENVIO_AMBIENTE</code>.<br>
+              O campo acima é um <strong>fallback</strong> — só é usado enquanto a variável de ambiente não estiver definida.
+              Obtenha o token em: <a href="https://melhorenvio.com.br/painel/gerenciar/tokens" target="_blank" style="color:var(--gold)">melhorenvio.com.br → Painel → Tokens</a>
+              (permissão <strong>shipping-calculate</strong>).
             </p>
             <div id="me-token-status" style="display:none;margin-top:6px;font-size:11px;padding:6px 10px;border-radius:4px"></div>
           </div>
@@ -6616,7 +6623,8 @@ function getProxyURL() {
 
 async function calcularFreteME(cepDestino) {
   const cfg = getMEConfig();
-  if(!cfg.token || !cfg.cepOrigem) return null;
+  // Token e CEP de origem podem vir da variável de ambiente no servidor,
+  // então não exigimos que estejam preenchidos no cliente — basta o proxy.
   const proxy = getProxyURL();
   if(!proxy) return null;
 
@@ -6657,37 +6665,23 @@ async function testarMelhorEnvio() {
     ambiente:  (_el('cfg-me-ambiente')  && _el('cfg-me-ambiente').value)     || config.meAmbiente  || 'sandbox',
   };
 
-  // Validações básicas
-  if(!cfg.token) {
-    statusEl.className = 'me-status-err';
-    statusEl.innerHTML = '❌ <strong>Token não preenchido.</strong> Cole o token e clique em Salvar antes de testar.';
-    return;
-  }
-  if(!cfg.cepOrigem || cfg.cepOrigem.length !== 8) {
-    statusEl.className = 'me-status-err';
-    statusEl.innerHTML = '❌ <strong>CEP de origem inválido.</strong> Preencha o CEP (somente números) e salve.';
-    return;
-  }
-
   const proxy = getProxyURL();
 
-  // Se não tem proxy (arquivo local), validar só o token visualmente
+  // Sem proxy (arquivo aberto localmente) não é possível testar a API de verdade.
   if(!proxy) {
     statusEl.className = 'me-status-ok';
     statusEl.innerHTML = `
-      ✅ <strong>Configuração salva!</strong><br>
-      Token e CEP preenchidos. O cálculo de frete funcionará quando o site estiver
-      hospedado na <strong>Netlify</strong>.<br><br>
-      <strong>Como hospedar na Netlify (gratuito):</strong><br>
-      1. Baixe este arquivo HTML<br>
-      2. Coloque na pasta <code style="background:#F0EAD8;padding:1px 5px;border-radius:3px">claudino-joias/</code>
-         junto com a pasta <code style="background:#F0EAD8;padding:1px 5px;border-radius:3px">netlify/functions/</code> que está disponível para download abaixo<br>
-      3. Arraste a pasta inteira em <a href="https://app.netlify.com/drop" target="_blank" style="color:var(--gold)">app.netlify.com/drop</a><br>
-      4. Pronto — a Netlify cuida do resto automaticamente`;
+      ℹ️ <strong>Teste indisponível localmente.</strong><br>
+      O cálculo de frete funciona quando o site está hospedado na <strong>Netlify</strong>.<br>
+      O token pode ser preenchido no campo acima ou, de forma mais segura, na variável de
+      ambiente <code style="background:#F0EAD8;padding:1px 5px;border-radius:3px">MELHOR_ENVIO_TOKEN</code>
+      no painel da Netlify.`;
     return;
   }
 
-  // Com proxy disponível — testar de verdade
+  // Com proxy: o token/CEP de origem podem vir do formulário OU da variável de
+  // ambiente no servidor, então não bloqueamos quando os campos estão vazios —
+  // o servidor responde 401/422 se não houver configuração em lugar nenhum.
   statusEl.innerHTML = '⏳ Testando chamada à API...';
   try {
     const resp = await fetch(proxy, {
@@ -6707,9 +6701,10 @@ async function testarMelhorEnvio() {
 
     if(resp.status === 401 || (data && data.message && data.message.includes('Unauthenticated'))) {
       statusEl.className = 'me-status-err';
-      statusEl.innerHTML = '❌ <strong>Token inválido ou sem permissão.</strong><br>'
+      statusEl.innerHTML = '❌ <strong>Token inválido, ausente ou sem permissão.</strong><br>'
         + 'Verifique em <a href="https://melhorenvio.com.br/painel/gerenciar/tokens" target="_blank" style="color:#9A7020">melhorenvio.com.br → Tokens</a> '
-        + 'se o token tem a permissão <strong>shipping-calculate</strong> e se o ambiente (sandbox/produção) está correto.';
+        + 'se o token tem a permissão <strong>shipping-calculate</strong> e se o ambiente (sandbox/produção) está correto.<br>'
+        + 'Confirme também se a variável de ambiente <strong>MELHOR_ENVIO_TOKEN</strong> está definida na Netlify (ou preencha o token no campo acima).';
       return;
     }
     // 422 — dados inválidos. O caso mais comum é o CEP de origem recusado.
@@ -7002,7 +6997,9 @@ async function consultarFreteAdmin() {
   const cfg   = getMEConfig();
   const proxy = getProxyURL();
 
-  if(cfg.token && cfg.cepOrigem && proxy) {
+  // Tenta o Melhor Envio sempre que houver proxy — o token/CEP de origem
+  // podem estar configurados como variável de ambiente no servidor.
+  if(proxy) {
     try {
       const resp = await fetch(proxy, {
         method: 'POST',
@@ -7109,9 +7106,8 @@ async function buscarCEP() {
     ? currentProduct.preco
     : cartVarejo.reduce((s,i) => s + i.preco * i.qty, 0);
 
-  // 2. Tentar Melhor Envio
-  const cfg = getMEConfig();
-  if(cfg.token && cfg.cepOrigem) {
+  // 2. Tentar Melhor Envio (token/CEP de origem podem estar no servidor)
+  {
     const listaEl = document.getElementById('end-lista-fretes');
     const opcoesEl = document.getElementById('end-opcoes-frete');
     opcoesEl.style.display = '';
@@ -7121,7 +7117,7 @@ async function buscarCEP() {
       renderOpcoesFrete(servicos, subtotal);
       return; // Aguarda cliente selecionar uma opção
     }
-    // ME falhou — usar fallback
+    // ME falhou ou não configurado — usar fallback
     opcoesEl.style.display = 'none';
   }
 
