@@ -2574,7 +2574,7 @@
       <button class="modal-close" onclick="document.getElementById('modal-opcoes').classList.remove('open')">×</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">Escolha como prefere pagar. Aceitamos cartão de crédito via Mercado Pago ou Pix com confirmação pelo Instagram.</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">Escolha como prefere pagar. Aceitamos cartão de crédito via Mercado Pago ou Pix com confirmação pelo WhatsApp.</p>
       <div style="display:flex;flex-direction:column;gap:14px">
         <div class="opcao-pay" onclick="selecionarOpcao('mp')">
           <div class="opcao-icon">💳</div>
@@ -2588,7 +2588,7 @@
           <div class="opcao-icon">💚</div>
           <div class="opcao-info">
             <strong>Pix</strong>
-            <span>Pagamento instantâneo · Confirmação em segundos · Envie o comprovante pelo Instagram</span>
+            <span>Pagamento instantâneo · Confirmação em segundos · Envie o comprovante pelo WhatsApp</span>
           </div>
           <div class="opcao-seta">›</div>
         </div>
@@ -2642,14 +2642,14 @@
         <div class="pix-box">
           <div class="pix-logo">💚</div>
           <h4>Pagamento via Pix</h4>
-          <p>Copie a chave abaixo e realize o pagamento. Após o pagamento, envie o comprovante pelo Instagram para confirmar seu pedido.</p>
+          <p>Copie a chave abaixo e realize o pagamento. Após o pagamento, envie o comprovante pelo WhatsApp para confirmar seu pedido.</p>
           <div class="pix-key" id="pix-key-display">Defina sua chave Pix no Painel Admin</div>
           <button class="btn-copy" onclick="copiarPix()">📋 Copiar Chave Pix</button>
           <ol class="pix-inst">
             <li>Copie a chave Pix acima</li>
             <li>Abra o app do seu banco</li>
             <li>Cole a chave e confirme o valor: <strong id="pix-valor">—</strong></li>
-            <li>Envie o comprovante pelo Instagram: <strong>@claudinojoias</strong></li>
+            <li>Envie o comprovante pelo WhatsApp: <strong>(45) 99838-9436</strong></li>
           </ol>
         </div>
       </div>
@@ -4080,8 +4080,9 @@
               <input type="text" id="cfg-msg-sucesso" placeholder="✅ Pagamento processado!...">
             </div>
             <div class="afield">
-              <label>Instagram para envio de comprovante</label>
-              <input type="text" id="cfg-instagram" placeholder="@claudinojoias">
+            <label>WhatsApp para envio de comprovante</label>
+            <input type="text" id="cfg-instagram" placeholder="5545998389436">
+              
             </div>
             <div class="afield">
               <label>Máximo de parcelas</label>
@@ -7248,7 +7249,7 @@ async function buscarCEP() {
   const zona = calcularFretePorCEP(cep);
   resultEl.classList.add('show');
   if(!zona) {
-    resultEl.innerHTML = '<h4>CEP não atendido</h4><p>Não fazemos entregas neste CEP no momento. Entre em contato pelo Instagram.</p>';
+    resultEl.innerHTML = '<h4>CEP não atendido</h4><p>Não fazemos entregas neste CEP no momento. Entre em contato pelo WhatsApp.</p>';
     return;
   }
   const freteFinal = (config.freteGratis && subtotal >= config.freteGratis) ? 0 : zona.valor;
