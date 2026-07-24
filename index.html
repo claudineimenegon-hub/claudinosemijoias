@@ -4239,6 +4239,37 @@ let products = JSON.parse(localStorage.getItem('cj_products') || 'null') || [
   { id:6, nome:'Anel Coração Ouro', cat:'anel', preco:69.90, precoOld:null, desc:'Anel ajustável com detalhes de coração banhado a ouro 18k.', badge:'', emoji:'❤️', img:'' },
 ];
 let config = JSON.parse(localStorage.getItem('cj_config') || '{}');
+
+// ── Sincronização de config entre dispositivos ──────────────────────
+async function syncConfigDoServidor() {
+  try {
+    const base = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
+      ? '' : window.location.origin;
+    const resp = await fetch(`${base}/.netlify/functions/config-get`);
+    const data = await resp.json();
+    if (data.ok && data.config && Object.keys(data.config).length > 0) {
+      config = { ...config, ...data.config };
+      localStorage.setItem('cj_config', JSON.stringify(config));
+    }
+  } catch (e) {
+    console.warn('Config: usando localStorage local.', e.message);
+  }
+}
+
+async function salvarConfigNoServidor(cfg) {
+  try {
+    const base = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
+      ? '' : window.location.origin;
+    await fetch(`${base}/.netlify/functions/config-set`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(cfg),
+    });
+  } catch (e) {
+    console.warn('Config: erro ao salvar no servidor.', e.message);
+  }
+}
+// ────────────────────────────────────────────────────────────────────  
 let cadastrosAtacado = JSON.parse(localStorage.getItem('cj_atacado') || '[]');
 let produtosAtacado  = JSON.parse(localStorage.getItem('cj_prod_atacado') || '[]');
 let currentProduct = null;
@@ -4791,6 +4822,7 @@ function salvarConfig() {
   config.btnPagarTxt   = document.getElementById('cfg-btn-pagar-txt')?.value.trim() || config.btnPagarTxt || '';
   config.msgSucesso    = document.getElementById('cfg-msg-sucesso')?.value.trim() || config.msgSucesso || '';
   localStorage.setItem('cj_config', JSON.stringify(config));
+  salvarConfigNoServidor(config); // ← sincroniza com todos os dispositivos
   aplicarTextosDinamicos();
   renderLogo();
   // Aplicar botão pagar texto
@@ -7983,6 +8015,12 @@ function initCarouselTouch(id) {
     startX = null; isDragging = false;
   });
 }
+// ── Inicialização: sincroniza config do servidor ao abrir a página ──
+(async () => {
+  await syncConfigDoServidor();
+  loadConfig();
+})();
+// ────────────────────────────────────────────────────────────────────
 </script>
 </body>
 </html>
