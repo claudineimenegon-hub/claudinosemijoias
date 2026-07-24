@@ -656,6 +656,7 @@
   }
   .admin-tabs {
     display: flex;
+    flex-wrap: wrap;
     border-bottom: 1px solid #EEE8DC;
     background: var(--bg);
     overflow-x: auto;
@@ -2671,6 +2672,7 @@
       <button class="atab" onclick="switchAdminTab('prod-atacado',this)">📦 Cat.</button>
       <button class="atab" onclick="switchAdminTab('links',this)">🔗 Links</button>
       <button class="atab" onclick="switchAdminTab('frete',this)">🚚 Frete</button>
+      <button class="atab" onclick="switchAdminTab('pedidos',this)">📋 Pedidos</button>
       <button class="atab" onclick="switchAdminTab('config',this)" style="color:var(--gold)">⚙️ Config</button>
       <button class="atab" onclick="switchAdminTab('ferramentas',this)">🔗 Redes</button>
     </div>
@@ -4204,6 +4206,23 @@
         </div>
       </div>
     </div><!-- fim tab-ferramentas -->
+    
+    <!-- ── ABA PEDIDOS ─────────────────────────────── -->
+    <div class="atab-content" id="tab-pedidos">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400">📋 Pedidos</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select id="filtro-pedidos" onchange="renderPedidos()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--cream);font-size:13px">
+            <option value="todos">Todos</option>
+            <option value="aprovado">✅ Aprovados</option>
+            <option value="pendente">⏳ Aguardando Pix</option>
+            <option value="enviado">🚚 Enviados</option>
+          </select>
+          <button class="btn-outline" style="padding:6px 12px;font-size:12px" onclick="limparPedidosAntigos()">🗑 Limpar antigos</button>
+        </div>
+      </div>
+      <div id="lista-pedidos-admin"></div>
+    </div><!-- fim tab-pedidos -->
 
   </div>
 </div>
