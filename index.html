@@ -4495,6 +4495,7 @@ function finalizarPagamentoCartao(formData) {
     .then(resp => resp.json().catch(() => ({})).then(data => ({ ok: resp.ok, data })))
     .then(({ ok, data }) => {
       if(ok && data.status === 'approved') {
+        salvarPedido('aprovado');
         if(successBox) {
           successBox.textContent = config.msgSucesso || '✅ Pagamento aprovado! Você receberá a confirmação por email.';
           successBox.classList.add('show');
@@ -4533,6 +4534,107 @@ function traduzErroCartao(detail) {
   return mapa[detail] || '';
 }
 
+// ─── PEDIDOS ─────────────────────────────────────────────────────────────────
+
+function salvarPedido(status) {
+  let itens = [];
+  if (typeof _enderecoContexto !== 'undefined' && _enderecoContexto === 'produto' && typeof currentProduct !== 'undefined' && currentProduct) {
+    itens = [{ nome: currentProduct.nome, preco: currentProduct.preco, qty: 1, emoji: currentProduct.emoji || '💍' }];
+  } else if (typeof cartVarejo !== 'undefined') {
+    itens = cartVarejo.map(i => ({ nome: i.nome, preco: i.preco, qty: i.qty, emoji: i.emoji || '💍' }));
+  }
+  const subtotal   = itens.reduce((s, i) => s + i.preco * i.qty, 0);
+  const frete      = typeof freteAtual !== 'undefined' && freteAtual ? freteAtual : null;
+  const valorFrete = frete ? frete.valor : 0;
+  const pedido = {
+    id:      Date.now(),
+    status:  status || 'pendente',
+    data:    new Date().toLocaleString('pt-BR'),
+    itens,
+    subtotal,
+    frete:   frete ? { valor: valorFrete, nome: frete.nome || '', prazo: frete.prazo || '' } : { valor: 0, nome: 'A combinar', prazo: '' },
+    total:   subtotal + valorFrete,
+    endereco: typeof enderecoAtual !== 'undefined' ? { ...enderecoAtual } : {},
+  };
+  const pedidos = JSON.parse(localStorage.getItem('cj_pedidos') || '[]');
+  pedidos.unshift(pedido);
+  localStorage.setItem('cj_pedidos', JSON.stringify(pedidos));
+}
+
+function renderPedidos() {
+  const el = document.getElementById('lista-pedidos-admin');
+  if (!el) return;
+  const filtro  = (document.getElementById('filtro-pedidos') || {}).value || 'todos';
+  let pedidos   = JSON.parse(localStorage.getItem('cj_pedidos') || '[]');
+  if (filtro !== 'todos') pedidos = pedidos.filter(p => p.status === filtro);
+  if (!pedidos.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:14px;padding:20px 0">Nenhum pedido' + (filtro !== 'todos' ? ' com este filtro' : '') + ' ainda.</p>';
+    return;
+  }
+  const badgeColor = { aprovado:'#2D7A4A', pendente:'#B8860B', enviado:'#1A5276' };
+  const badgeLabel = { aprovado:'✅ Aprovado', pendente:'⏳ Aguard. Pix', enviado:'🚚 Enviado' };
+  el.innerHTML = pedidos.map(p => {
+    const end  = p.endereco || {};
+    const cepF = (end.cep || '').replace(/(\d{5})(\d{3})/, '$1-$2');
+    const endFormatado =
+      (end.rua || '') + (end.numero ? ', ' + end.numero : '') + (end.complemento ? ' — ' + end.complemento : '') + '\n' +
+      (end.bairro ? end.bairro + ' · ' : '') + (end.cidade || '') + ' - ' + (end.estado || '') + '\n' +
+      'CEP: ' + cepF;
+    const itensHtml = (p.itens || []).map(i =>
+      `<span style="display:inline-block;background:var(--gold-pale,#fdf6e3);border-radius:4px;padding:2px 8px;font-size:12px;margin:2px">${i.emoji} ${i.nome} ×${i.qty} — R$ ${(i.preco * i.qty).toFixed(2).replace('.', ',')}</span>`
+    ).join('');
+    const endEscapado = endFormatado.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');
+    return `<div style="border:1px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:12px;background:var(--cream)">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+        <span style="font-size:12px;color:var(--muted)">#${p.id} · ${p.data}</span>
+        <span style="background:${badgeColor[p.status]||'#555'};color:#fff;border-radius:20px;padding:3px 10px;font-size:12px">${badgeLabel[p.status]||p.status}</span>
+      </div>
+      <div style="margin-bottom:8px">${itensHtml}</div>
+      <div style="display:flex;gap:12px;font-size:13px;margin-bottom:10px;flex-wrap:wrap">
+        <span>Subtotal: <strong>R$ ${(p.subtotal||0).toFixed(2).replace('.',',')}</strong></span>
+        <span>Frete: <strong>${p.frete&&p.frete.valor===0?'Grátis':'R$ '+(p.frete&&p.frete.valor||0).toFixed(2).replace('.',',')}</strong>${p.frete&&p.frete.nome?' ('+p.frete.nome+')':''}</span>
+        <span style="color:var(--gold)"><strong>Total: R$ ${(p.total||0).toFixed(2).replace('.',',')}</strong></span>
+      </div>
+      <div style="background:#fff;border:1px solid var(--border);border-radius:6px;padding:10px;font-size:13px;margin-bottom:10px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">📍 Endereço de entrega</div>
+        <div style="white-space:pre-line;line-height:1.6">${endFormatado}</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-outline" style="font-size:12px;padding:6px 12px"
+          onclick="navigator.clipboard.writeText('${endEscapado}').then(()=>alert('✅ Endereço copiado!'))">📋 Copiar Endereço</button>
+        ${p.status!=='enviado'?`<button class="btn-save" style="font-size:12px;padding:6px 14px" onclick="marcarPedido(${p.id},'enviado')">🚚 Marcar como Enviado</button>`:''}
+        ${p.status==='pendente'?`<button class="btn-outline" style="font-size:12px;padding:6px 12px" onclick="marcarPedido(${p.id},'aprovado')">✅ Confirmar Pix</button>`:''}
+        <button class="btn-outline" style="font-size:12px;padding:6px 12px;color:#c0392b;border-color:#c0392b" onclick="excluirPedido(${p.id})">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function marcarPedido(id, novoStatus) {
+  const pedidos = JSON.parse(localStorage.getItem('cj_pedidos') || '[]');
+  const idx = pedidos.findIndex(p => p.id === id);
+  if (idx === -1) return;
+  pedidos[idx].status = novoStatus;
+  localStorage.setItem('cj_pedidos', JSON.stringify(pedidos));
+  renderPedidos();
+}
+
+function excluirPedido(id) {
+  if (!confirm('Excluir este pedido?')) return;
+  const pedidos = JSON.parse(localStorage.getItem('cj_pedidos') || '[]').filter(p => p.id !== id);
+  localStorage.setItem('cj_pedidos', JSON.stringify(pedidos));
+  renderPedidos();
+}
+
+function limparPedidosAntigos() {
+  if (!confirm('Remover pedidos com mais de 60 dias?')) return;
+  const limite  = Date.now() - 60 * 24 * 60 * 60 * 1000;
+  const pedidos = JSON.parse(localStorage.getItem('cj_pedidos') || '[]').filter(p => p.id > limite);
+  localStorage.setItem('cj_pedidos', JSON.stringify(pedidos));
+  renderPedidos();
+}
+
+// ─── FIM PEDIDOS ─────────────────────────────────────────────────────
 function copiarPix() {
   const key = config.pixKey || '';
   if(!key) { alert('Configure sua chave Pix no Painel Admin → Configurações'); return; }
@@ -4540,6 +4642,7 @@ function copiarPix() {
     const btn = document.querySelector('.btn-copy');
     btn.textContent = '✓ Copiado!';
     setTimeout(() => btn.textContent = '📋 Copiar Chave Pix', 2000);
+    salvarPedido('pendente');
   });
 }
 
@@ -4572,6 +4675,7 @@ function switchAdminTab(tab, btn) {
   if(tab === 'links')        popularSelectProdutos();
   if(tab === 'ferramentas')  carregarRedes();
   if(tab === 'frete')        { renderZonasFrete(); loadConfigMelhorEnvio(); if(config.freteGratis !== undefined) { const fg = document.getElementById('cfg-frete-gratis'); if(fg) fg.value = config.freteGratis; } }
+  if(tab === 'pedidos')     renderPedidos(); 
   if(tab === 'sobre')       { loadSobre(); }
   if(tab === 'config')      {
     loadConfig();
