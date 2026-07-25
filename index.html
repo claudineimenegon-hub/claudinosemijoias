@@ -4241,19 +4241,52 @@ let products = JSON.parse(localStorage.getItem('cj_products') || 'null') || [
 let config = JSON.parse(localStorage.getItem('cj_config') || '{}');
 
 // ── Sincronização de config entre dispositivos ──────────────────────
+function _getBase() {
+  return (window.location.hostname === 'localhost' || window.location.protocol === 'file:')
+    ? '' : window.location.origin;
+}
+
 async function syncConfigDoServidor() {
   try {
-    const base = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
-      ? '' : window.location.origin;
-    const resp = await fetch(`${base}/.netlify/functions/config-get`);
-    const data = await resp.json();
-    if (data.ok && data.config && Object.keys(data.config).length > 0) {
-      config = { ...config, ...data.config };
+    const resp = await fetch(`${_getBase()}/.netlify/functions/config-get`);
+    const json = await resp.json();
+    if (!json.ok || !json.data) return;
+    const d = json.data;
+
+    if (d.config && Object.keys(d.config).length > 0) {
+      config = { ...config, ...d.config };
       localStorage.setItem('cj_config', JSON.stringify(config));
     }
+    if (Array.isArray(d.products) && d.products.length > 0) {
+      products = d.products;
+      localStorage.setItem('cj_products', JSON.stringify(products));
+    }
+    if (Array.isArray(d.frete_zonas)) {
+      zonasFrete = d.frete_zonas;
+      localStorage.setItem('cj_frete_zonas', JSON.stringify(zonasFrete));
+    }
+    if (d.redes && Object.keys(d.redes).length > 0) {
+      localStorage.setItem('cj_redes', JSON.stringify(d.redes));
+    }
   } catch (e) {
-    console.warn('Config: usando localStorage local.', e.message);
+    console.warn('Sync: usando dados locais.', e.message);
   }
+}
+
+async function salvarNoServidor(dados) {
+  try {
+    await fetch(`${_getBase()}/.netlify/functions/config-set`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(dados),
+    });
+  } catch (e) {
+    console.warn('Sync: erro ao salvar no servidor.', e.message);
+  }
+}
+
+async function salvarConfigNoServidor(cfg) {
+  await salvarNoServidor({ config: cfg });
 }
 
 async function salvarConfigNoServidor(cfg) {
@@ -4278,7 +4311,7 @@ let editIdAtacado = null;
 let checkoutTotal  = 0;  // valor final (com frete) a ser cobrado no checkout
 let checkoutTitulo = ''; // descrição do pedido para o Mercado Pago
 
-function save() { localStorage.setItem('cj_products', JSON.stringify(products)); }
+function save() { localStorage.setItem('cj_products', JSON.stringify(products)); salvarNoServidor({ products }); }
 function saveAtacado() { localStorage.setItem('cj_atacado', JSON.stringify(cadastrosAtacado)); }
 function saveProdAtacado() { localStorage.setItem('cj_prod_atacado', JSON.stringify(produtosAtacado)); }
 
@@ -7023,7 +7056,7 @@ let zonasFrete   = JSON.parse(localStorage.getItem('cj_frete_zonas') || '[]');
 let freteAtual   = null; // { valor, prazo, nome, obs }
 let enderecoAtual = {};
 
-function saveZonas() { localStorage.setItem('cj_frete_zonas', JSON.stringify(zonasFrete)); }
+function saveZonas() { localStorage.setItem('cj_frete_zonas', JSON.stringify(zonasFrete)); salvarNoServidor({ frete_zonas: zonasFrete }); }
 
 function maskCEP(el) {
   let v = el.value.replace(/\D/g,'').substring(0,8);
@@ -7628,6 +7661,7 @@ function salvarRedes() {
     if (inp && inp.value.trim()) cfg[id] = inp.value.trim();
   });
   localStorage.setItem('cj_redes', JSON.stringify(cfg));
+  salvarNoServidor({ redes: cfg });
   const ok = document.getElementById('ferr-ok');
   if (ok) { ok.style.display='inline'; setTimeout(()=>ok.style.display='none', 2500); }
   renderizarBarSocialRodape();
