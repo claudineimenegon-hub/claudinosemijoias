@@ -9,17 +9,17 @@ exports.handler = async (event, context) => {
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ok: false, error: 'NETLIFY_SITE_ID ou NETLIFY_ACCESS_TOKEN não configurados' }),
+      body: JSON.stringify({ ok: false, error: 'Credenciais não configuradas' }),
     };
   }
 
   try {
-    const store  = getStore({ name: 'site-config', siteID, token });
-    const config = await store.get('config', { type: 'json' });
+    const store = getStore({ name: 'site-config', siteID, token });
+    const data  = await store.get('store', { type: 'json' });
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ok: true, config: config || {} }),
+      body: JSON.stringify({ ok: true, data: data || {} }),
     };
   } catch (err) {
     return {
