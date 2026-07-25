@@ -4682,7 +4682,7 @@ function copiarPix() {
 function openAdmin() {
   if(!adminAutenticado()) { openAdminLogin(); return; }
   renderAdminList();
-  loadConfig();
+  syncConfigDoServidor().then(() => loadConfig());
   adicionarBtnTrocarSenha();
   document.getElementById('admin-panel').classList.add('open');
   document.body.style.overflow = 'hidden';
