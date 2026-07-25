@@ -13,7 +13,7 @@ exports.handler = async (event, context) => {
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ok: false, error: 'NETLIFY_SITE_ID ou NETLIFY_ACCESS_TOKEN não configurados' }),
+      body: JSON.stringify({ ok: false, error: 'Credenciais não configuradas' }),
     };
   }
 
@@ -26,7 +26,12 @@ exports.handler = async (event, context) => {
 
   try {
     const store = getStore({ name: 'site-config', siteID, token });
-    await store.setJSON('config', body);
+
+    // Carrega dados existentes e mescla (só atualiza o que foi enviado)
+    const atual = await store.get('store', { type: 'json' }) || {};
+    const novo  = { ...atual, ...body };
+    await store.setJSON('store', novo);
+
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
