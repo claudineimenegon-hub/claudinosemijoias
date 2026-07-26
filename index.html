@@ -2454,11 +2454,29 @@
       <!-- Etapa 2: Endereço completo -->
       <div id="end-step2" style="display:none">
         <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Confirme ou complete o endereço de entrega.</p>
-        <div class="admin-form">
-          <div class="afield full">
-            <label>Logradouro</label>
-            <input type="text" id="end-rua" placeholder="Rua, Avenida...">
-          </div>
+         <div class="admin-form">
+  <!-- Dados pessoais -->
+  <div class="afield full">
+    <label>Nome completo <span style="color:#c0392b">*</span></label>
+    <input type="text" id="end-nome-cliente" placeholder="Seu nome completo">
+  </div>
+  <div class="afield">
+    <label>E-mail <span style="color:#c0392b">*</span></label>
+    <input type="email" id="end-email-cliente" placeholder="seu@email.com">
+  </div>
+  <div class="afield">
+    <label>WhatsApp <span style="color:#c0392b">*</span></label>
+    <input type="tel" id="end-tel-cliente" placeholder="(47) 99999-9999" maxlength="15" oninput="this.value=this.value.replace(/\D/g,'').replace(/(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d)/,'$1-$2')">
+  </div>
+  <div class="afield">
+    <label>CPF</label>
+    <input type="text" id="end-cpf-cliente" placeholder="000.000.000-00" maxlength="14" oninput="this.value=this.value.replace(/\D/g,'').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2')">
+  </div>
+  <!-- Endereço -->
+  <div class="afield full" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+    <label>Logradouro</label>
+    <input type="text" id="end-rua" placeholder="Rua, Avenida...">
+  </div>
           <div class="afield">
             <label>Número</label>
             <input type="text" id="end-numero" placeholder="123">
@@ -4647,13 +4665,20 @@ function renderPedidos() {
       'CEP: ' + cepF;
     const itensHtml = (p.itens || []).map(i =>
       `<span style="display:inline-block;background:var(--gold-pale,#fdf6e3);border-radius:4px;padding:2px 8px;font-size:12px;margin:2px">${i.emoji} ${i.nome} ×${i.qty} — R$ ${(i.preco * i.qty).toFixed(2).replace('.', ',')}</span>`
-    ).join('');
+    ).join('');const clienteInfo = [
+      end.nomeCliente  ? `<strong>${end.nomeCliente}</strong>` : '',
+      end.emailCliente ? `📧 ${end.emailCliente}` : '',
+      end.telCliente   ? `📱 ${end.telCliente}` : '',
+      end.cpfCliente   ? `CPF: ${end.cpfCliente}` : '',
+    ].filter(Boolean).join(' &nbsp;·&nbsp; ');
+    
     const endEscapado = endFormatado.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');
     return `<div style="border:1px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:12px;background:var(--cream)">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:10px">
         <span style="font-size:12px;color:var(--muted)">#${p.id} · ${p.data}</span>
         <span style="background:${badgeColor[p.status]||'#555'};color:#fff;border-radius:20px;padding:3px 10px;font-size:12px">${badgeLabel[p.status]||p.status}</span>
       </div>
+      ${clienteInfo ? `<div style="font-size:13px;margin-bottom:10px;padding:8px 10px;background:#fff;border-radius:6px;border:1px solid var(--border)">${clienteInfo}</div>` : ''}
       <div style="margin-bottom:8px">${itensHtml}</div>
       <div style="display:flex;gap:12px;font-size:13px;margin-bottom:10px;flex-wrap:wrap">
         <span>Subtotal: <strong>R$ ${(p.subtotal||0).toFixed(2).replace('.',',')}</strong></span>
@@ -4667,6 +4692,7 @@ function renderPedidos() {
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-outline" style="font-size:12px;padding:6px 12px"
           onclick="navigator.clipboard.writeText('${endEscapado}').then(()=>alert('✅ Endereço copiado!'))">📋 Copiar Endereço</button>
+          <button class="btn-outline" style="font-size:12px;padding:6px 12px" onclick="imprimirPedido(${p.id})">🖨️ PDF</button>
         ${p.status!=='enviado'?`<button class="btn-save" style="font-size:12px;padding:6px 14px" onclick="marcarPedido(${p.id},'enviado')">🚚 Marcar como Enviado</button>`:''}
         ${p.status==='pendente'?`<button class="btn-outline" style="font-size:12px;padding:6px 12px" onclick="marcarPedido(${p.id},'aprovado')">✅ Confirmar Pix</button>`:''}
         <button class="btn-outline" style="font-size:12px;padding:6px 12px;color:#c0392b;border-color:#c0392b" onclick="excluirPedido(${p.id})">🗑</button>
@@ -4675,6 +4701,71 @@ function renderPedidos() {
   }).join('');
 }
 
+function imprimirPedido(id) {
+  const pedidos = JSON.parse(localStorage.getItem('cj_pedidos') || '[]');
+  const p = pedidos.find(x => x.id === id);
+  if (!p) return;
+  const end  = p.endereco || {};
+  const cepF = (end.cep || '').replace(/(\d{5})(\d{3})/, '$1-$2');
+  const itensRows = (p.itens || []).map(i =>
+    `<tr><td>${i.emoji||'💍'} ${i.nome}</td><td style="text-align:center">${i.qty}</td><td style="text-align:right">R$ ${(i.preco*i.qty).toFixed(2).replace('.',',')}</td></tr>`
+  ).join('');
+  const statusLabel = { aprovado:'✅ Aprovado', pendente:'⏳ Aguardando Pix', enviado:'🚚 Enviado' };
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Pedido #${p.id}</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 13px; color: #222; margin: 0; padding: 30px; }
+    h1 { font-size: 20px; margin-bottom: 4px; color: #1A1610; }
+    .sub { color: #888; font-size: 12px; margin-bottom: 20px; }
+    .badge { display:inline-block; background:#2D7A4A; color:#fff; border-radius:20px; padding:3px 12px; font-size:12px; margin-bottom:16px; }
+    section { margin-bottom: 20px; }
+    h2 { font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: #888; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; }
+    td, th { padding: 7px 6px; border-bottom: 1px solid #f0f0f0; }
+    th { background: #f8f5ef; text-align: left; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+    .total { font-size: 16px; font-weight: bold; text-align: right; margin-top: 10px; color: #C9A84C; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .field { margin-bottom: 8px; }
+    .field label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; display: block; }
+    .field span { font-size: 13px; }
+    @media print { body { padding: 10px; } button { display: none; } }
+  </style></head><body>
+  <h1>🛍️ Claudino Joias — Pedido</h1>
+  <div class="sub">#${p.id} &nbsp;·&nbsp; ${p.data}</div>
+  <div class="badge">${statusLabel[p.status]||p.status}</div>
+  <section>
+    <h2>👤 Dados do Cliente</h2>
+    <div class="grid2">
+      <div class="field"><label>Nome</label><span>${end.nomeCliente||'—'}</span></div>
+      <div class="field"><label>WhatsApp</label><span>${end.telCliente||'—'}</span></div>
+      <div class="field"><label>E-mail</label><span>${end.emailCliente||'—'}</span></div>
+      <div class="field"><label>CPF</label><span>${end.cpfCliente||'—'}</span></div>
+    </div>
+  </section>
+  <section>
+    <h2>📍 Endereço de Entrega</h2>
+    <div>${end.rua||''}, ${end.numero||''}${end.complemento?' — '+end.complemento:''}</div>
+    <div>${end.bairro?end.bairro+' · ':''}${end.cidade||''} - ${end.estado||''}</div>
+    <div>CEP: ${cepF}</div>
+  </section>
+  <section>
+    <h2>🛒 Itens do Pedido</h2>
+    <table>
+      <thead><tr><th>Produto</th><th style="text-align:center">Qtd</th><th style="text-align:right">Valor</th></tr></thead>
+      <tbody>${itensRows}</tbody>
+    </table>
+    <table style="margin-top:10px">
+      <tr><td>Subtotal</td><td style="text-align:right">R$ ${(p.subtotal||0).toFixed(2).replace('.',',')}</td></tr>
+      <tr><td>Frete ${p.frete&&p.frete.nome?'('+p.frete.nome+')':''}</td><td style="text-align:right">${p.frete&&p.frete.valor===0?'Grátis':'R$ '+(p.frete&&p.frete.valor||0).toFixed(2).replace('.',',')}</td></tr>
+    </table>
+    <div class="total">Total: R$ ${(p.total||0).toFixed(2).replace('.',',')}</div>
+  </section>
+  <script>window.onload = () => window.print();<\/script>
+  </body></html>`;
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+}
 function marcarPedido(id, novoStatus) {
   const pedidos = JSON.parse(localStorage.getItem('cj_pedidos') || '[]');
   const idx = pedidos.findIndex(p => p.id === id);
@@ -7332,12 +7423,29 @@ function endStep2() {
 }
 
 function endStep3() {
+  const nome   = document.getElementById('end-nome-cliente').value.trim();
+  const email  = document.getElementById('end-email-cliente').value.trim();
+  const tel    = document.getElementById('end-tel-cliente').value.trim();
+  const cpf    = document.getElementById('end-cpf-cliente').value.trim();
   const rua    = document.getElementById('end-rua').value.trim();
   const numero = document.getElementById('end-numero').value.trim();
   const cidade = document.getElementById('end-cidade').value.trim();
   const estado = document.getElementById('end-estado').value.trim();
+  if(!nome)  { alert('Preencha seu nome completo.'); document.getElementById('end-nome-cliente').focus(); return; }
+  if(!email) { alert('Preencha seu e-mail.'); document.getElementById('end-email-cliente').focus(); return; }
+  if(!tel)   { alert('Preencha seu WhatsApp.'); document.getElementById('end-tel-cliente').focus(); return; }
   if(!rua || !numero || !cidade || !estado) { alert('Preencha pelo menos rua, número, cidade e estado.'); return; }
   enderecoAtual = {
+    ...enderecoAtual,
+    nomeCliente: nome,
+    emailCliente: email,
+    telCliente: tel,
+    cpfCliente: cpf,
+    rua, numero,
+    complemento: document.getElementById('end-complemento').value.trim(),
+    bairro:      document.getElementById('end-bairro').value.trim(),
+    cidade, estado
+  };
     ...enderecoAtual,
     rua, numero,
     complemento: document.getElementById('end-complemento').value.trim(),
