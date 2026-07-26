@@ -2550,10 +2550,7 @@
           onkeydown="if(event.key==='Enter') verificarSenhaAdmin()">
       </div>
       <button class="btn-pay" onclick="verificarSenhaAdmin()">🔓 Entrar no Painel</button>
-      <div class="login-hint">
-        Primeira vez? A senha padrão é <strong>admin123</strong><br>
-        <a onclick="abrirTrocaSenha()">Alterar senha →</a>
-      </div>
+      <div class="login-hint" id="login-lockout-msg" style="display:none;color:#c0392b;font-size:12px;margin-top:8px"></div>
     </div>
   </div>
 </div>
@@ -6397,18 +6394,14 @@ function testarNotificacoes() {
 }
 
 
-// Hash simples (não criptográfico — adequado para uso local/single-file)
-function hashSenha(s) {
-  let h = 0;
-  for(let i = 0; i < s.length; i++) {
-    h = Math.imul(31, h) + s.charCodeAt(i) | 0;
-  }
-  return h.toString(36);
+async function hashSenha(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-const SENHA_PADRAO_HASH = hashSenha('admin123');
+const SENHA_PADRAO_HASH = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9';
 
-function getSenhaHash() {
+async function getSenhaHash() {
   return localStorage.getItem('cj_admin_hash') || SENHA_PADRAO_HASH;
 }
 
@@ -6416,13 +6409,18 @@ function adminAutenticado() {
   return sessionStorage.getItem('cj_admin_ok') === '1';
 }
 
+function getLoginState() {
+  return JSON.parse(sessionStorage.getItem('cj_login_state') || '{"tentativas":0,"bloqueadoAte":0}');
+}
+function setLoginState(state) {
+  sessionStorage.setItem('cj_login_state', JSON.stringify(state));
+}
+
 function openAdminLogin() {
-  if(adminAutenticado()) {
-    openAdmin();
-    return;
-  }
+  if(adminAutenticado()) { openAdmin(); return; }
   document.getElementById('admin-senha-input').value = '';
   document.getElementById('login-error').classList.remove('show');
+  document.getElementById('login-lockout-msg').style.display = 'none';
   document.getElementById('modal-admin-login').classList.add('open');
   document.body.style.overflow = 'hidden';
   setTimeout(() => document.getElementById('admin-senha-input').focus(), 100);
@@ -6433,77 +6431,97 @@ function fecharLoginAdmin() {
   document.body.style.overflow = '';
 }
 
-function verificarSenhaAdmin() {
-  const input  = document.getElementById('admin-senha-input').value;
-  const errEl  = document.getElementById('login-error');
+async function verificarSenhaAdmin() {
+  const state = getLoginState();
+  const agora = Date.now();
+  if(state.bloqueadoAte > agora) {
+    const seg = Math.ceil((state.bloqueadoAte - agora) / 1000);
+    const msg = document.getElementById('login-lockout-msg');
+    msg.textContent = `🔒 Muitas tentativas. Aguarde ${seg} segundos.`;
+    msg.style.display = 'block';
+    return;
+  }
+  const input = document.getElementById('admin-senha-input').value;
+  const errEl = document.getElementById('login-error');
   if(!input) { errEl.textContent = 'Digite a senha.'; errEl.classList.add('show'); return; }
-  if(hashSenha(input) === getSenhaHash()) {
+  const hashInput = await hashSenha(input);
+  const hashSalvo = await getSenhaHash();
+  if(hashInput === hashSalvo) {
+    setLoginState({ tentativas: 0, bloqueadoAte: 0 });
     sessionStorage.setItem('cj_admin_ok', '1');
     fecharLoginAdmin();
     openAdmin();
   } else {
-    errEl.textContent = 'Senha incorreta. Tente novamente.';
-    errEl.classList.add('show');
+    const novasTentativas = state.tentativas + 1;
+    const bloqueadoAte    = novasTentativas >= 3 ? agora + 60000 : 0;
+    setLoginState({ tentativas: novasTentativas, bloqueadoAte });
+    if(bloqueadoAte > 0) {
+      const msg = document.getElementById('login-lockout-msg');
+      msg.textContent = '🔒 3 tentativas incorretas. Aguarde 60 segundos.';
+      msg.style.display = 'block';
+      errEl.classList.remove('show');
+    } else {
+      const restam = 3 - novasTentativas;
+      errEl.textContent = `Senha incorreta. ${restam} tentativa${restam>1?'s':''} restante${restam>1?'s':''}.`;
+      errEl.classList.add('show');
+    }
     document.getElementById('admin-senha-input').value = '';
     document.getElementById('admin-senha-input').focus();
-    // Vibrar no mobile
     if(navigator.vibrate) navigator.vibrate(200);
   }
 }
 
 function abrirTrocaSenha() {
-  document.getElementById('modal-admin-login').classList.remove('open');
+  if(!adminAutenticado()) return;
   document.getElementById('modal-trocar-senha').classList.add('open');
   ['senha-atual','senha-nova','senha-confirma'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('troca-error').classList.remove('show');
 }
 
-function trocarSenhaAdmin() {
-  const atual     = document.getElementById('senha-atual').value;
-  const nova      = document.getElementById('senha-nova').value;
-  const confirma  = document.getElementById('senha-confirma').value;
-  const errEl     = document.getElementById('troca-error');
+async function trocarSenhaAdmin() {
+  const atual    = document.getElementById('senha-atual').value;
+  const nova     = document.getElementById('senha-nova').value;
+  const confirma = document.getElementById('senha-confirma').value;
+  const errEl    = document.getElementById('troca-error');
   errEl.classList.remove('show');
-  if(hashSenha(atual) !== getSenhaHash()) {
+  const hashAtual = await hashSenha(atual);
+  const hashSalvo = await getSenhaHash();
+  if(hashAtual !== hashSalvo) {
     errEl.textContent = 'Senha atual incorreta.'; errEl.classList.add('show'); return;
   }
-  if(nova.length < 6) {
-    errEl.textContent = 'A nova senha deve ter pelo menos 6 caracteres.'; errEl.classList.add('show'); return;
+  if(nova.length < 8) {
+    errEl.textContent = 'A nova senha deve ter pelo menos 8 caracteres.'; errEl.classList.add('show'); return;
   }
   if(nova !== confirma) {
     errEl.textContent = 'As senhas não coincidem.'; errEl.classList.add('show'); return;
   }
-  localStorage.setItem('cj_admin_hash', hashSenha(nova));
+  const hashNova = await hashSenha(nova);
+  localStorage.setItem('cj_admin_hash', hashNova);
   document.getElementById('modal-trocar-senha').classList.remove('open');
   document.body.style.overflow = '';
   alert('✅ Senha alterada com sucesso!');
 }
 
-// Logout: limpar sessão ao fechar painel
 function closeAdmin() {
   document.getElementById('admin-panel').classList.remove('open');
   document.body.style.overflow = '';
-  // Manter sessão ativa enquanto a aba estiver aberta (sessionStorage)
 }
 
-// Atalho secreto: clicar 5x no logo abre o login
 (function() {
   let clicks = 0, timer;
   function setupLogoClick() {
     const logo = document.getElementById('logo-header');
     if(!logo) return;
-    logo.style.cursor = 'pointer';
     logo.addEventListener('click', () => {
       clicks++;
       clearTimeout(timer);
-      timer = setTimeout(() => { clicks = 0; }, 2000);
-      if(clicks >= 5) {
+      timer = setTimeout(() => { clicks = 0; }, 3000);
+      if(clicks >= 10) {
         clicks = 0;
         openAdminLogin();
       }
     });
   }
-  // Aguardar DOM
   if(document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setupLogoClick);
   } else {
