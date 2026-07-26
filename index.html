@@ -4283,6 +4283,12 @@ async function syncConfigDoServidor() {
     if (d.redes && Object.keys(d.redes).length > 0) {
       localStorage.setItem('cj_redes', JSON.stringify(d.redes));
     }
+    if (d.redes && Object.keys(d.redes).length > 0) {
+      localStorage.setItem('cj_redes', JSON.stringify(d.redes));
+    }
+    if (d.admin_hash) {
+      localStorage.setItem('cj_admin_hash', d.admin_hash);
+    }
   } catch (e) {
     console.warn('Sync: usando dados locais.', e.message);
   }
@@ -6497,6 +6503,7 @@ async function trocarSenhaAdmin() {
   }
   const hashNova = await hashSenha(nova);
   localStorage.setItem('cj_admin_hash', hashNova);
+  salvarNoServidor({ admin_hash: hashNova });
   document.getElementById('modal-trocar-senha').classList.remove('open');
   document.body.style.overflow = '';
   alert('✅ Senha alterada com sucesso!');
