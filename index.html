@@ -4297,6 +4297,13 @@ async function syncConfigDoServidor() {
     if (d.admin_hash) {
       localStorage.setItem('cj_admin_hash', d.admin_hash);
     }
+    if (Array.isArray(d.pedidos) && d.pedidos.length > 0) {
+      const pedidosLocais  = JSON.parse(localStorage.getItem('cj_pedidos') || '[]');
+      const todosPedidos   = [...d.pedidos, ...pedidosLocais];
+      const unicos         = todosPedidos.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
+      const ordenados      = unicos.sort((a, b) => b.id - a.id);
+      localStorage.setItem('cj_pedidos', JSON.stringify(ordenados));
+    }
   } catch (e) {
     console.warn('Sync: usando dados locais.', e.message);
   }
@@ -4653,6 +4660,7 @@ function salvarPedido(status) {
   const pedidos = JSON.parse(localStorage.getItem('cj_pedidos') || '[]');
   pedidos.unshift(pedido);
   localStorage.setItem('cj_pedidos', JSON.stringify(pedidos));
+  salvarNoServidor({ pedidos });
 }
 
 function renderPedidos() {
