@@ -4665,7 +4665,8 @@ function renderPedidos() {
       'CEP: ' + cepF;
     const itensHtml = (p.itens || []).map(i =>
       `<span style="display:inline-block;background:var(--gold-pale,#fdf6e3);border-radius:4px;padding:2px 8px;font-size:12px;margin:2px">${i.emoji} ${i.nome} ×${i.qty} — R$ ${(i.preco * i.qty).toFixed(2).replace('.', ',')}</span>`
-    ).join('');const clienteInfo = [
+    ).join('');
+    const clienteInfo = [
       end.nomeCliente  ? `<strong>${end.nomeCliente}</strong>` : '',
       end.emailCliente ? `📧 ${end.emailCliente}` : '',
       end.telCliente   ? `📱 ${end.telCliente}` : '',
@@ -4766,6 +4767,7 @@ function imprimirPedido(id) {
   win.document.write(html);
   win.document.close();
 }
+  
 function marcarPedido(id, novoStatus) {
   const pedidos = JSON.parse(localStorage.getItem('cj_pedidos') || '[]');
   const idx = pedidos.findIndex(p => p.id === id);
@@ -7446,6 +7448,7 @@ function endStep3() {
     bairro:      document.getElementById('end-bairro').value.trim(),
     cidade, estado
   };
+  enderecoAtual = {
     ...enderecoAtual,
     rua, numero,
     complemento: document.getElementById('end-complemento').value.trim(),
