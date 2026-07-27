@@ -15,6 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://sdk.mercadopago.com/js/v2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>  
 <style>
   :root {
     --gold: #C9A84C;
@@ -2637,6 +2638,21 @@
       </div>
 
       <div class="pay-methods">
+        <!-- Resumo do total -->
+        <div id="checkout-resumo" style="background:var(--gold-pale,#fdf6e3);border:1px solid var(--gold);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="color:var(--muted)">Produto</span>
+            <span id="resumo-subtotal">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span style="color:var(--muted)">Frete</span>
+            <span id="resumo-frete">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;border-top:1px solid var(--gold);padding-top:6px">
+            <span style="font-weight:600">Total</span>
+            <span id="resumo-total" style="font-weight:700;color:var(--gold);font-size:16px">—</span>
+          </div>
+        </div>
         <button class="pay-tab active" onclick="switchPay('mp',this)">💳 Cartão</button>
         <button class="pay-tab" onclick="switchPay('pix',this)">🟢 Pix</button>
       </div>
@@ -2665,14 +2681,27 @@
         <div class="pix-box">
           <div class="pix-logo">💚</div>
           <h4>Pagamento via Pix</h4>
-          <p>Copie a chave abaixo e realize o pagamento. Após o pagamento, envie o comprovante pelo WhatsApp para confirmar seu pedido.</p>
+          <p>Escaneie o QR Code ou copie o código abaixo e realize o pagamento no app do seu banco.</p>
+
+          <!-- QR Code -->
+          <div style="display:flex;flex-direction:column;align-items:center;margin:14px 0">
+            <div id="pix-qrcode" style="background:#fff;padding:10px;border-radius:10px;border:2px solid var(--gold);display:inline-block"></div>
+            <span style="font-size:11px;color:var(--muted);margin-top:6px">Escaneie com o app do banco</span>
+          </div>
+
+          <!-- Valor destacado -->
+          <div style="background:var(--gold);color:#fff;border-radius:8px;padding:8px 16px;font-size:18px;font-weight:700;margin-bottom:12px" id="pix-valor-destaque">—</div>
+
+          <!-- Chave -->
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Chave Pix:</div>
           <div class="pix-key" id="pix-key-display">Defina sua chave Pix no Painel Admin</div>
-          <button class="btn-copy" onclick="copiarPix()">📋 Copiar Chave Pix</button>
+          <button class="btn-copy" onclick="copiarCodigoPix()" style="width:100%;margin-bottom:8px">📋 Copiar Código Pix</button>
+
           <ol class="pix-inst">
-            <li>Copie a chave Pix acima</li>
+            <li>Copie o código ou escaneie o QR Code</li>
             <li>Abra o app do seu banco</li>
-            <li>Cole a chave e confirme o valor: <strong id="pix-valor">—</strong></li>
-            <li>Envie o comprovante pelo WhatsApp: <strong>(45) 99838-9436</strong></li>
+            <li>Cole o código e confirme o valor: <strong id="pix-valor">—</strong></li>
+            <li>Envie o comprovante pelo WhatsApp: <strong id="pix-whats-num">{{WHATS}}</strong></li>
           </ol>
         </div>
       </div>
@@ -4812,6 +4841,90 @@ function limparPedidosAntigos() {
 }
 
 // ─── FIM PEDIDOS ─────────────────────────────────────────────────────
+// ─── RESUMO CHECKOUT ─────────────────────────────────────────────────────────
+function _atualizarResumoCheckout(subtotal, valorFrete, freteObj) {
+  const elSub   = document.getElementById('resumo-subtotal');
+  const elFrete = document.getElementById('resumo-frete');
+  const elTotal = document.getElementById('resumo-total');
+  if(!elSub) return;
+  const total = (subtotal||0) + (valorFrete||0);
+  elSub.textContent   = 'R$ ' + (subtotal||0).toFixed(2).replace('.',',');
+  elFrete.textContent = valorFrete === 0 ? 'Grátis' : 'R$ ' + (valorFrete||0).toFixed(2).replace('.',',');
+  if(freteObj && freteObj.nome) elFrete.textContent += ' (' + freteObj.nome + ')';
+  elTotal.textContent = 'R$ ' + total.toFixed(2).replace('.',',');
+}
+// ─── FIM RESUMO CHECKOUT ─────────────────────────────────────────────────────
+
+// ─── PIX EMV + QR CODE ───────────────────────────────────────────────────────
+function _pixCRC16(str) {
+  let crc = 0xFFFF;
+  for (let i = 0; i < str.length; i++) {
+    crc ^= str.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      crc = (crc & 0x8000) ? (crc << 1) ^ 0x1021 : crc << 1;
+    }
+  }
+  return ((crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0'));
+}
+
+function _pixTLV(id, value) {
+  return id + value.length.toString().padStart(2, '0') + value;
+}
+
+function gerarPixEMV(chave, valor, nome, cidade, txid) {
+  nome   = (nome   || 'Claudino Joias').substring(0,25).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+  cidade = (cidade || 'Brasil').substring(0,15).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+  txid   = (txid   || 'CLAUDINOJOIAS').substring(0,25).replace(/\s/g,'').toUpperCase();
+  const gui     = _pixTLV('00', 'BR.GOV.BCB.PIX');
+  const key     = _pixTLV('01', chave);
+  const merch   = _pixTLV('26', gui + key);
+  const mcc     = '52040000';
+  const currency= '5303986';
+  const amount  = valor > 0 ? _pixTLV('54', valor.toFixed(2)) : '';
+  const country = '5802BR';
+  const mName   = _pixTLV('59', nome);
+  const mCity   = _pixTLV('60', cidade);
+  const addData = _pixTLV('62', _pixTLV('05', txid));
+  const payload = '000201' + '010211' + merch + mcc + currency + amount + country + mName + mCity + addData + '6304';
+  return payload + _pixCRC16(payload);
+}
+
+let _pixQRInstance = null;
+
+function atualizarPixQR() {
+  const chave = config.pixKey || '';
+  const total = checkoutTotal || 0;
+  const destaque = document.getElementById('pix-valor-destaque');
+  if (destaque) destaque.textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+  const elValor = document.getElementById('pix-valor');
+  if (elValor) elValor.textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+  if (!chave) return;
+  const emv  = gerarPixEMV(chave, total, 'Claudino Joias', 'Brasil', 'PEDIDO');
+  const qrEl = document.getElementById('pix-qrcode');
+  if (!qrEl) return;
+  qrEl.innerHTML = '';
+  try {
+    _pixQRInstance = new QRCode(qrEl, {
+      text: emv, width: 180, height: 180,
+      colorDark: '#1A1610', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M,
+    });
+    window._pixEMV = emv;
+  } catch(e) {
+    qrEl.innerHTML = '<p style="font-size:12px;color:var(--muted)">QR Code indisponível</p>';
+  }
+}
+
+function copiarCodigoPix() {
+  const codigo = window._pixEMV || config.pixKey || '';
+  if (!codigo) { alert('Configure sua chave Pix no Painel Admin'); return; }
+  navigator.clipboard.writeText(codigo).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    if (btn) { btn.textContent = '✓ Código copiado!'; setTimeout(() => btn.textContent = '📋 Copiar Código Pix', 2500); }
+    salvarPedido('pendente');
+  });
+}
+// ─── FIM PIX EMV + QR CODE ───────────────────────────────────────────────────
 function copiarPix() {
   const key = config.pixKey || '';
   if(!key) { alert('Configure sua chave Pix no Painel Admin → Configurações'); return; }
@@ -6764,6 +6877,8 @@ function selecionarOpcaoCarrinho(metodo, tipo) {
   document.getElementById('modal-preco').textContent = 'R$ ' + total.toFixed(2).replace('.',',');
   document.getElementById('pix-valor').textContent   = 'R$ ' + total.toFixed(2).replace('.',',');
   document.getElementById('pix-key-display').textContent = config.pixKey || 'Defina sua chave Pix no Painel Admin';
+  _atualizarResumoCheckout(subtotal, freteAtual ? freteAtual.valor : 0, freteAtual);
+  atualizarPixQR();
   document.getElementById('modal-img').innerHTML = '🛒';
   gerarParcelas(total);
   document.getElementById('mp-success').classList.remove('show');
@@ -7558,6 +7673,8 @@ function pagarComEndereco(metodo) {
   checkoutTitulo = nome;
   document.getElementById('pix-valor').textContent   = `R$ ${total.toFixed(2).replace('.',',')}`;
   document.getElementById('pix-key-display').textContent = config.pixKey || 'Defina sua chave Pix no Painel Admin';
+  _atualizarResumoCheckout(subtotal, freteAtual ? freteAtual.valor : 0, freteAtual);
+  atualizarPixQR();
   document.getElementById('modal-img').innerHTML = emoji;
   gerarParcelas(total);
   document.getElementById('mp-success').classList.remove('show');
