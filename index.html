@@ -2418,12 +2418,54 @@
             <input type="email" id="atk-email" placeholder="contato@empresa.com.br">
           </div>
           <div style="display:flex;gap:10px">
+            </div>
+
+          <!-- CEP e Endereço -->
+          <div class="form-row">
+            <label>CEP</label>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="atk-cep" placeholder="00000-000" maxlength="9"
+                oninput="this.value=this.value.replace(/\D/g,'').replace(/(\d{5})(\d)/,'$1-$2')"
+                style="flex:1">
+              <button class="btn-outline" style="padding:8px 14px;font-size:13px;white-space:nowrap"
+                onclick="buscarCepAtacado()">🔍 Buscar</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Logradouro</label>
+            <input type="text" id="atk-rua" placeholder="Rua, Avenida...">
+          </div>
+          <div style="display:flex;gap:10px">
+            <div class="form-row" style="flex:1">
+              <label>Número</label>
+              <input type="text" id="atk-numero" placeholder="Nº">
+            </div>
+            <div class="form-row" style="flex:2">
+              <label>Complemento</label>
+              <input type="text" id="atk-complemento" placeholder="Sala, Andar...">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Bairro</label>
+            <input type="text" id="atk-bairro" placeholder="Bairro">
+          </div>
+          <div style="display:flex;gap:10px">
+            <div class="form-row" style="flex:2">
+              <label>Cidade</label>
+              <input type="text" id="atk-cidade" placeholder="Cidade">
+            </div>
+            <div class="form-row" style="flex:1">
+              <label>Estado</label>
+              <input type="text" id="atk-estado" placeholder="UF" maxlength="2">
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px">
             <button class="btn-outline" style="flex:1;padding:12px" onclick="atacadoBack()">← Voltar</button>
             <button class="btn-pay" style="flex:2" onclick="enviarCadastroAtacado()">✓ Enviar Cadastro</button>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
@@ -6240,20 +6282,45 @@ function atacadoStep2() {
 
 function atacadoBack() { mostrarStep(1); }
 
+async function buscarCepAtacado() {
+  const cep = document.getElementById('atk-cep').value.replace(/\D/g,'');
+  if(cep.length !== 8) { alert('CEP inválido. Digite os 8 dígitos.'); return; }
+  try {
+    const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const d = await r.json();
+    if(d.erro) { alert('CEP não encontrado.'); return; }
+    document.getElementById('atk-rua').value    = d.logradouro || '';
+    document.getElementById('atk-bairro').value  = d.bairro    || '';
+    document.getElementById('atk-cidade').value  = d.localidade|| '';
+    document.getElementById('atk-estado').value  = d.uf        || '';
+    document.getElementById('atk-numero').focus();
+  } catch(e) {
+    alert('Erro ao buscar CEP. Preencha o endereço manualmente.');
+  }
+}  
 function enviarCadastroAtacado() {
   const razao   = document.getElementById('atk-razao').value.trim();
   const cnpj    = document.getElementById('atk-cnpj').value.trim();
   const seg     = document.getElementById('atk-segmento').value;
   const nome    = document.getElementById('atk-nome').value.trim();
   const tel     = document.getElementById('atk-tel').value.trim();
-  const email   = document.getElementById('atk-email').value.trim();
-  if(!nome || !tel || !email) { alert('Preencha todos os campos.'); return; }
+  const email  = document.getElementById('atk-email').value.trim();
+  const cep    = document.getElementById('atk-cep').value.trim();
+  const rua    = document.getElementById('atk-rua').value.trim();
+  const numero = document.getElementById('atk-numero').value.trim();
+  const compl  = document.getElementById('atk-complemento').value.trim();
+  const bairro = document.getElementById('atk-bairro').value.trim();
+  const cidade = document.getElementById('atk-cidade').value.trim();
+  const estado = document.getElementById('atk-estado').value.trim();
+  if(!nome || !tel || !email) { alert('Preencha nome, telefone e e-mail.'); return; }
+  if(!cep || !rua || !numero || !cidade || !estado) { alert('Preencha o endereço completo (CEP, rua, número, cidade e estado).'); return; }
   // Verificar CNPJ já cadastrado
   if(cadastrosAtacado.find(c => c.cnpj === cnpj)) {
     alert('Este CNPJ já foi cadastrado.');
     return;
   }
-  const novo = { id: Date.now(), razao, cnpj, segmento: seg, nome, tel, email, status: 'pendente', data: new Date().toLocaleDateString('pt-BR') };
+  const endereco = { cep, rua, numero, complemento: compl, bairro, cidade, estado };
+  const novo = { id: Date.now(), razao, cnpj, segmento: seg, nome, tel, email, endereco, status: 'pendente', data: new Date().toLocaleDateString('pt-BR') };
   cadastrosAtacado.push(novo);
   saveAtacado();
   localStorage.setItem('cj_meu_cnpj', cnpj);
@@ -6291,7 +6358,9 @@ function renderCnpjList() {
       <div class="cnpj-item">
         <div class="cnpj-item-info">
           <strong>${c.razao} ${badge}</strong>
-          <small>CNPJ: ${c.cnpj} · ${c.segmento} · ${c.nome} · ${c.tel} · ${c.data}</small>
+          <small>CNPJ: ${c.cnpj} · ${c.segmento} · ${c.data}</small><br>
+          <small>👤 ${c.nome} · 📱 ${c.tel} · 📧 ${c.email||'—'}</small>
+          ${c.endereco ? `<br><small>📍 ${c.endereco.rua||''}, ${c.endereco.numero||''} ${c.endereco.complemento?'— '+c.endereco.complemento:''} · ${c.endereco.bairro||''} · ${c.endereco.cidade||''}/${c.endereco.estado||''} · CEP: ${c.endereco.cep||''}</small>` : ''}
         </div>
         <div class="cnpj-item-actions">${btns}</div>
       </div>`;
