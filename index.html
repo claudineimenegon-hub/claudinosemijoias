@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
+<head>f
 <meta charset="UTF-8">
 <meta name="description" content="Claudino SemiJoias — Semijoias banhadas a ouro 18k. Colares, anéis, pulseiras e brincos com qualidade e elegância. Compre online com entrega para todo o Brasil.">
 <meta name="keywords" content="semijoias, joias banhadas a ouro, colares, anéis, pulseiras, brincos, semijoias online, Claudino Joias">
@@ -2956,6 +2956,88 @@
         </label>
       </div>
 
+      <!-- BANNER ATACADO -->
+      <div class="config-block">
+        <h3>🏭 Banner de Atacado — Textos e Cores</h3>
+        <p>Personalize o banner de revendedores exibido na página principal.</p>
+
+        <div class="admin-form">
+          <div class="afield">
+            <label>Título — Parte 1</label>
+            <input type="text" id="cfg-at-titulo1" placeholder="Compre no" oninput="previewBannerAtacado()">
+          </div>
+          <div class="afield">
+            <label>Título — Parte 2 (itálico dourado)</label>
+            <input type="text" id="cfg-at-titulo2" placeholder="Atacado" oninput="previewBannerAtacado()">
+          </div>
+          <div class="afield full">
+            <label>Descrição / Subtítulo</label>
+            <input type="text" id="cfg-at-desc" placeholder="Condições especiais para revendedores..." oninput="previewBannerAtacado()">
+          </div>
+          <div class="afield full">
+            <label>Texto do Botão</label>
+            <input type="text" id="cfg-at-btn" placeholder="🏭 Quero Ser Revendedor" oninput="previewBannerAtacado()">
+          </div>
+          <div class="afield full" style="margin-top:4px">
+            <label style="margin-bottom:8px;display:block">Ícones e Textos dos Destaques (4 itens)</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div style="display:flex;gap:6px">
+                <input type="text" id="cfg-at-feat1-emoji" placeholder="💰" style="width:50px;text-align:center" oninput="previewBannerAtacado()">
+                <input type="text" id="cfg-at-feat1-txt" placeholder="Preços de atacado" oninput="previewBannerAtacado()">
+              </div>
+              <div style="display:flex;gap:6px">
+                <input type="text" id="cfg-at-feat2-emoji" placeholder="📦" style="width:50px;text-align:center" oninput="previewBannerAtacado()">
+                <input type="text" id="cfg-at-feat2-txt" placeholder="Pedido mínimo" oninput="previewBannerAtacado()">
+              </div>
+              <div style="display:flex;gap:6px">
+                <input type="text" id="cfg-at-feat3-emoji" placeholder="🔄" style="width:50px;text-align:center" oninput="previewBannerAtacado()">
+                <input type="text" id="cfg-at-feat3-txt" placeholder="Reposição rápida" oninput="previewBannerAtacado()">
+              </div>
+              <div style="display:flex;gap:6px">
+                <input type="text" id="cfg-at-feat4-emoji" placeholder="🤝" style="width:50px;text-align:center" oninput="previewBannerAtacado()">
+                <input type="text" id="cfg-at-feat4-txt" placeholder="Suporte dedicado" oninput="previewBannerAtacado()">
+              </div>
+            </div>
+          </div>
+          <div class="afield full" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+            <label style="margin-bottom:8px;display:block">🎨 Cores do Banner</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div>
+                <label style="font-size:11px;color:var(--muted)">Fundo — Cor 1</label>
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input type="color" id="cfg-at-bg1" value="#1A1610" oninput="this.nextElementSibling.value=this.value;previewBannerAtacado()" style="width:40px;height:36px;border:none;cursor:pointer;background:none">
+                  <input type="text" id="cfg-at-bg1-hex" value="#1A1610" maxlength="7" placeholder="#1A1610" oninput="document.getElementById('cfg-at-bg1').value=this.value;previewBannerAtacado()">
+                </div>
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--muted)">Fundo — Cor 2</label>
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input type="color" id="cfg-at-bg2" value="#2C2619" oninput="this.nextElementSibling.value=this.value;previewBannerAtacado()" style="width:40px;height:36px;border:none;cursor:pointer;background:none">
+                  <input type="text" id="cfg-at-bg2-hex" value="#2C2619" maxlength="7" placeholder="#2C2619" oninput="document.getElementById('cfg-at-bg2').value=this.value;previewBannerAtacado()">
+                </div>
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--muted)">Cor do Título</label>
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input type="color" id="cfg-at-cor-titulo" value="#F5EDD8" oninput="this.nextElementSibling.value=this.value;previewBannerAtacado()" style="width:40px;height:36px;border:none;cursor:pointer;background:none">
+                  <input type="text" id="cfg-at-cor-titulo-hex" value="#F5EDD8" maxlength="7" placeholder="#F5EDD8" oninput="document.getElementById('cfg-at-cor-titulo').value=this.value;previewBannerAtacado()">
+                </div>
+              </div>
+              <div>
+                <label style="font-size:11px;color:var(--muted)">Cor da Descrição</label>
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input type="color" id="cfg-at-cor-desc" value="#9A8E7A" oninput="this.nextElementSibling.value=this.value;previewBannerAtacado()" style="width:40px;height:36px;border:none;cursor:pointer;background:none">
+                  <input type="text" id="cfg-at-cor-desc-hex" value="#9A8E7A" maxlength="7" placeholder="#9A8E7A" oninput="document.getElementById('cfg-at-cor-desc').value=this.value;previewBannerAtacado()">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-save" style="margin-top:12px" onclick="salvarBannerAtacado()">✓ Salvar Banner Atacado</button>
+      </div>
+
+      <!-- NOTIFICAÇÕES -->
+
       <!-- NOTIFICAÇÕES -->
       <div class="config-block">
         <h3>🔔 Notificações de Novos Cadastros</h3>
@@ -4967,6 +5049,98 @@ function copiarCodigoPix() {
   });
 }
 // ─── FIM PIX EMV + QR CODE ───────────────────────────────────────────────────
+ // ─── BANNER ATACADO ──────────────────────────────────────────────────────────
+
+function previewBannerAtacado() {
+  const banner = document.querySelector('.atacado-banner');
+  if(!banner) return;
+  const bg1   = document.getElementById('cfg-at-bg1')?.value   || '#1A1610';
+  const bg2   = document.getElementById('cfg-at-bg2')?.value   || '#2C2619';
+  const cTit  = document.getElementById('cfg-at-cor-titulo')?.value || '#F5EDD8';
+  const cDesc = document.getElementById('cfg-at-cor-desc')?.value  || '#9A8E7A';
+  const t1    = document.getElementById('cfg-at-titulo1')?.value.trim() || 'Compre no';
+  const t2    = document.getElementById('cfg-at-titulo2')?.value.trim() || 'Atacado';
+  const desc  = document.getElementById('cfg-at-desc')?.value.trim()   || '';
+  const btn   = document.getElementById('cfg-at-btn')?.value.trim()    || '';
+  banner.style.background = `linear-gradient(135deg, ${bg1} 0%, ${bg2} 100%)`;
+  const h2 = banner.querySelector('h2');
+  if(h2) { h2.style.color = cTit; h2.innerHTML = `${t1} <em>${t2}</em>`; }
+  const p = banner.querySelector('p');
+  if(p && desc) { p.style.color = cDesc; p.textContent = desc; }
+  const b = document.getElementById('btn-atacado-banner');
+  if(b && btn) b.textContent = btn;
+  const feats = banner.querySelectorAll('.atacado-feat');
+  [1,2,3,4].forEach((n,i) => {
+    const emoji = document.getElementById(`cfg-at-feat${n}-emoji`)?.value || '';
+    const txt   = document.getElementById(`cfg-at-feat${n}-txt`)?.value   || '';
+    if(feats[i]) {
+      const sp = feats[i].querySelector('span');
+      const fp = feats[i].querySelector('p');
+      if(sp && emoji) sp.textContent = emoji;
+      if(fp && txt)   fp.textContent = txt;
+    }
+  });
+}
+
+function salvarBannerAtacado() {
+  config.atBg1       = document.getElementById('cfg-at-bg1')?.value        || '#1A1610';
+  config.atBg2       = document.getElementById('cfg-at-bg2')?.value        || '#2C2619';
+  config.atCorTitulo = document.getElementById('cfg-at-cor-titulo')?.value || '#F5EDD8';
+  config.atCorDesc   = document.getElementById('cfg-at-cor-desc')?.value   || '#9A8E7A';
+  config.atTitulo1   = document.getElementById('cfg-at-titulo1')?.value.trim() || '';
+  config.atTitulo2   = document.getElementById('cfg-at-titulo2')?.value.trim() || '';
+  config.atDesc      = document.getElementById('cfg-at-desc')?.value.trim()    || '';
+  config.atBtn       = document.getElementById('cfg-at-btn')?.value.trim()     || '';
+  config.atFeat1e    = document.getElementById('cfg-at-feat1-emoji')?.value    || '💰';
+  config.atFeat1t    = document.getElementById('cfg-at-feat1-txt')?.value      || 'Preços de atacado';
+  config.atFeat2e    = document.getElementById('cfg-at-feat2-emoji')?.value    || '📦';
+  config.atFeat2t    = document.getElementById('cfg-at-feat2-txt')?.value      || 'Pedido mínimo';
+  config.atFeat3e    = document.getElementById('cfg-at-feat3-emoji')?.value    || '🔄';
+  config.atFeat3t    = document.getElementById('cfg-at-feat3-txt')?.value      || 'Reposição rápida';
+  config.atFeat4e    = document.getElementById('cfg-at-feat4-emoji')?.value    || '🤝';
+  config.atFeat4t    = document.getElementById('cfg-at-feat4-txt')?.value      || 'Suporte dedicado';
+  localStorage.setItem('cj_config', JSON.stringify(config));
+  salvarNoServidor({ config });
+  aplicarBannerAtacado();
+  alert('✅ Banner Atacado salvo!');
+}
+
+function aplicarBannerAtacado() {
+  if(!config.atBg1) return;
+  const banner = document.querySelector('.atacado-banner');
+  if(!banner) return;
+  banner.style.background = `linear-gradient(135deg, ${config.atBg1||'#1A1610'} 0%, ${config.atBg2||'#2C2619'} 100%)`;
+  const h2 = banner.querySelector('h2');
+  if(h2) { h2.style.color = config.atCorTitulo||'#F5EDD8'; h2.innerHTML = `${config.atTitulo1||'Compre no'} <em>${config.atTitulo2||'Atacado'}</em>`; }
+  const p = banner.querySelector('p');
+  if(p && config.atDesc) { p.style.color = config.atCorDesc||'#9A8E7A'; p.textContent = config.atDesc; }
+  const b = document.getElementById('btn-atacado-banner');
+  if(b && config.atBtn) b.textContent = config.atBtn;
+  const feats = banner.querySelectorAll('.atacado-feat');
+  [[config.atFeat1e,config.atFeat1t],[config.atFeat2e,config.atFeat2t],[config.atFeat3e,config.atFeat3t],[config.atFeat4e,config.atFeat4t]].forEach(([e,t],i) => {
+    if(!feats[i]) return;
+    const sp = feats[i].querySelector('span'); const fp = feats[i].querySelector('p');
+    if(sp && e) sp.textContent = e; if(fp && t) fp.textContent = t;
+  });
+}
+
+function carregarCamposBannerAtacado() {
+  if(!config.atBg1) return;
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+  set('cfg-at-bg1',        config.atBg1);       set('cfg-at-bg1-hex',        config.atBg1);
+  set('cfg-at-bg2',        config.atBg2);       set('cfg-at-bg2-hex',        config.atBg2);
+  set('cfg-at-cor-titulo', config.atCorTitulo); set('cfg-at-cor-titulo-hex', config.atCorTitulo);
+  set('cfg-at-cor-desc',   config.atCorDesc);   set('cfg-at-cor-desc-hex',   config.atCorDesc);
+  set('cfg-at-titulo1',    config.atTitulo1);   set('cfg-at-titulo2',        config.atTitulo2);
+  set('cfg-at-desc',       config.atDesc);      set('cfg-at-btn',            config.atBtn);
+  set('cfg-at-feat1-emoji',config.atFeat1e);    set('cfg-at-feat1-txt',      config.atFeat1t);
+  set('cfg-at-feat2-emoji',config.atFeat2e);    set('cfg-at-feat2-txt',      config.atFeat2t);
+  set('cfg-at-feat3-emoji',config.atFeat3e);    set('cfg-at-feat3-txt',      config.atFeat3t);
+  set('cfg-at-feat4-emoji',config.atFeat4e);    set('cfg-at-feat4-txt',      config.atFeat4t);
+}
+
+// ─── FIM BANNER ATACADO ──────────────────────────────────────────────────────
+
 function copiarPix() {
   const key = config.pixKey || '';
   if(!key) { alert('Configure sua chave Pix no Painel Admin → Configurações'); return; }
@@ -5001,8 +5175,8 @@ function switchAdminTab(tab, btn) {
   if(btn) btn.classList.add('active');
   const el = document.getElementById('tab-' + tab);
   if(el) { el.classList.add('active'); el.style.display = ''; }
-  if(tab === 'produtos')     renderAdminList();
-  if(tab === 'atacado')      { renderCnpjList(); aplicarEstadoBotaoAtacado(); loadConfigNotif(); }
+  if(tab === 'produtos')     renderAdminList(); }
+  if(tab === 'atacado')      { renderCnpjList(); aplicarEstadoBotaoAtacado(); loadConfigNotif(); carregarCamposBannerAtacado(); }
   if(tab === 'prod-atacado') renderAdminListAtacado();
   if(tab === 'links')        popularSelectProdutos();
   if(tab === 'ferramentas')  carregarRedes();
@@ -7918,6 +8092,7 @@ atualizarBadges();
 processarQueryString();
 aplicarCoresCarregadas();
 aplicarTextosDinamicos();
+aplicarBannerAtacado();
 aplicarSobre();
 if(config.freteGratis !== undefined) {
   const el = document.getElementById('cfg-frete-gratis');
