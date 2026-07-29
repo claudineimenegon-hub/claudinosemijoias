@@ -7153,9 +7153,13 @@ function closeAdmin() {
 
 (function() {
   let clicks = 0, timer;
+  let pressTimer = null;
+
   function setupLogoClick() {
     const logo = document.getElementById('logo-header');
     if(!logo) return;
+
+    // Método 1: 10 cliques rápidos (desktop)
     logo.addEventListener('click', () => {
       clicks++;
       clearTimeout(timer);
@@ -7165,7 +7169,24 @@ function closeAdmin() {
         openAdminLogin();
       }
     });
+
+    // Método 2: segurar por 3 segundos (iOS / mobile)
+    logo.addEventListener('touchstart', (e) => {
+      pressTimer = setTimeout(() => {
+        e.preventDefault();
+        openAdminLogin();
+      }, 3000);
+    }, { passive: false });
+
+    logo.addEventListener('touchend', () => {
+      clearTimeout(pressTimer);
+    });
+
+    logo.addEventListener('touchmove', () => {
+      clearTimeout(pressTimer);
+    });
   }
+
   if(document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setupLogoClick);
   } else {
