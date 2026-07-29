@@ -2767,6 +2767,7 @@
       <button class="atab" onclick="switchAdminTab('links',this)">🔗 Links</button>
       <button class="atab" onclick="switchAdminTab('frete',this)">🚚 Frete</button>
       <button class="atab" onclick="switchAdminTab('pedidos',this)">📋 Pedidos</button>
+      <button class="atab" onclick="switchAdminTab('pedidos-atacado',this)">📦 Pedidos Atacado</button>
       <button class="atab" onclick="switchAdminTab('config',this)" style="color:var(--gold)">⚙️ Config</button>
       <button class="atab" onclick="switchAdminTab('ferramentas',this)">🔗 Redes</button>
     </div>
@@ -4399,6 +4400,22 @@
       </div>
       <div id="lista-pedidos-admin"></div>
     </div><!-- fim tab-pedidos -->
+    <!-- ── ABA PEDIDOS ATACADO ──────────────────────────── -->
+    <div class="atab-content" id="tab-pedidos-atacado">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400">📦 Pedidos Atacado</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select id="filtro-pedidos-atacado" onchange="renderPedidosAtacado()" style="padding:6px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--cream);font-size:13px">
+            <option value="todos">Todos</option>
+            <option value="aprovado">✅ Aprovados</option>
+            <option value="pendente">⏳ Aguardando Pix</option>
+            <option value="enviado">🚚 Enviados</option>
+          </select>
+          <button class="btn-outline" style="padding:6px 12px;font-size:12px" onclick="limparPedidosAtacadoAntigos()">🗑 Limpar antigos</button>
+        </div>
+      </div>
+      <div id="lista-pedidos-atacado-admin"></div>
+    </div><!-- fim tab-pedidos-atacado -->
 
   </div>
 </div>
@@ -4455,6 +4472,13 @@ async function syncConfigDoServidor() {
       const unicos         = todosPedidos.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
       const ordenados      = unicos.sort((a, b) => b.id - a.id);
       localStorage.setItem('cj_pedidos', JSON.stringify(ordenados));
+    }
+    if (Array.isArray(d.pedidos_atacado) && d.pedidos_atacado.length > 0) {
+      const locais    = JSON.parse(localStorage.getItem('cj_pedidos_atacado') || '[]');
+      const todos     = [...d.pedidos_atacado, ...locais];
+      const unicos    = todos.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
+      const ordenados = unicos.sort((a, b) => b.id - a.id);
+      localStorage.setItem('cj_pedidos_atacado', JSON.stringify(ordenados));
     }
   } catch (e) {
     console.warn('Sync: usando dados locais.', e.message);
@@ -5139,7 +5163,182 @@ function carregarCamposBannerAtacado() {
 }
 
 // ─── FIM BANNER ATACADO ──────────────────────────────────────────────────────
+// ─── PEDIDOS ATACADO ─────────────────────────────────────────────────────────
 
+function salvarPedidoAtacado(status) {
+  const itens = cartAtacado.map(i => ({ nome: i.nome, preco: i.preco, qty: i.qty, emoji: i.emoji || '📦' }));
+  const subtotal   = itens.reduce((s, i) => s + i.preco * i.qty, 0);
+  const frete      = typeof freteAtual !== 'undefined' && freteAtual ? freteAtual : null;
+  const valorFrete = frete ? frete.valor : 0;
+  const meuCad     = getMeuCadastro();
+  const pedido = {
+    id:       Date.now(),
+    status:   status || 'pendente',
+    data:     new Date().toLocaleString('pt-BR'),
+    itens,
+    subtotal,
+    frete:    frete ? { valor: valorFrete, nome: frete.nome || '', prazo: frete.prazo || '' } : { valor: 0, nome: 'A combinar', prazo: '' },
+    total:    subtotal + valorFrete,
+    endereco: typeof enderecoAtual !== 'undefined' ? { ...enderecoAtual } : {},
+    revendedor: meuCad ? { razao: meuCad.razao, cnpj: meuCad.cnpj, nome: meuCad.nome, tel: meuCad.tel, email: meuCad.email } : {},
+  };
+  const pedidos = JSON.parse(localStorage.getItem('cj_pedidos_atacado') || '[]');
+  pedidos.unshift(pedido);
+  localStorage.setItem('cj_pedidos_atacado', JSON.stringify(pedidos));
+  salvarNoServidor({ pedidos_atacado: pedidos });
+}
+
+function renderPedidosAtacado() {
+  const el = document.getElementById('lista-pedidos-atacado-admin');
+  if (!el) return;
+  const filtro  = (document.getElementById('filtro-pedidos-atacado') || {}).value || 'todos';
+  let pedidos   = JSON.parse(localStorage.getItem('cj_pedidos_atacado') || '[]');
+  if (filtro !== 'todos') pedidos = pedidos.filter(p => p.status === filtro);
+  if (!pedidos.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:14px;padding:20px 0">Nenhum pedido atacado' + (filtro !== 'todos' ? ' com este filtro' : '') + ' ainda.</p>';
+    return;
+  }
+  const badgeColor = { aprovado:'#2D7A4A', pendente:'#B8860B', enviado:'#1A5276' };
+  const badgeLabel = { aprovado:'✅ Aprovado', pendente:'⏳ Aguard. Pix', enviado:'🚚 Enviado' };
+  el.innerHTML = pedidos.map(p => {
+    const end  = p.endereco || {};
+    const rev  = p.revendedor || {};
+    const cepF = (end.cep || '').replace(/(\d{5})(\d{3})/, '$1-$2');
+    const endFormatado =
+      (end.rua || '') + (end.numero ? ', ' + end.numero : '') + (end.complemento ? ' — ' + end.complemento : '') + '\n' +
+      (end.bairro ? end.bairro + ' · ' : '') + (end.cidade || '') + (end.estado ? ' - ' + end.estado : '') + '\n' +
+      'CEP: ' + cepF;
+    const itensHtml = (p.itens || []).map(i =>
+      `<span style="display:inline-block;background:var(--gold-pale,#fdf6e3);border-radius:4px;padding:2px 8px;font-size:12px;margin:2px">${i.emoji||'📦'} ${i.nome} ×${i.qty} — R$ ${(i.preco*i.qty).toFixed(2).replace('.',',')}</span>`
+    ).join('');
+    const endEscapado = endFormatado.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');
+    const revendedorInfo = rev.razao
+      ? `<div style="font-size:13px;margin-bottom:8px;padding:8px 10px;background:#fff;border-radius:6px;border:1px solid var(--border)">
+          <strong>🏭 ${rev.razao}</strong> &nbsp;·&nbsp; CNPJ: ${rev.cnpj||'—'}<br>
+          👤 ${rev.nome||'—'} &nbsp;·&nbsp; 📱 ${rev.tel||'—'} &nbsp;·&nbsp; 📧 ${rev.email||'—'}
+        </div>` : '';
+    return `<div style="border:1px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:12px;background:var(--cream)">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+        <span style="font-size:12px;color:var(--muted)">#${p.id} · ${p.data}</span>
+        <span style="background:${badgeColor[p.status]||'#555'};color:#fff;border-radius:20px;padding:3px 10px;font-size:12px">${badgeLabel[p.status]||p.status}</span>
+      </div>
+      ${revendedorInfo}
+      <div style="margin-bottom:8px">${itensHtml}</div>
+      <div style="display:flex;gap:12px;font-size:13px;margin-bottom:10px;flex-wrap:wrap">
+        <span>Subtotal: <strong>R$ ${(p.subtotal||0).toFixed(2).replace('.',',')}</strong></span>
+        <span>Frete: <strong>${p.frete&&p.frete.valor===0?'Grátis':'R$ '+(p.frete&&p.frete.valor||0).toFixed(2).replace('.',',')}</strong>${p.frete&&p.frete.nome?' ('+p.frete.nome+')':''}</span>
+        <span style="color:var(--gold)"><strong>Total: R$ ${(p.total||0).toFixed(2).replace('.',',')}</strong></span>
+      </div>
+      ${end.rua ? `<div style="background:#fff;border:1px solid var(--border);border-radius:6px;padding:10px;font-size:13px;margin-bottom:10px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">📍 Endereço de entrega</div>
+        <div style="white-space:pre-line;line-height:1.6">${endFormatado}</div>
+      </div>` : ''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${end.rua ? `<button class="btn-outline" style="font-size:12px;padding:6px 12px"
+          onclick="navigator.clipboard.writeText('${endEscapado}').then(()=>alert('✅ Endereço copiado!'))">📋 Copiar Endereço</button>` : ''}
+        <button class="btn-outline" style="font-size:12px;padding:6px 12px" onclick="imprimirPedidoAtacado(${p.id})">🖨️ PDF</button>
+        ${p.status!=='enviado'?`<button class="btn-save" style="font-size:12px;padding:6px 14px" onclick="marcarPedidoAtacado(${p.id},'enviado')">🚚 Marcar Enviado</button>`:''}
+        ${p.status==='pendente'?`<button class="btn-outline" style="font-size:12px;padding:6px 12px" onclick="marcarPedidoAtacado(${p.id},'aprovado')">✅ Confirmar Pix</button>`:''}
+        <button class="btn-outline" style="font-size:12px;padding:6px 12px;color:#c0392b;border-color:#c0392b" onclick="excluirPedidoAtacado(${p.id})">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function marcarPedidoAtacado(id, novoStatus) {
+  const pedidos = JSON.parse(localStorage.getItem('cj_pedidos_atacado') || '[]');
+  const idx = pedidos.findIndex(p => p.id === id);
+  if (idx === -1) return;
+  pedidos[idx].status = novoStatus;
+  localStorage.setItem('cj_pedidos_atacado', JSON.stringify(pedidos));
+  salvarNoServidor({ pedidos_atacado: pedidos });
+  renderPedidosAtacado();
+}
+
+function excluirPedidoAtacado(id) {
+  if (!confirm('Excluir este pedido?')) return;
+  const pedidos = JSON.parse(localStorage.getItem('cj_pedidos_atacado') || '[]').filter(p => p.id !== id);
+  localStorage.setItem('cj_pedidos_atacado', JSON.stringify(pedidos));
+  salvarNoServidor({ pedidos_atacado: pedidos });
+  renderPedidosAtacado();
+}
+
+function limparPedidosAtacadoAntigos() {
+  if (!confirm('Remover pedidos com mais de 60 dias?')) return;
+  const limite  = Date.now() - 60 * 24 * 60 * 60 * 1000;
+  const pedidos = JSON.parse(localStorage.getItem('cj_pedidos_atacado') || '[]').filter(p => p.id > limite);
+  localStorage.setItem('cj_pedidos_atacado', JSON.stringify(pedidos));
+  renderPedidosAtacado();
+}
+
+function imprimirPedidoAtacado(id) {
+  const pedidos = JSON.parse(localStorage.getItem('cj_pedidos_atacado') || '[]');
+  const p = pedidos.find(x => x.id === id);
+  if (!p) return;
+  const end  = p.endereco || {};
+  const rev  = p.revendedor || {};
+  const cepF = (end.cep || '').replace(/(\d{5})(\d{3})/, '$1-$2');
+  const itensRows = (p.itens || []).map(i =>
+    `<tr><td>${i.emoji||'📦'} ${i.nome}</td><td style="text-align:center">${i.qty}</td><td style="text-align:right">R$ ${(i.preco*i.qty).toFixed(2).replace('.',',')}</td></tr>`
+  ).join('');
+  const statusLabel = { aprovado:'✅ Aprovado', pendente:'⏳ Aguardando Pix', enviado:'🚚 Enviado' };
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Pedido Atacado #${p.id}</title>
+  <style>
+    body{font-family:Arial,sans-serif;font-size:13px;color:#222;margin:0;padding:30px}
+    h1{font-size:20px;color:#1A1610;margin-bottom:4px}
+    .sub{color:#888;font-size:12px;margin-bottom:20px}
+    .badge{display:inline-block;background:#2D7A4A;color:#fff;border-radius:20px;padding:3px 12px;font-size:12px;margin-bottom:16px}
+    section{margin-bottom:20px}
+    h2{font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:#888;border-bottom:1px solid #eee;padding-bottom:4px;margin-bottom:10px}
+    table{width:100%;border-collapse:collapse}
+    td,th{padding:7px 6px;border-bottom:1px solid #f0f0f0}
+    th{background:#f8f5ef;text-align:left;font-size:11px;letter-spacing:1px;text-transform:uppercase}
+    .total{font-size:16px;font-weight:bold;text-align:right;margin-top:10px;color:#C9A84C}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .field{margin-bottom:8px}
+    .field label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#888;display:block}
+    @media print{body{padding:10px}}
+  </style></head><body>
+  <h1>🏭 Claudino Joias — Pedido Atacado</h1>
+  <div class="sub">#${p.id} · ${p.data}</div>
+  <div class="badge">${statusLabel[p.status]||p.status}</div>
+  ${rev.razao?`<section>
+    <h2>🏢 Revendedor</h2>
+    <div class="grid2">
+      <div class="field"><label>Razão Social</label><span>${rev.razao||'—'}</span></div>
+      <div class="field"><label>CNPJ</label><span>${rev.cnpj||'—'}</span></div>
+      <div class="field"><label>Responsável</label><span>${rev.nome||'—'}</span></div>
+      <div class="field"><label>WhatsApp</label><span>${rev.tel||'—'}</span></div>
+      <div class="field"><label>E-mail</label><span>${rev.email||'—'}</span></div>
+    </div>
+  </section>`:''}
+  ${end.rua?`<section>
+    <h2>📍 Endereço de Entrega</h2>
+    <div>${end.rua||''}, ${end.numero||''}${end.complemento?' — '+end.complemento:''}</div>
+    <div>${end.bairro?end.bairro+' · ':''}${end.cidade||''} - ${end.estado||''}</div>
+    <div>CEP: ${cepF}</div>
+  </section>`:''}
+  <section>
+    <h2>🛒 Itens do Pedido</h2>
+    <table>
+      <thead><tr><th>Produto</th><th style="text-align:center">Qtd</th><th style="text-align:right">Valor</th></tr></thead>
+      <tbody>${itensRows}</tbody>
+    </table>
+    <table style="margin-top:10px">
+      <tr><td>Subtotal</td><td style="text-align:right">R$ ${(p.subtotal||0).toFixed(2).replace('.',',')}</td></tr>
+      <tr><td>Frete ${p.frete&&p.frete.nome?'('+p.frete.nome+')':''}</td><td style="text-align:right">${p.frete&&p.frete.valor===0?'Grátis':'R$ '+(p.frete&&p.frete.valor||0).toFixed(2).replace('.',',')}</td></tr>
+    </table>
+    <div class="total">Total: R$ ${(p.total||0).toFixed(2).replace('.',',')}</div>
+  </section>
+  <script>window.onload=()=>window.print();<\/script>
+  </body></html>`;
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+}
+
+// ─── FIM PEDIDOS ATACADO ─────────────────────────────────────────────────────
 function copiarPix() {
   const key = config.pixKey || '';
   if(!key) { alert('Configure sua chave Pix no Painel Admin → Configurações'); return; }
@@ -5180,7 +5379,8 @@ function switchAdminTab(tab, btn) {
   if(tab === 'links')        popularSelectProdutos();
   if(tab === 'ferramentas')  carregarRedes();
   if(tab === 'frete')        { renderZonasFrete(); loadConfigMelhorEnvio(); if(config.freteGratis !== undefined) { const fg = document.getElementById('cfg-frete-gratis'); if(fg) fg.value = config.freteGratis; } }
-  if(tab === 'pedidos')     renderPedidos(); 
+  if(tab === 'pedidos')         renderPedidos();
+  if(tab === 'pedidos-atacado') renderPedidosAtacado(); 
   if(tab === 'sobre')       { loadSobre(); }
   if(tab === 'config')      {
     loadConfig();
@@ -7208,6 +7408,7 @@ function selecionarOpcaoCarrinho(metodo, tipo) {
   gerarParcelas(total);
   document.getElementById('mp-success').classList.remove('show');
   document.getElementById('modal-compra').classList.add('open');
+  if(tipo === 'atacado') salvarPedidoAtacado('pendente');
   setTimeout(() => {
     switchPay(metodo, document.querySelectorAll('.pay-tab')[metodo === 'pix' ? 1 : 0]);
   }, 10);
