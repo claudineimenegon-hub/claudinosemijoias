@@ -7323,7 +7323,8 @@ function checkoutCarrinho(tipo) {
   const total = cart.reduce((s,i) => s + i.preco * i.qty, 0);
   const nome  = cart.length === 1 ? cart[0].nome : `${cart.length} produtos`;
   currentProduct = { id: 0, nome, preco: total, emoji: '🛒', img: '' };
-  if(tipo === 'varejo') {
+  abrirModalEndereco(tipo);
+}
     // Varejo: primeiro pede endereço e calcula frete
     abrirModalEndereco();
     return;
@@ -8142,6 +8143,8 @@ function endStep3() {
   let subtotal = 0;
   if(_enderecoContexto === 'produto' && currentProduct) {
     subtotal = currentProduct.preco;
+  } else if(_enderecoContexto === 'atacado') {
+    subtotal = cartAtacado.reduce((s,i) => s + i.preco * i.qty, 0);
   } else {
     subtotal = cartVarejo.reduce((s,i) => s + i.preco * i.qty, 0);
   }
@@ -8181,6 +8184,10 @@ function pagarComEndereco(metodo) {
     subtotal = currentProduct.preco;
     nome     = currentProduct.nome;
     emoji    = currentProduct.emoji || '💍';
+  } else if(_enderecoContexto === 'atacado') {
+    subtotal = cartAtacado.reduce((s,i) => s + i.preco * i.qty, 0);
+    nome     = cartAtacado.length === 1 ? cartAtacado[0].nome : `${cartAtacado.length} produtos`;
+    emoji    = '📦';
   } else {
     subtotal = cartVarejo.reduce((s,i) => s + i.preco * i.qty, 0);
     nome     = cartVarejo.length === 1 ? cartVarejo[0].nome : `${cartVarejo.length} produtos`;
@@ -8206,6 +8213,7 @@ function pagarComEndereco(metodo) {
   document.getElementById('mp-success').classList.remove('show');
   document.getElementById('modal-compra').classList.add('open');
   document.body.style.overflow = 'hidden';
+  if(_enderecoContexto === 'atacado') salvarPedidoAtacado('pendente');
   setTimeout(() => switchPay(metodo, document.querySelectorAll('.pay-tab')[metodo === 'pix' ? 1 : 0]), 10);
 }
 
