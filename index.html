@@ -5175,7 +5175,7 @@ function switchAdminTab(tab, btn) {
   if(btn) btn.classList.add('active');
   const el = document.getElementById('tab-' + tab);
   if(el) { el.classList.add('active'); el.style.display = ''; }
-  if(tab === 'produtos')     renderAdminList(); }
+  if(tab === 'produtos')     renderAdminList();
   if(tab === 'atacado')      { renderCnpjList(); aplicarEstadoBotaoAtacado(); loadConfigNotif(); carregarCamposBannerAtacado(); }
   if(tab === 'prod-atacado') renderAdminListAtacado();
   if(tab === 'links')        popularSelectProdutos();
@@ -6536,7 +6536,11 @@ function renderCnpjList() {
           <small>👤 ${c.nome} · 📱 ${c.tel} · 📧 ${c.email||'—'}</small>
           ${c.endereco ? `<br><small>📍 ${c.endereco.rua||''}, ${c.endereco.numero||''} ${c.endereco.complemento?'— '+c.endereco.complemento:''} · ${c.endereco.bairro||''} · ${c.endereco.cidade||''}/${c.endereco.estado||''} · CEP: ${c.endereco.cep||''}</small>` : ''}
         </div>
-        <div class="cnpj-item-actions">${btns}</div>
+        <div class="cnpj-item-actions">
+          ${btns}
+          <button class="btn-outline" style="font-size:12px;padding:5px 10px" onclick="imprimirCadastroAtacado(${c.id})">🖨️ Imprimir</button>
+          <button class="btn-outline" style="font-size:12px;padding:5px 10px;color:#c0392b;border-color:#c0392b" onclick="excluirCadastroAtacado(${c.id})">🗑 Excluir</button>
+        </div>
       </div>`;
   }).join('');
 }
@@ -6544,6 +6548,65 @@ function renderCnpjList() {
 function mudarStatusCnpj(id, status) {
   const idx = cadastrosAtacado.findIndex(c => c.id===id);
   if(idx > -1) { cadastrosAtacado[idx].status = status; saveAtacado(); renderCnpjList(); }
+}
+
+function excluirCadastroAtacado(id) {
+  if(!confirm('Excluir este cadastro permanentemente?')) return;
+  cadastrosAtacado = cadastrosAtacado.filter(c => c.id !== id);
+  saveAtacado();
+  renderCnpjList();
+}
+
+function imprimirCadastroAtacado(id) {
+  const c = cadastrosAtacado.find(x => x.id === id);
+  if(!c) return;
+  const end = c.endereco || {};
+  const statusLabel = { pendente:'⏳ Pendente', aprovado:'✅ Aprovado', negado:'❌ Negado' };
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Cadastro Atacado — ${c.razao}</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 13px; color: #222; margin: 0; padding: 30px; }
+    h1 { font-size: 20px; color: #1A1610; margin-bottom: 4px; }
+    .sub { color: #888; font-size: 12px; margin-bottom: 20px; }
+    .badge { display:inline-block; background:#2D7A4A; color:#fff; border-radius:20px; padding:3px 12px; font-size:12px; margin-bottom:16px; }
+    section { margin-bottom: 20px; }
+    h2 { font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: #888; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-bottom: 10px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .field { margin-bottom: 8px; }
+    .field label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; display: block; }
+    .field span { font-size: 13px; }
+    @media print { body { padding: 10px; } }
+  </style></head><body>
+  <h1>🏭 Claudino Joias — Cadastro Atacado</h1>
+  <div class="sub">#${c.id} · ${c.data}</div>
+  <div class="badge">${statusLabel[c.status]||c.status}</div>
+  <section>
+    <h2>🏢 Dados da Empresa</h2>
+    <div class="grid2">
+      <div class="field"><label>Razão Social</label><span>${c.razao||'—'}</span></div>
+      <div class="field"><label>CNPJ</label><span>${c.cnpj||'—'}</span></div>
+      <div class="field"><label>Segmento</label><span>${c.segmento||'—'}</span></div>
+    </div>
+  </section>
+  <section>
+    <h2>👤 Responsável</h2>
+    <div class="grid2">
+      <div class="field"><label>Nome</label><span>${c.nome||'—'}</span></div>
+      <div class="field"><label>WhatsApp</label><span>${c.tel||'—'}</span></div>
+      <div class="field"><label>E-mail</label><span>${c.email||'—'}</span></div>
+    </div>
+  </section>
+  ${end.rua ? `<section>
+    <h2>📍 Endereço</h2>
+    <div>${end.rua}, ${end.numero||''}${end.complemento?' — '+end.complemento:''}</div>
+    <div>${end.bairro?end.bairro+' · ':''}${end.cidade||''} - ${end.estado||''}</div>
+    <div>CEP: ${end.cep||''}</div>
+  </section>` : ''}
+  <script>window.onload = () => window.print();<\/script>
+  </body></html>`;
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
 }
 
 function toggleBotaoAtacado() {
