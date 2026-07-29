@@ -4400,6 +4400,7 @@
       </div>
       <div id="lista-pedidos-admin"></div>
     </div><!-- fim tab-pedidos -->
+
     <!-- ── ABA PEDIDOS ATACADO ──────────────────────────── -->
     <div class="atab-content" id="tab-pedidos-atacado">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px">
@@ -4474,9 +4475,9 @@ async function syncConfigDoServidor() {
       localStorage.setItem('cj_pedidos', JSON.stringify(ordenados));
     }
     if (Array.isArray(d.pedidos_atacado) && d.pedidos_atacado.length > 0) {
-      const locais    = JSON.parse(localStorage.getItem('cj_pedidos_atacado') || '[]');
-      const todos     = [...d.pedidos_atacado, ...locais];
-      const unicos    = todos.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
+      const locais   = JSON.parse(localStorage.getItem('cj_pedidos_atacado') || '[]');
+      const todos    = [...d.pedidos_atacado, ...locais];
+      const unicos   = todos.filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i);
       const ordenados = unicos.sort((a, b) => b.id - a.id);
       localStorage.setItem('cj_pedidos_atacado', JSON.stringify(ordenados));
     }
@@ -4987,182 +4988,6 @@ function limparPedidosAntigos() {
   renderPedidos();
 }
 
-// ─── FIM PEDIDOS ─────────────────────────────────────────────────────
-// ─── RESUMO CHECKOUT ─────────────────────────────────────────────────────────
-function _atualizarResumoCheckout(subtotal, valorFrete, freteObj) {
-  const elSub   = document.getElementById('resumo-subtotal');
-  const elFrete = document.getElementById('resumo-frete');
-  const elTotal = document.getElementById('resumo-total');
-  if(!elSub) return;
-  const total = (subtotal||0) + (valorFrete||0);
-  elSub.textContent   = 'R$ ' + (subtotal||0).toFixed(2).replace('.',',');
-  elFrete.textContent = valorFrete === 0 ? 'Grátis' : 'R$ ' + (valorFrete||0).toFixed(2).replace('.',',');
-  if(freteObj && freteObj.nome) elFrete.textContent += ' (' + freteObj.nome + ')';
-  elTotal.textContent = 'R$ ' + total.toFixed(2).replace('.',',');
-}
-// ─── FIM RESUMO CHECKOUT ─────────────────────────────────────────────────────
-
-// ─── PIX EMV + QR CODE ───────────────────────────────────────────────────────
-function _pixCRC16(str) {
-  let crc = 0xFFFF;
-  for (let i = 0; i < str.length; i++) {
-    crc ^= str.charCodeAt(i) << 8;
-    for (let j = 0; j < 8; j++) {
-      crc = (crc & 0x8000) ? (crc << 1) ^ 0x1021 : crc << 1;
-    }
-  }
-  return ((crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0'));
-}
-
-function _pixTLV(id, value) {
-  return id + value.length.toString().padStart(2, '0') + value;
-}
-
-function gerarPixEMV(chave, valor, nome, cidade, txid) {
-  nome   = (nome   || 'Claudino Joias').substring(0,25).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
-  cidade = (cidade || 'Brasil').substring(0,15).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
-  txid   = (txid   || 'CLAUDINOJOIAS').substring(0,25).replace(/\s/g,'').toUpperCase();
-  const gui     = _pixTLV('00', 'BR.GOV.BCB.PIX');
-  const key     = _pixTLV('01', chave);
-  const merch   = _pixTLV('26', gui + key);
-  const mcc     = '52040000';
-  const currency= '5303986';
-  const amount  = valor > 0 ? _pixTLV('54', valor.toFixed(2)) : '';
-  const country = '5802BR';
-  const mName   = _pixTLV('59', nome);
-  const mCity   = _pixTLV('60', cidade);
-  const addData = _pixTLV('62', _pixTLV('05', txid));
-  const payload = '000201' + '010211' + merch + mcc + currency + amount + country + mName + mCity + addData + '6304';
-  return payload + _pixCRC16(payload);
-}
-
-let _pixQRInstance = null;
-
-function atualizarPixQR() {
-  const chave = config.pixKey || '';
-  const total = checkoutTotal || 0;
-  const destaque = document.getElementById('pix-valor-destaque');
-  if (destaque) destaque.textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
-  const elValor = document.getElementById('pix-valor');
-  if (elValor) elValor.textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
-  if (!chave) return;
-  const emv  = gerarPixEMV(chave, total, 'Claudino Joias', 'Brasil', 'PEDIDO');
-  const qrEl = document.getElementById('pix-qrcode');
-  if (!qrEl) return;
-  qrEl.innerHTML = '';
-  try {
-    _pixQRInstance = new QRCode(qrEl, {
-      text: emv, width: 180, height: 180,
-      colorDark: '#1A1610', colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.M,
-    });
-    window._pixEMV = emv;
-  } catch(e) {
-    qrEl.innerHTML = '<p style="font-size:12px;color:var(--muted)">QR Code indisponível</p>';
-  }
-}
-
-function copiarCodigoPix() {
-  const codigo = window._pixEMV || config.pixKey || '';
-  if (!codigo) { alert('Configure sua chave Pix no Painel Admin'); return; }
-  navigator.clipboard.writeText(codigo).then(() => {
-    const btn = document.querySelector('.btn-copy');
-    if (btn) { btn.textContent = '✓ Código copiado!'; setTimeout(() => btn.textContent = '📋 Copiar Código Pix', 2500); }
-    salvarPedido('pendente');
-  });
-}
-// ─── FIM PIX EMV + QR CODE ───────────────────────────────────────────────────
- // ─── BANNER ATACADO ──────────────────────────────────────────────────────────
-
-function previewBannerAtacado() {
-  const banner = document.querySelector('.atacado-banner');
-  if(!banner) return;
-  const bg1   = document.getElementById('cfg-at-bg1')?.value   || '#1A1610';
-  const bg2   = document.getElementById('cfg-at-bg2')?.value   || '#2C2619';
-  const cTit  = document.getElementById('cfg-at-cor-titulo')?.value || '#F5EDD8';
-  const cDesc = document.getElementById('cfg-at-cor-desc')?.value  || '#9A8E7A';
-  const t1    = document.getElementById('cfg-at-titulo1')?.value.trim() || 'Compre no';
-  const t2    = document.getElementById('cfg-at-titulo2')?.value.trim() || 'Atacado';
-  const desc  = document.getElementById('cfg-at-desc')?.value.trim()   || '';
-  const btn   = document.getElementById('cfg-at-btn')?.value.trim()    || '';
-  banner.style.background = `linear-gradient(135deg, ${bg1} 0%, ${bg2} 100%)`;
-  const h2 = banner.querySelector('h2');
-  if(h2) { h2.style.color = cTit; h2.innerHTML = `${t1} <em>${t2}</em>`; }
-  const p = banner.querySelector('p');
-  if(p && desc) { p.style.color = cDesc; p.textContent = desc; }
-  const b = document.getElementById('btn-atacado-banner');
-  if(b && btn) b.textContent = btn;
-  const feats = banner.querySelectorAll('.atacado-feat');
-  [1,2,3,4].forEach((n,i) => {
-    const emoji = document.getElementById(`cfg-at-feat${n}-emoji`)?.value || '';
-    const txt   = document.getElementById(`cfg-at-feat${n}-txt`)?.value   || '';
-    if(feats[i]) {
-      const sp = feats[i].querySelector('span');
-      const fp = feats[i].querySelector('p');
-      if(sp && emoji) sp.textContent = emoji;
-      if(fp && txt)   fp.textContent = txt;
-    }
-  });
-}
-
-function salvarBannerAtacado() {
-  config.atBg1       = document.getElementById('cfg-at-bg1')?.value        || '#1A1610';
-  config.atBg2       = document.getElementById('cfg-at-bg2')?.value        || '#2C2619';
-  config.atCorTitulo = document.getElementById('cfg-at-cor-titulo')?.value || '#F5EDD8';
-  config.atCorDesc   = document.getElementById('cfg-at-cor-desc')?.value   || '#9A8E7A';
-  config.atTitulo1   = document.getElementById('cfg-at-titulo1')?.value.trim() || '';
-  config.atTitulo2   = document.getElementById('cfg-at-titulo2')?.value.trim() || '';
-  config.atDesc      = document.getElementById('cfg-at-desc')?.value.trim()    || '';
-  config.atBtn       = document.getElementById('cfg-at-btn')?.value.trim()     || '';
-  config.atFeat1e    = document.getElementById('cfg-at-feat1-emoji')?.value    || '💰';
-  config.atFeat1t    = document.getElementById('cfg-at-feat1-txt')?.value      || 'Preços de atacado';
-  config.atFeat2e    = document.getElementById('cfg-at-feat2-emoji')?.value    || '📦';
-  config.atFeat2t    = document.getElementById('cfg-at-feat2-txt')?.value      || 'Pedido mínimo';
-  config.atFeat3e    = document.getElementById('cfg-at-feat3-emoji')?.value    || '🔄';
-  config.atFeat3t    = document.getElementById('cfg-at-feat3-txt')?.value      || 'Reposição rápida';
-  config.atFeat4e    = document.getElementById('cfg-at-feat4-emoji')?.value    || '🤝';
-  config.atFeat4t    = document.getElementById('cfg-at-feat4-txt')?.value      || 'Suporte dedicado';
-  localStorage.setItem('cj_config', JSON.stringify(config));
-  salvarNoServidor({ config });
-  aplicarBannerAtacado();
-  alert('✅ Banner Atacado salvo!');
-}
-
-function aplicarBannerAtacado() {
-  if(!config.atBg1) return;
-  const banner = document.querySelector('.atacado-banner');
-  if(!banner) return;
-  banner.style.background = `linear-gradient(135deg, ${config.atBg1||'#1A1610'} 0%, ${config.atBg2||'#2C2619'} 100%)`;
-  const h2 = banner.querySelector('h2');
-  if(h2) { h2.style.color = config.atCorTitulo||'#F5EDD8'; h2.innerHTML = `${config.atTitulo1||'Compre no'} <em>${config.atTitulo2||'Atacado'}</em>`; }
-  const p = banner.querySelector('p');
-  if(p && config.atDesc) { p.style.color = config.atCorDesc||'#9A8E7A'; p.textContent = config.atDesc; }
-  const b = document.getElementById('btn-atacado-banner');
-  if(b && config.atBtn) b.textContent = config.atBtn;
-  const feats = banner.querySelectorAll('.atacado-feat');
-  [[config.atFeat1e,config.atFeat1t],[config.atFeat2e,config.atFeat2t],[config.atFeat3e,config.atFeat3t],[config.atFeat4e,config.atFeat4t]].forEach(([e,t],i) => {
-    if(!feats[i]) return;
-    const sp = feats[i].querySelector('span'); const fp = feats[i].querySelector('p');
-    if(sp && e) sp.textContent = e; if(fp && t) fp.textContent = t;
-  });
-}
-
-function carregarCamposBannerAtacado() {
-  if(!config.atBg1) return;
-  const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
-  set('cfg-at-bg1',        config.atBg1);       set('cfg-at-bg1-hex',        config.atBg1);
-  set('cfg-at-bg2',        config.atBg2);       set('cfg-at-bg2-hex',        config.atBg2);
-  set('cfg-at-cor-titulo', config.atCorTitulo); set('cfg-at-cor-titulo-hex', config.atCorTitulo);
-  set('cfg-at-cor-desc',   config.atCorDesc);   set('cfg-at-cor-desc-hex',   config.atCorDesc);
-  set('cfg-at-titulo1',    config.atTitulo1);   set('cfg-at-titulo2',        config.atTitulo2);
-  set('cfg-at-desc',       config.atDesc);      set('cfg-at-btn',            config.atBtn);
-  set('cfg-at-feat1-emoji',config.atFeat1e);    set('cfg-at-feat1-txt',      config.atFeat1t);
-  set('cfg-at-feat2-emoji',config.atFeat2e);    set('cfg-at-feat2-txt',      config.atFeat2t);
-  set('cfg-at-feat3-emoji',config.atFeat3e);    set('cfg-at-feat3-txt',      config.atFeat3t);
-  set('cfg-at-feat4-emoji',config.atFeat4e);    set('cfg-at-feat4-txt',      config.atFeat4t);
-}
-
-// ─── FIM BANNER ATACADO ──────────────────────────────────────────────────────
 // ─── PEDIDOS ATACADO ─────────────────────────────────────────────────────────
 
 function salvarPedidoAtacado(status) {
@@ -5339,6 +5164,184 @@ function imprimirPedidoAtacado(id) {
 }
 
 // ─── FIM PEDIDOS ATACADO ─────────────────────────────────────────────────────
+
+// ─── FIM PEDIDOS ─────────────────────────────────────────────────────
+// ─── RESUMO CHECKOUT ─────────────────────────────────────────────────────────
+function _atualizarResumoCheckout(subtotal, valorFrete, freteObj) {
+  const elSub   = document.getElementById('resumo-subtotal');
+  const elFrete = document.getElementById('resumo-frete');
+  const elTotal = document.getElementById('resumo-total');
+  if(!elSub) return;
+  const total = (subtotal||0) + (valorFrete||0);
+  elSub.textContent   = 'R$ ' + (subtotal||0).toFixed(2).replace('.',',');
+  elFrete.textContent = valorFrete === 0 ? 'Grátis' : 'R$ ' + (valorFrete||0).toFixed(2).replace('.',',');
+  if(freteObj && freteObj.nome) elFrete.textContent += ' (' + freteObj.nome + ')';
+  elTotal.textContent = 'R$ ' + total.toFixed(2).replace('.',',');
+}
+// ─── FIM RESUMO CHECKOUT ─────────────────────────────────────────────────────
+
+// ─── PIX EMV + QR CODE ───────────────────────────────────────────────────────
+function _pixCRC16(str) {
+  let crc = 0xFFFF;
+  for (let i = 0; i < str.length; i++) {
+    crc ^= str.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      crc = (crc & 0x8000) ? (crc << 1) ^ 0x1021 : crc << 1;
+    }
+  }
+  return ((crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0'));
+}
+
+function _pixTLV(id, value) {
+  return id + value.length.toString().padStart(2, '0') + value;
+}
+
+function gerarPixEMV(chave, valor, nome, cidade, txid) {
+  nome   = (nome   || 'Claudino Joias').substring(0,25).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+  cidade = (cidade || 'Brasil').substring(0,15).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+  txid   = (txid   || 'CLAUDINOJOIAS').substring(0,25).replace(/\s/g,'').toUpperCase();
+  const gui     = _pixTLV('00', 'BR.GOV.BCB.PIX');
+  const key     = _pixTLV('01', chave);
+  const merch   = _pixTLV('26', gui + key);
+  const mcc     = '52040000';
+  const currency= '5303986';
+  const amount  = valor > 0 ? _pixTLV('54', valor.toFixed(2)) : '';
+  const country = '5802BR';
+  const mName   = _pixTLV('59', nome);
+  const mCity   = _pixTLV('60', cidade);
+  const addData = _pixTLV('62', _pixTLV('05', txid));
+  const payload = '000201' + '010211' + merch + mcc + currency + amount + country + mName + mCity + addData + '6304';
+  return payload + _pixCRC16(payload);
+}
+
+let _pixQRInstance = null;
+
+function atualizarPixQR() {
+  const chave = config.pixKey || '';
+  const total = checkoutTotal || 0;
+  const destaque = document.getElementById('pix-valor-destaque');
+  if (destaque) destaque.textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+  const elValor = document.getElementById('pix-valor');
+  if (elValor) elValor.textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+  if (!chave) return;
+  const emv  = gerarPixEMV(chave, total, 'Claudino Joias', 'Brasil', 'PEDIDO');
+  const qrEl = document.getElementById('pix-qrcode');
+  if (!qrEl) return;
+  qrEl.innerHTML = '';
+  try {
+    _pixQRInstance = new QRCode(qrEl, {
+      text: emv, width: 180, height: 180,
+      colorDark: '#1A1610', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M,
+    });
+    window._pixEMV = emv;
+  } catch(e) {
+    qrEl.innerHTML = '<p style="font-size:12px;color:var(--muted)">QR Code indisponível</p>';
+  }
+}
+
+function copiarCodigoPix() {
+  const codigo = window._pixEMV || config.pixKey || '';
+  if (!codigo) { alert('Configure sua chave Pix no Painel Admin'); return; }
+  navigator.clipboard.writeText(codigo).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    if (btn) { btn.textContent = '✓ Código copiado!'; setTimeout(() => btn.textContent = '📋 Copiar Código Pix', 2500); }
+    salvarPedido('pendente');
+  });
+}
+// ─── FIM PIX EMV + QR CODE ───────────────────────────────────────────────────
+ // ─── BANNER ATACADO ──────────────────────────────────────────────────────────
+
+function previewBannerAtacado() {
+  const banner = document.querySelector('.atacado-banner');
+  if(!banner) return;
+  const bg1   = document.getElementById('cfg-at-bg1')?.value   || '#1A1610';
+  const bg2   = document.getElementById('cfg-at-bg2')?.value   || '#2C2619';
+  const cTit  = document.getElementById('cfg-at-cor-titulo')?.value || '#F5EDD8';
+  const cDesc = document.getElementById('cfg-at-cor-desc')?.value  || '#9A8E7A';
+  const t1    = document.getElementById('cfg-at-titulo1')?.value.trim() || 'Compre no';
+  const t2    = document.getElementById('cfg-at-titulo2')?.value.trim() || 'Atacado';
+  const desc  = document.getElementById('cfg-at-desc')?.value.trim()   || '';
+  const btn   = document.getElementById('cfg-at-btn')?.value.trim()    || '';
+  banner.style.background = `linear-gradient(135deg, ${bg1} 0%, ${bg2} 100%)`;
+  const h2 = banner.querySelector('h2');
+  if(h2) { h2.style.color = cTit; h2.innerHTML = `${t1} <em>${t2}</em>`; }
+  const p = banner.querySelector('p');
+  if(p && desc) { p.style.color = cDesc; p.textContent = desc; }
+  const b = document.getElementById('btn-atacado-banner');
+  if(b && btn) b.textContent = btn;
+  const feats = banner.querySelectorAll('.atacado-feat');
+  [1,2,3,4].forEach((n,i) => {
+    const emoji = document.getElementById(`cfg-at-feat${n}-emoji`)?.value || '';
+    const txt   = document.getElementById(`cfg-at-feat${n}-txt`)?.value   || '';
+    if(feats[i]) {
+      const sp = feats[i].querySelector('span');
+      const fp = feats[i].querySelector('p');
+      if(sp && emoji) sp.textContent = emoji;
+      if(fp && txt)   fp.textContent = txt;
+    }
+  });
+}
+
+function salvarBannerAtacado() {
+  config.atBg1       = document.getElementById('cfg-at-bg1')?.value        || '#1A1610';
+  config.atBg2       = document.getElementById('cfg-at-bg2')?.value        || '#2C2619';
+  config.atCorTitulo = document.getElementById('cfg-at-cor-titulo')?.value || '#F5EDD8';
+  config.atCorDesc   = document.getElementById('cfg-at-cor-desc')?.value   || '#9A8E7A';
+  config.atTitulo1   = document.getElementById('cfg-at-titulo1')?.value.trim() || '';
+  config.atTitulo2   = document.getElementById('cfg-at-titulo2')?.value.trim() || '';
+  config.atDesc      = document.getElementById('cfg-at-desc')?.value.trim()    || '';
+  config.atBtn       = document.getElementById('cfg-at-btn')?.value.trim()     || '';
+  config.atFeat1e    = document.getElementById('cfg-at-feat1-emoji')?.value    || '💰';
+  config.atFeat1t    = document.getElementById('cfg-at-feat1-txt')?.value      || 'Preços de atacado';
+  config.atFeat2e    = document.getElementById('cfg-at-feat2-emoji')?.value    || '📦';
+  config.atFeat2t    = document.getElementById('cfg-at-feat2-txt')?.value      || 'Pedido mínimo';
+  config.atFeat3e    = document.getElementById('cfg-at-feat3-emoji')?.value    || '🔄';
+  config.atFeat3t    = document.getElementById('cfg-at-feat3-txt')?.value      || 'Reposição rápida';
+  config.atFeat4e    = document.getElementById('cfg-at-feat4-emoji')?.value    || '🤝';
+  config.atFeat4t    = document.getElementById('cfg-at-feat4-txt')?.value      || 'Suporte dedicado';
+  localStorage.setItem('cj_config', JSON.stringify(config));
+  salvarNoServidor({ config });
+  aplicarBannerAtacado();
+  alert('✅ Banner Atacado salvo!');
+}
+
+function aplicarBannerAtacado() {
+  if(!config.atBg1) return;
+  const banner = document.querySelector('.atacado-banner');
+  if(!banner) return;
+  banner.style.background = `linear-gradient(135deg, ${config.atBg1||'#1A1610'} 0%, ${config.atBg2||'#2C2619'} 100%)`;
+  const h2 = banner.querySelector('h2');
+  if(h2) { h2.style.color = config.atCorTitulo||'#F5EDD8'; h2.innerHTML = `${config.atTitulo1||'Compre no'} <em>${config.atTitulo2||'Atacado'}</em>`; }
+  const p = banner.querySelector('p');
+  if(p && config.atDesc) { p.style.color = config.atCorDesc||'#9A8E7A'; p.textContent = config.atDesc; }
+  const b = document.getElementById('btn-atacado-banner');
+  if(b && config.atBtn) b.textContent = config.atBtn;
+  const feats = banner.querySelectorAll('.atacado-feat');
+  [[config.atFeat1e,config.atFeat1t],[config.atFeat2e,config.atFeat2t],[config.atFeat3e,config.atFeat3t],[config.atFeat4e,config.atFeat4t]].forEach(([e,t],i) => {
+    if(!feats[i]) return;
+    const sp = feats[i].querySelector('span'); const fp = feats[i].querySelector('p');
+    if(sp && e) sp.textContent = e; if(fp && t) fp.textContent = t;
+  });
+}
+
+function carregarCamposBannerAtacado() {
+  if(!config.atBg1) return;
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+  set('cfg-at-bg1',        config.atBg1);       set('cfg-at-bg1-hex',        config.atBg1);
+  set('cfg-at-bg2',        config.atBg2);       set('cfg-at-bg2-hex',        config.atBg2);
+  set('cfg-at-cor-titulo', config.atCorTitulo); set('cfg-at-cor-titulo-hex', config.atCorTitulo);
+  set('cfg-at-cor-desc',   config.atCorDesc);   set('cfg-at-cor-desc-hex',   config.atCorDesc);
+  set('cfg-at-titulo1',    config.atTitulo1);   set('cfg-at-titulo2',        config.atTitulo2);
+  set('cfg-at-desc',       config.atDesc);      set('cfg-at-btn',            config.atBtn);
+  set('cfg-at-feat1-emoji',config.atFeat1e);    set('cfg-at-feat1-txt',      config.atFeat1t);
+  set('cfg-at-feat2-emoji',config.atFeat2e);    set('cfg-at-feat2-txt',      config.atFeat2t);
+  set('cfg-at-feat3-emoji',config.atFeat3e);    set('cfg-at-feat3-txt',      config.atFeat3t);
+  set('cfg-at-feat4-emoji',config.atFeat4e);    set('cfg-at-feat4-txt',      config.atFeat4t);
+}
+
+// ─── FIM BANNER ATACADO ──────────────────────────────────────────────────────
+
 function copiarPix() {
   const key = config.pixKey || '';
   if(!key) { alert('Configure sua chave Pix no Painel Admin → Configurações'); return; }
@@ -5380,7 +5383,7 @@ function switchAdminTab(tab, btn) {
   if(tab === 'ferramentas')  carregarRedes();
   if(tab === 'frete')        { renderZonasFrete(); loadConfigMelhorEnvio(); if(config.freteGratis !== undefined) { const fg = document.getElementById('cfg-frete-gratis'); if(fg) fg.value = config.freteGratis; } }
   if(tab === 'pedidos')         renderPedidos();
-  if(tab === 'pedidos-atacado') renderPedidosAtacado(); 
+  if(tab === 'pedidos-atacado') renderPedidosAtacado();
   if(tab === 'sobre')       { loadSobre(); }
   if(tab === 'config')      {
     loadConfig();
@@ -7193,6 +7196,7 @@ function saveCart() {
   localStorage.setItem('cj_cart_v', JSON.stringify(cartVarejo));
   localStorage.setItem('cj_cart_a', JSON.stringify(cartAtacado));
 }
+
 function _resumoAtacadoCard(prodId, preco, minimo) {
   const item = cartAtacado.find(i => i.id === prodId);
   if(item) {
@@ -7209,6 +7213,7 @@ function _atualizarBotoesResumoAtacado() {
     if(btn) btn.textContent = _resumoAtacadoCard(p.id, p.preco, p.minimo);
   });
 }
+
 function addCarrinho(id, tipo) {
   const lista  = tipo === 'varejo' ? products : produtosAtacado;
   const prod   = lista.find(p => p.id === id);
@@ -7256,6 +7261,7 @@ function atualizarBadges() {
   const ba = document.getElementById('badge-atacado');
   bv.textContent = tv; bv.classList.toggle('show', tv > 0);
   ba.textContent = ta; ba.classList.toggle('show', ta > 0);
+  // Mostrar/ocultar FAB atacado conforme carrinho
   const fabAt = document.getElementById('fab-cart-atacado');
   if(fabAt) fabAt.style.display = ta > 0 ? '' : 'none';
 }
@@ -7323,68 +7329,8 @@ function checkoutCarrinho(tipo) {
   const total = cart.reduce((s,i) => s + i.preco * i.qty, 0);
   const nome  = cart.length === 1 ? cart[0].nome : `${cart.length} produtos`;
   currentProduct = { id: 0, nome, preco: total, emoji: '🛒', img: '' };
+  // Ambos passam pelo modal de endereço para coletar CEP e calcular frete
   abrirModalEndereco(tipo);
-}
-    // Varejo: primeiro pede endereço e calcula frete
-    abrirModalEndereco();
-    return;
-  }
-  if(tipo === 'atacado') {
-    // Atacado: abre modal com opções incluindo WhatsApp
-    document.getElementById('modal-opcoes').innerHTML = `
-      <div class="modal" style="max-width:480px">
-        <div class="modal-head">
-          <h3>Opções de Pagamento</h3>
-          <button class="modal-close" onclick="document.getElementById('modal-opcoes').classList.remove('open')">×</button>
-        </div>
-        <div class="modal-body">
-          <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">Escolha como deseja pagar seu pedido de atacado.</p>
-          <div style="display:flex;flex-direction:column;gap:14px">
-            <div class="opcao-pay" onclick="selecionarOpcaoCarrinho('mp','atacado')">
-              <div class="opcao-icon">💳</div>
-              <div class="opcao-info"><strong>Cartão de Crédito</strong><span>Parcelamento em até 6x via Mercado Pago</span></div>
-              <div class="opcao-seta">›</div>
-            </div>
-            <div class="opcao-pay" onclick="selecionarOpcaoCarrinho('pix','atacado')">
-              <div class="opcao-icon">💚</div>
-              <div class="opcao-info"><strong>Pix</strong><span>Pagamento instantâneo · Envie o comprovante</span></div>
-              <div class="opcao-seta">›</div>
-            </div>
-            <div class="opcao-pay" onclick="selecionarOpcaoCarrinho('whats','atacado')">
-              <div class="opcao-icon">📱</div>
-              <div class="opcao-info"><strong>WhatsApp</strong><span>Enviar pedido pelo WhatsApp e combinar pagamento</span></div>
-              <div class="opcao-seta">›</div>
-            </div>
-          </div>
-        </div>
-      </div>`;
-    document.getElementById('modal-opcoes').classList.add('open');
-  } else {
-    // Varejo: abre modal padrão de opções
-    document.getElementById('modal-opcoes').innerHTML = `
-      <div class="modal" style="max-width:480px">
-        <div class="modal-head">
-          <h3>Opções de Pagamento</h3>
-          <button class="modal-close" onclick="document.getElementById('modal-opcoes').classList.remove('open')">×</button>
-        </div>
-        <div class="modal-body">
-          <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">Escolha como prefere pagar. Aceitamos cartão de crédito via Mercado Pago ou Pix.</p>
-          <div style="display:flex;flex-direction:column;gap:14px">
-            <div class="opcao-pay" onclick="selecionarOpcaoCarrinho('mp','varejo')">
-              <div class="opcao-icon">💳</div>
-              <div class="opcao-info"><strong>Cartão de Crédito</strong><span>Visa, Mastercard, Elo · Parcelamento em até 6x</span></div>
-              <div class="opcao-seta">›</div>
-            </div>
-            <div class="opcao-pay" onclick="selecionarOpcaoCarrinho('pix','varejo')">
-              <div class="opcao-icon">💚</div>
-              <div class="opcao-info"><strong>Pix</strong><span>Pagamento instantâneo · Confirmação em segundos</span></div>
-              <div class="opcao-seta">›</div>
-            </div>
-          </div>
-        </div>
-      </div>`;
-    document.getElementById('modal-opcoes').classList.add('open');
-  }
 }
 
 function selecionarOpcaoCarrinho(metodo, tipo) {
@@ -7403,12 +7349,13 @@ function selecionarOpcaoCarrinho(metodo, tipo) {
   document.getElementById('modal-preco').textContent = 'R$ ' + total.toFixed(2).replace('.',',');
   document.getElementById('pix-valor').textContent   = 'R$ ' + total.toFixed(2).replace('.',',');
   document.getElementById('pix-key-display').textContent = config.pixKey || 'Defina sua chave Pix no Painel Admin';
-  _atualizarResumoCheckout(subtotal, freteAtual ? freteAtual.valor : 0, freteAtual);
+  _atualizarResumoCheckout(total, 0, null);
   atualizarPixQR();
   document.getElementById('modal-img').innerHTML = '🛒';
   gerarParcelas(total);
   document.getElementById('mp-success').classList.remove('show');
   document.getElementById('modal-compra').classList.add('open');
+  // Salvar pedido atacado como pendente
   if(tipo === 'atacado') salvarPedidoAtacado('pendente');
   setTimeout(() => {
     switchPay(metodo, document.querySelectorAll('.pay-tab')[metodo === 'pix' ? 1 : 0]);
@@ -8213,7 +8160,10 @@ function pagarComEndereco(metodo) {
   document.getElementById('mp-success').classList.remove('show');
   document.getElementById('modal-compra').classList.add('open');
   document.body.style.overflow = 'hidden';
-  if(_enderecoContexto === 'atacado') salvarPedidoAtacado('pendente');
+  // Salvar pedido no contexto correto
+  if(_enderecoContexto === 'atacado') {
+    salvarPedidoAtacado('pendente');
+  }
   setTimeout(() => switchPay(metodo, document.querySelectorAll('.pay-tab')[metodo === 'pix' ? 1 : 0]), 10);
 }
 
