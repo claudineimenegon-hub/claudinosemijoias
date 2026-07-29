@@ -6300,7 +6300,7 @@ function renderCatalogoAtacado(filter='todos') {
         <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Mín: ${p.minimo} unid. · Estoque: ${p.estoque||0} unid.</div>
         <div class="card-actions">
           <button class="btn-buy" onclick="addCarrinho(${p.id},'atacado')">🛒 Carrinho</button>
-          <button class="btn-pix" onclick="pedirAtacado('${p.nome}',${p.preco},${p.minimo})">WhatsApp</button>
+          <button class="btn-pix" id="btn-at-resumo-${p.id}" onclick="openCart('atacado')" style="font-size:11px;line-height:1.3">${_resumoAtacadoCard(p.id, p.preco, p.minimo)}</button>
         </div>
       </div>
     </div>`;
@@ -6993,7 +6993,22 @@ function saveCart() {
   localStorage.setItem('cj_cart_v', JSON.stringify(cartVarejo));
   localStorage.setItem('cj_cart_a', JSON.stringify(cartAtacado));
 }
+function _resumoAtacadoCard(prodId, preco, minimo) {
+  const item = cartAtacado.find(i => i.id === prodId);
+  if(item) {
+    const total = (item.preco * item.qty).toFixed(2).replace('.', ',');
+    return `📦 ${item.qty} un · R$ ${total}`;
+  }
+  const totalMin = (preco * minimo).toFixed(2).replace('.', ',');
+  return `Mín: ${minimo} un · R$ ${totalMin}`;
+}
 
+function _atualizarBotoesResumoAtacado() {
+  produtosAtacado.forEach(p => {
+    const btn = document.getElementById(`btn-at-resumo-${p.id}`);
+    if(btn) btn.textContent = _resumoAtacadoCard(p.id, p.preco, p.minimo);
+  });
+}
 function addCarrinho(id, tipo) {
   const lista  = tipo === 'varejo' ? products : produtosAtacado;
   const prod   = lista.find(p => p.id === id);
@@ -7005,6 +7020,7 @@ function addCarrinho(id, tipo) {
   saveCart();
   atualizarBadges();
   renderDrawer(tipo);
+  if(tipo === 'atacado') _atualizarBotoesResumoAtacado();
   // Flash no badge do FAB — feedback visual sem abrir o drawer
   const badge = document.getElementById('badge-' + tipo);
   badge.classList.add('show');
@@ -7018,6 +7034,7 @@ function removeCarrinho(id, tipo) {
   saveCart();
   atualizarBadges();
   renderDrawer(tipo);
+  if(tipo === 'atacado') _atualizarBotoesResumoAtacado();
 }
 
 function changeQty(id, tipo, delta) {
@@ -7029,6 +7046,7 @@ function changeQty(id, tipo, delta) {
   saveCart();
   atualizarBadges();
   renderDrawer(tipo);
+  if(tipo === 'atacado') _atualizarBotoesResumoAtacado();
 }
 
 function atualizarBadges() {
@@ -7038,6 +7056,8 @@ function atualizarBadges() {
   const ba = document.getElementById('badge-atacado');
   bv.textContent = tv; bv.classList.toggle('show', tv > 0);
   ba.textContent = ta; ba.classList.toggle('show', ta > 0);
+  const fabAt = document.getElementById('fab-cart-atacado');
+  if(fabAt) fabAt.style.display = ta > 0 ? '' : 'none';
 }
 
 function renderDrawer(tipo) {
