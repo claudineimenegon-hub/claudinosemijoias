@@ -4429,8 +4429,9 @@ async function syncConfigDoServidor() {
     if (!json.ok || !json.data) return;
     const d = json.data;
 
-    if (d.config && Object.keys(d.config).length > 0) {
-      config = { ...config, ...d.config };
+    const remoteConfig = d.config || (d.pixKey || d.cor_dark || d.logoTipo ? d : null);
+    if (remoteConfig && Object.keys(remoteConfig).length > 0) {
+      config = { ...config, ...remoteConfig };
       localStorage.setItem('cj_config', JSON.stringify(config));
     }
     if (Array.isArray(d.products) && d.products.length > 0) {
@@ -4440,9 +4441,6 @@ async function syncConfigDoServidor() {
     if (Array.isArray(d.frete_zonas)) {
       zonasFrete = d.frete_zonas;
       localStorage.setItem('cj_frete_zonas', JSON.stringify(zonasFrete));
-    }
-    if (d.redes && Object.keys(d.redes).length > 0) {
-      localStorage.setItem('cj_redes', JSON.stringify(d.redes));
     }
     if (d.redes && Object.keys(d.redes).length > 0) {
       localStorage.setItem('cj_redes', JSON.stringify(d.redes));
@@ -4476,20 +4474,6 @@ async function salvarNoServidor(dados) {
 
 async function salvarConfigNoServidor(cfg) {
   await salvarNoServidor({ config: cfg });
-}
-
-async function salvarConfigNoServidor(cfg) {
-  try {
-    const base = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
-      ? '' : window.location.origin;
-    await fetch(`${base}/.netlify/functions/config-set`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(cfg),
-    });
-  } catch (e) {
-    console.warn('Config: erro ao salvar no servidor.', e.message);
-  }
 }
 // ────────────────────────────────────────────────────────────────────  
 let cadastrosAtacado = JSON.parse(localStorage.getItem('cj_atacado') || '[]');
@@ -5175,7 +5159,7 @@ function switchAdminTab(tab, btn) {
   if(btn) btn.classList.add('active');
   const el = document.getElementById('tab-' + tab);
   if(el) { el.classList.add('active'); el.style.display = ''; }
-  if(tab === 'produtos')     renderAdminList(); }
+  if(tab === 'produtos')     renderAdminList();
   if(tab === 'atacado')      { renderCnpjList(); aplicarEstadoBotaoAtacado(); loadConfigNotif(); carregarCamposBannerAtacado(); }
   if(tab === 'prod-atacado') renderAdminListAtacado();
   if(tab === 'links')        popularSelectProdutos();
