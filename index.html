@@ -4398,6 +4398,70 @@
           <button class="btn-outline" style="padding:6px 12px;font-size:12px" onclick="limparPedidosAntigos()">🗑 Limpar antigos</button>
         </div>
       </div>
+
+      <!-- NOTIFICAÇÕES DE PEDIDOS -->
+      <div class="config-block" style="margin-bottom:20px">
+        <h3>🔔 Notificações de Novos Pedidos</h3>
+        <p>Configure como você quer ser avisado quando um novo pedido chegar.</p>
+        <div class="admin-form">
+
+          <div class="afield full">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:8px">
+              <input type="checkbox" id="cfg-notif-pedido-whats" style="accent-color:var(--gold);width:16px;height:16px">
+              📱 Notificar via WhatsApp
+            </label>
+            <input type="text" id="cfg-whats-pedido-admin" placeholder="Ex: 5544999887766 (DDI+DDD+número)">
+            <p style="font-size:11px;color:var(--muted);margin-top:4px">Brasil: 55 + DDD + número. Ex: 5544999887766</p>
+          </div>
+
+          <div class="afield full">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:8px">
+              <input type="checkbox" id="cfg-notif-pedido-email" style="accent-color:var(--gold);width:16px;height:16px">
+              📧 Notificar por E-mail (EmailJS — gratuito)
+            </label>
+            <div class="admin-form" style="margin-top:0">
+              <div class="afield">
+                <label>Service ID</label>
+                <input type="text" id="cfg-ejs-pedido-service" placeholder="service_xxxxxxx">
+              </div>
+              <div class="afield">
+                <label>Template ID</label>
+                <input type="text" id="cfg-ejs-pedido-template" placeholder="template_xxxxxxx">
+              </div>
+              <div class="afield">
+                <label>Public Key</label>
+                <input type="text" id="cfg-ejs-pedido-pubkey" placeholder="chave pública">
+              </div>
+              <div class="afield">
+                <label>Seu e-mail (destino)</label>
+                <input type="email" id="cfg-email-pedido-admin" placeholder="seu@email.com">
+              </div>
+            </div>
+            <div class="info-note" style="margin-top:10px">
+              📌 <strong>Como configurar o EmailJS (100% gratuito):</strong><br>
+              1. Crie conta em <a href="https://emailjs.com" target="_blank" style="color:var(--gold)">emailjs.com</a><br>
+              2. Adicione um serviço (Gmail, Outlook etc.) → copie o <strong>Service ID</strong><br>
+              3. Crie um template com as variáveis: <code style="background:#F0EAD8;padding:1px 5px;border-radius:3px">{{nome_cliente}}</code> <code style="background:#F0EAD8;padding:1px 5px;border-radius:3px">{{tel_cliente}}</code> <code style="background:#F0EAD8;padding:1px 5px;border-radius:3px">{{email_cliente}}</code> <code style="background:#F0EAD8;padding:1px 5px;border-radius:3px">{{total}}</code> <code style="background:#F0EAD8;padding:1px 5px;border-radius:3px">{{itens}}</code> <code style="background:#F0EAD8;padding:1px 5px;border-radius:3px">{{endereco}}</code><br>
+              4. Em <strong>Account → General → Public Key</strong> → copie e cole acima
+            </div>
+          </div>
+
+          <div class="afield full">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:8px">
+              <input type="checkbox" id="cfg-notif-pedido-push" onchange="ativarPushPedido(this)" style="accent-color:var(--gold);width:16px;height:16px">
+              🔔 Notificação no Navegador (Push)
+            </label>
+            <div id="push-pedido-status" style="font-size:12px;color:var(--muted);padding:8px 0">Status: não ativado</div>
+            <p style="font-size:11px;color:var(--muted)">Receba uma notificação no navegador/celular assim que um pedido chegar (funciona com o site aberto).</p>
+          </div>
+
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap">
+          <button class="btn-save" onclick="salvarConfigNotifPedido()">✓ Salvar Notificações</button>
+          <button class="btn-outline" style="padding:10px 20px" onclick="testarNotificacoesPedido()">🧪 Testar agora</button>
+        </div>
+      </div>
+
       <div id="lista-pedidos-admin"></div>
     </div><!-- fim tab-pedidos -->
 
@@ -4838,7 +4902,11 @@ function salvarPedido(status) {
   pedidos.unshift(pedido);
   localStorage.setItem('cj_pedidos', JSON.stringify(pedidos));
   salvarNoServidor({ pedidos });
+  notificarNovoPedido(pedido);
 }
+
+function renderPedidos() {
+
 
 function renderPedidos() {
   const el = document.getElementById('lista-pedidos-admin');
@@ -4989,7 +5057,106 @@ function limparPedidosAntigos() {
 }
 
 // ─── PEDIDOS ATACADO ─────────────────────────────────────────────────────────
+// ─── NOTIFICAÇÕES DE PEDIDOS ─────────────────────────────────────────────────
 
+function salvarConfigNotifPedido() {
+  config.notifPedidoWhats    = document.getElementById('cfg-notif-pedido-whats')?.checked    || false;
+  config.notifPedidoEmail    = document.getElementById('cfg-notif-pedido-email')?.checked    || false;
+  config.notifPedidoPush     = document.getElementById('cfg-notif-pedido-push')?.checked     || false;
+  config.whatsPedidoAdmin    = document.getElementById('cfg-whats-pedido-admin')?.value.trim() || '';
+  config.ejsPedidoService    = document.getElementById('cfg-ejs-pedido-service')?.value.trim() || '';
+  config.ejsPedidoTemplate   = document.getElementById('cfg-ejs-pedido-template')?.value.trim() || '';
+  config.ejsPedidoPubkey     = document.getElementById('cfg-ejs-pedido-pubkey')?.value.trim() || '';
+  config.emailPedidoAdmin    = document.getElementById('cfg-email-pedido-admin')?.value.trim() || '';
+  localStorage.setItem('cj_config', JSON.stringify(config));
+  salvarNoServidor({ config });
+  alert('✅ Notificações de pedidos salvas!');
+}
+
+function loadConfigNotifPedido() {
+  const s = id => document.getElementById(id);
+  if(s('cfg-notif-pedido-whats'))  s('cfg-notif-pedido-whats').checked  = config.notifPedidoWhats  || false;
+  if(s('cfg-notif-pedido-email'))  s('cfg-notif-pedido-email').checked  = config.notifPedidoEmail  || false;
+  if(s('cfg-notif-pedido-push'))   s('cfg-notif-pedido-push').checked   = config.notifPedidoPush   || false;
+  if(s('cfg-whats-pedido-admin'))  s('cfg-whats-pedido-admin').value    = config.whatsPedidoAdmin  || '';
+  if(s('cfg-ejs-pedido-service'))  s('cfg-ejs-pedido-service').value    = config.ejsPedidoService  || '';
+  if(s('cfg-ejs-pedido-template')) s('cfg-ejs-pedido-template').value   = config.ejsPedidoTemplate || '';
+  if(s('cfg-ejs-pedido-pubkey'))   s('cfg-ejs-pedido-pubkey').value     = config.ejsPedidoPubkey   || '';
+  if(s('cfg-email-pedido-admin'))  s('cfg-email-pedido-admin').value    = config.emailPedidoAdmin  || '';
+  const st = document.getElementById('push-pedido-status');
+  if(st) st.textContent = config.notifPedidoPush ? '✅ Ativado — você receberá notificações neste navegador' : 'Status: não ativado';
+}
+
+async function notificarNovoPedido(pedido) {
+  const end    = pedido.endereco || {};
+  const endStr = `${end.rua||''}, ${end.numero||''} ${end.complemento||''} — ${end.bairro||''} ${end.cidade||''}/${end.estado||''} CEP:${end.cep||''}`.trim();
+  const itensStr = (pedido.itens||[]).map(i => `${i.nome} x${i.qty}`).join(', ');
+
+  if(config.notifPedidoWhats && config.whatsPedidoAdmin) {
+    const msg = encodeURIComponent(
+      `🛍️ *Novo Pedido — Claudino Joias*\n` +
+      `👤 ${end.nomeCliente||'—'} | 📱 ${end.telCliente||'—'}\n` +
+      `📦 ${itensStr}\n` +
+      `💰 Total: R$ ${(pedido.total||0).toFixed(2).replace('.',',')}\n` +
+      `📍 ${endStr}`
+    );
+    window.open(`https://wa.me/${config.whatsPedidoAdmin}?text=${msg}`, '_blank');
+  }
+
+  if(config.notifPedidoEmail && config.ejsPedidoService && config.ejsPedidoTemplate && typeof emailjs !== 'undefined') {
+    try {
+      await emailjs.send(config.ejsPedidoService, config.ejsPedidoTemplate, {
+        nome_cliente:  end.nomeCliente  || '—',
+        tel_cliente:   end.telCliente   || '—',
+        email_cliente: end.emailCliente || '—',
+        total:         'R$ ' + (pedido.total||0).toFixed(2).replace('.',','),
+        itens:         itensStr,
+        endereco:      endStr,
+        email_destino: config.emailPedidoAdmin || '',
+      }, config.ejsPedidoPubkey);
+    } catch(err) { console.warn('EmailJS pedido:', err); }
+  }
+
+  if(config.notifPedidoPush && 'Notification' in window && Notification.permission === 'granted') {
+    new Notification('🛍️ Novo Pedido — Claudino Joias', {
+      body: `${end.nomeCliente||'Cliente'} · R$ ${(pedido.total||0).toFixed(2).replace('.',',')}`,
+      icon: '/favicon.ico',
+    });
+  }
+}
+
+function ativarPushPedido(checkbox) {
+  const st = document.getElementById('push-pedido-status');
+  if(checkbox.checked) {
+    if('Notification' in window) {
+      Notification.requestPermission().then(perm => {
+        if(perm === 'granted') {
+          if(st) st.textContent = '✅ Ativado — você receberá notificações neste navegador';
+          config.notifPedidoPush = true;
+        } else {
+          checkbox.checked = false;
+          if(st) st.textContent = '❌ Permissão negada pelo navegador';
+        }
+      });
+    }
+  } else {
+    if(st) st.textContent = 'Status: não ativado';
+    config.notifPedidoPush = false;
+  }
+}
+
+async function testarNotificacoesPedido() {
+  const pedidoTeste = {
+    id: 0, total: 150.00,
+    itens: [{ nome: 'Colar Teste', qty: 1 }],
+    endereco: { nomeCliente: 'Cliente Teste', telCliente: '(00) 00000-0000', emailCliente: 'teste@teste.com', rua: 'Rua Teste', numero: '123', cidade: 'Cidade', estado: 'PR', cep: '00000000' }
+  };
+  await notificarNovoPedido(pedidoTeste);
+  alert('🧪 Notificações de teste disparadas! Verifique WhatsApp, e-mail e a notificação do navegador.');
+}
+
+// ─── FIM NOTIFICAÇÕES DE PEDIDOS ─────────────────────────────────────────────
+  
 function salvarPedidoAtacado(status) {
   const itens = cartAtacado.map(i => ({ nome: i.nome, preco: i.preco, qty: i.qty, emoji: i.emoji || '📦' }));
   const subtotal   = itens.reduce((s, i) => s + i.preco * i.qty, 0);
@@ -5382,7 +5549,7 @@ function switchAdminTab(tab, btn) {
   if(tab === 'links')        popularSelectProdutos();
   if(tab === 'ferramentas')  carregarRedes();
   if(tab === 'frete')        { renderZonasFrete(); loadConfigMelhorEnvio(); if(config.freteGratis !== undefined) { const fg = document.getElementById('cfg-frete-gratis'); if(fg) fg.value = config.freteGratis; } }
-  if(tab === 'pedidos')         renderPedidos();
+  if(tab === 'pedidos')         { renderPedidos(); loadConfigNotifPedido(); }
   if(tab === 'pedidos-atacado') renderPedidosAtacado();
   if(tab === 'sobre')       { loadSobre(); }
   if(tab === 'config')      {
