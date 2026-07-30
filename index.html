@@ -4906,9 +4906,6 @@ function salvarPedido(status) {
 }
 
 function renderPedidos() {
-
-
-function renderPedidos() {
   const el = document.getElementById('lista-pedidos-admin');
   if (!el) return;
   const filtro  = (document.getElementById('filtro-pedidos') || {}).value || 'todos';
@@ -5057,6 +5054,7 @@ function limparPedidosAntigos() {
 }
 
 // ─── PEDIDOS ATACADO ─────────────────────────────────────────────────────────
+
 // ─── NOTIFICAÇÕES DE PEDIDOS ─────────────────────────────────────────────────
 
 function salvarConfigNotifPedido() {
@@ -5088,10 +5086,11 @@ function loadConfigNotifPedido() {
 }
 
 async function notificarNovoPedido(pedido) {
-  const end    = pedido.endereco || {};
+  const end   = pedido.endereco || {};
   const endStr = `${end.rua||''}, ${end.numero||''} ${end.complemento||''} — ${end.bairro||''} ${end.cidade||''}/${end.estado||''} CEP:${end.cep||''}`.trim();
   const itensStr = (pedido.itens||[]).map(i => `${i.nome} x${i.qty}`).join(', ');
 
+  // WhatsApp
   if(config.notifPedidoWhats && config.whatsPedidoAdmin) {
     const msg = encodeURIComponent(
       `🛍️ *Novo Pedido — Claudino Joias*\n` +
@@ -5103,6 +5102,7 @@ async function notificarNovoPedido(pedido) {
     window.open(`https://wa.me/${config.whatsPedidoAdmin}?text=${msg}`, '_blank');
   }
 
+  // EmailJS
   if(config.notifPedidoEmail && config.ejsPedidoService && config.ejsPedidoTemplate && typeof emailjs !== 'undefined') {
     try {
       await emailjs.send(config.ejsPedidoService, config.ejsPedidoTemplate, {
@@ -5117,6 +5117,7 @@ async function notificarNovoPedido(pedido) {
     } catch(err) { console.warn('EmailJS pedido:', err); }
   }
 
+  // Push
   if(config.notifPedidoPush && 'Notification' in window && Notification.permission === 'granted') {
     new Notification('🛍️ Novo Pedido — Claudino Joias', {
       body: `${end.nomeCliente||'Cliente'} · R$ ${(pedido.total||0).toFixed(2).replace('.',',')}`,
@@ -5156,7 +5157,7 @@ async function testarNotificacoesPedido() {
 }
 
 // ─── FIM NOTIFICAÇÕES DE PEDIDOS ─────────────────────────────────────────────
-  
+
 function salvarPedidoAtacado(status) {
   const itens = cartAtacado.map(i => ({ nome: i.nome, preco: i.preco, qty: i.qty, emoji: i.emoji || '📦' }));
   const subtotal   = itens.reduce((s, i) => s + i.preco * i.qty, 0);
