@@ -21,20 +21,8 @@
     return node;
   }
 
-  function openSupabaseAdmin() {
-    const panel = document.getElementById('supabase-admin-tools');
-    if (!panel) return;
-    panel.hidden = false;
-    panel.style.display = 'block';
-    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    panel.animate(
-      [
-        { transform: 'scale(.98)', boxShadow: '0 0 0 rgba(201,168,76,0)' },
-        { transform: 'scale(1)', boxShadow: '0 0 0 4px rgba(201,168,76,.35)' },
-        { transform: 'scale(1)', boxShadow: '0 16px 50px rgba(0,0,0,.22)' }
-      ],
-      { duration: 700, easing: 'ease-out' }
-    );
+  function redirectToAdmin() {
+    window.location.assign('/admin/');
   }
 
   function suppressLegacyModal(root) {
@@ -44,7 +32,7 @@
     root.setAttribute('aria-hidden', 'true');
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
-    openSupabaseAdmin();
+    redirectToAdmin();
   }
 
   function scan(scope = document) {
