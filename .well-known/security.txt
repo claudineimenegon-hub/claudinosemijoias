@@ -1,0 +1,5 @@
+Contact: mailto:contato@claudinosemijoias.com.br
+Preferred-Languages: pt-BR, en
+Canonical: https://www.claudinosemijoias.com.br/.well-known/security.txt
+Policy: https://www.claudinosemijoias.com.br/
+Expires: 2027-08-02T23:59:59Z
