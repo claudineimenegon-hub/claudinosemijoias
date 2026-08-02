@@ -19,15 +19,15 @@ values ('UUID_DO_USUARIO', 'admin');
 
 ## Variáveis da Netlify
 
-Cadastrar em **Site configuration → Environment variables**:
+Cadastrar em **Site configuration → Environment variables** e habilitar os contextos **Production**, **Deploy Previews** e **Branch deploys**:
 
 - `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
+- `SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `MERCADO_PAGO_PUBLIC_KEY`
 - `MERCADO_PAGO_ACCESS_TOKEN`
 
-Nunca salvar `SUPABASE_SERVICE_ROLE_KEY` ou `MERCADO_PAGO_ACCESS_TOKEN` no GitHub, no painel do navegador ou em arquivos públicos.
+`SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY` são configurações públicas do frontend. Nunca salvar `SUPABASE_SERVICE_ROLE_KEY` ou `MERCADO_PAGO_ACCESS_TOKEN` no GitHub, no painel do navegador ou em arquivos públicos.
 
 ## Segurança
 
