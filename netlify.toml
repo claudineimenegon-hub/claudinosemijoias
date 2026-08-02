@@ -1,5 +1,5 @@
 [build]
-  command = "node scripts/prepare-site.mjs"
+  command = "node scripts/generate-runtime-config.mjs && node scripts/prepare-site.mjs"
   publish = "."
   functions = "netlify/functions"
 
@@ -17,6 +17,11 @@
 
 [[headers]]
   for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/assets/js/runtime-config.js"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
