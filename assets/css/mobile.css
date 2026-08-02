@@ -1,0 +1,150 @@
+@media (max-width: 768px) {
+  html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+  body { font-size: 16px; line-height: 1.55; }
+
+  header { padding: 0 14px; }
+  .header-inner { min-height: 68px; height: auto; gap: 12px; }
+  .logo { font-size: 20px; letter-spacing: 1.5px; }
+  .logo img { height: 44px; }
+  nav { gap: 10px; }
+  nav a, .nav-link { font-size: 15px !important; letter-spacing: .5px !important; }
+
+  button,
+  .btn,
+  .buy-btn,
+  .checkout-btn,
+  .payment-method,
+  input[type="button"],
+  input[type="submit"] {
+    min-height: 52px;
+    font-size: 17px !important;
+    line-height: 1.25;
+    padding: 14px 18px !important;
+    touch-action: manipulation;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 50px;
+    font-size: 16px !important;
+    padding: 12px 14px !important;
+  }
+
+  .icon,
+  .cart-icon,
+  .menu-icon,
+  .header-icon,
+  [class*="icon"] {
+    font-size: 26px;
+  }
+
+  main,
+  .container,
+  .section,
+  .content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  h1 { font-size: clamp(28px, 8vw, 38px) !important; line-height: 1.15; }
+  h2 { font-size: clamp(24px, 7vw, 32px) !important; line-height: 1.2; }
+  h3 { font-size: 21px !important; line-height: 1.25; }
+  p, li, label, small, .muted, .description { font-size: 16px !important; }
+
+  .products-grid,
+  .product-grid,
+  .catalog-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+
+  .product-card,
+  .card {
+    padding: 16px !important;
+    border-radius: 10px !important;
+  }
+
+  .product-card img,
+  .product-image,
+  .card img {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    object-fit: cover;
+  }
+
+  .product-name,
+  .card-title,
+  .product-title { font-size: 20px !important; line-height: 1.3; }
+  .price,
+  .product-price,
+  .total-price { font-size: 26px !important; font-weight: 600; }
+
+  .modal,
+  .modal-content,
+  .checkout-modal,
+  .checkout-content {
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+    max-height: calc(100vh - 20px) !important;
+    margin: 10px !important;
+    padding: 18px !important;
+    border-radius: 12px !important;
+    overflow-y: auto !important;
+  }
+
+  .modal h2,
+  .checkout-modal h2,
+  .checkout-title { font-size: 24px !important; }
+
+  .payment-options,
+  .payment-tabs,
+  .payment-methods {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .payment-method,
+  .payment-tab {
+    font-size: 17px !important;
+    min-height: 54px;
+  }
+
+  .checkout-summary,
+  .order-summary,
+  .cart-summary {
+    font-size: 16px !important;
+    line-height: 1.6;
+  }
+
+  .checkout-summary > *,
+  .order-summary > *,
+  .cart-summary > * { margin-bottom: 10px; }
+
+  .close,
+  .modal-close,
+  .close-btn {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 28px !important;
+  }
+
+  .whatsapp,
+  .whatsapp-button,
+  .floating-whatsapp {
+    width: 58px !important;
+    height: 58px !important;
+    font-size: 30px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .payment-options,
+  .payment-tabs,
+  .payment-methods { grid-template-columns: 1fr !important; }
+
+  .logo { font-size: 18px; }
+  .product-card, .card { padding: 14px !important; }
+}
