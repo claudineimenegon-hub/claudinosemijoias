@@ -13,6 +13,7 @@ const correctedHead = `<head>
 <meta name="google-site-verification" content="A-_ZUNGRlOR12QyqGAC7iZ4Q_mb6NAU3qR2bLYJrPXg">
 <link rel="canonical" href="https://www.claudinosemijoias.com.br/">
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/assets/css/mobile.css">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="Claudino Semijoias">
 <meta property="og:title" content="Claudino Semijoias — Semijoias Banhadas a Ouro 18k">
@@ -37,6 +38,7 @@ for (const required of [
   'name="google-site-verification"',
   'rel="canonical"',
   'rel="manifest"',
+  'href="/assets/css/mobile.css"',
   'property="og:title"',
   'name="twitter:card"'
 ]) {
@@ -50,4 +52,4 @@ if (html.includes('<head>f')) {
 }
 
 await writeFile(indexPath, html, 'utf8');
-console.log('index.html preparado com SEO e metadados válidos.');
+console.log('index.html preparado com SEO, metadados e melhorias mobile.');
