@@ -14,11 +14,6 @@ const correctedHead = `<head>
 <link rel="canonical" href="https://www.claudinosemijoias.com.br/">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/assets/css/mobile.css">
-<script src="/assets/js/runtime-config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/assets/js/supabase-data.js"></script>
-<script src="/assets/js/admin-supabase-bridge.js"></script>
-<script src="/assets/js/admin-supabase-ui.js"></script>
 <script src="/assets/js/disable-legacy-admin.js"></script>
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="Claudino Semijoias">
@@ -45,10 +40,6 @@ for (const required of [
   'rel="canonical"',
   'rel="manifest"',
   'href="/assets/css/mobile.css"',
-  'src="/assets/js/runtime-config.js"',
-  'src="/assets/js/supabase-data.js"',
-  'src="/assets/js/admin-supabase-bridge.js"',
-  'src="/assets/js/admin-supabase-ui.js"',
   'src="/assets/js/disable-legacy-admin.js"',
   'property="og:title"',
   'name="twitter:card"'
@@ -63,4 +54,4 @@ if (html.includes('<head>f')) {
 }
 
 await writeFile(indexPath, html, 'utf8');
-console.log('index.html preparado com SEO, mobile e autenticação administrativa exclusiva pelo Supabase.');
+console.log('index.html preparado com SEO, mobile e área administrativa separada em /admin.');
