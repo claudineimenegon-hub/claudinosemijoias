@@ -18,6 +18,7 @@ const correctedHead = `<head>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/assets/js/supabase-data.js"></script>
 <script src="/assets/js/admin-supabase-bridge.js"></script>
+<script src="/assets/js/admin-supabase-ui.js"></script>
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="Claudino Semijoias">
 <meta property="og:title" content="Claudino Semijoias — Semijoias Banhadas a Ouro 18k">
@@ -46,6 +47,7 @@ for (const required of [
   'src="/assets/js/runtime-config.js"',
   'src="/assets/js/supabase-data.js"',
   'src="/assets/js/admin-supabase-bridge.js"',
+  'src="/assets/js/admin-supabase-ui.js"',
   'property="og:title"',
   'name="twitter:card"'
 ]) {
@@ -59,4 +61,4 @@ if (html.includes('<head>f')) {
 }
 
 await writeFile(indexPath, html, 'utf8');
-console.log('index.html preparado com SEO, mobile e integração administrativa do Supabase.');
+console.log('index.html preparado com SEO, mobile, login e migração administrativa do Supabase.');
