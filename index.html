@@ -2957,86 +2957,7 @@
         </label>
       </div>
 
-      <!-- BANNER ATACADO -->
-      <div class="config-block">
-        <h3>🏭 Banner de Atacado — Textos e Cores</h3>
-        <p>Personalize o banner de revendedores exibido na página principal.</p>
-
-        <div class="admin-form">
-          <div class="afield">
-            <label>Título — Parte 1</label>
-            <input type="text" id="cfg-at-titulo1" placeholder="Compre no" oninput="previewBannerAtacado()">
-          </div>
-          <div class="afield">
-            <label>Título — Parte 2 (itálico dourado)</label>
-            <input type="text" id="cfg-at-titulo2" placeholder="Atacado" oninput="previewBannerAtacado()">
-          </div>
-          <div class="afield full">
-            <label>Descrição / Subtítulo</label>
-            <input type="text" id="cfg-at-desc" placeholder="Condições especiais para revendedores..." oninput="previewBannerAtacado()">
-          </div>
-          <div class="afield full">
-            <label>Texto do Botão</label>
-            <input type="text" id="cfg-at-btn" placeholder="🏭 Quero Ser Revendedor" oninput="previewBannerAtacado()">
-          </div>
-          <div class="afield full" style="margin-top:4px">
-            <label style="margin-bottom:8px;display:block">Ícones e Textos dos Destaques (4 itens)</label>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <div style="display:flex;gap:6px">
-                <input type="text" id="cfg-at-feat1-emoji" placeholder="💰" style="width:50px;text-align:center" oninput="previewBannerAtacado()">
-                <input type="text" id="cfg-at-feat1-txt" placeholder="Preços de atacado" oninput="previewBannerAtacado()">
-              </div>
-              <div style="display:flex;gap:6px">
-                <input type="text" id="cfg-at-feat2-emoji" placeholder="📦" style="width:50px;text-align:center" oninput="previewBannerAtacado()">
-                <input type="text" id="cfg-at-feat2-txt" placeholder="Pedido mínimo" oninput="previewBannerAtacado()">
-              </div>
-              <div style="display:flex;gap:6px">
-                <input type="text" id="cfg-at-feat3-emoji" placeholder="🔄" style="width:50px;text-align:center" oninput="previewBannerAtacado()">
-                <input type="text" id="cfg-at-feat3-txt" placeholder="Reposição rápida" oninput="previewBannerAtacado()">
-              </div>
-              <div style="display:flex;gap:6px">
-                <input type="text" id="cfg-at-feat4-emoji" placeholder="🤝" style="width:50px;text-align:center" oninput="previewBannerAtacado()">
-                <input type="text" id="cfg-at-feat4-txt" placeholder="Suporte dedicado" oninput="previewBannerAtacado()">
-              </div>
-            </div>
-          </div>
-          <div class="afield full" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-            <label style="margin-bottom:8px;display:block">🎨 Cores do Banner</label>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <div>
-                <label style="font-size:11px;color:var(--muted)">Fundo — Cor 1</label>
-                <div style="display:flex;gap:6px;align-items:center">
-                  <input type="color" id="cfg-at-bg1" value="#1A1610" oninput="this.nextElementSibling.value=this.value;previewBannerAtacado()" style="width:40px;height:36px;border:none;cursor:pointer;background:none">
-                  <input type="text" id="cfg-at-bg1-hex" value="#1A1610" maxlength="7" placeholder="#1A1610" oninput="document.getElementById('cfg-at-bg1').value=this.value;previewBannerAtacado()">
-                </div>
-              </div>
-              <div>
-                <label style="font-size:11px;color:var(--muted)">Fundo — Cor 2</label>
-                <div style="display:flex;gap:6px;align-items:center">
-                  <input type="color" id="cfg-at-bg2" value="#2C2619" oninput="this.nextElementSibling.value=this.value;previewBannerAtacado()" style="width:40px;height:36px;border:none;cursor:pointer;background:none">
-                  <input type="text" id="cfg-at-bg2-hex" value="#2C2619" maxlength="7" placeholder="#2C2619" oninput="document.getElementById('cfg-at-bg2').value=this.value;previewBannerAtacado()">
-                </div>
-              </div>
-              <div>
-                <label style="font-size:11px;color:var(--muted)">Cor do Título</label>
-                <div style="display:flex;gap:6px;align-items:center">
-                  <input type="color" id="cfg-at-cor-titulo" value="#F5EDD8" oninput="this.nextElementSibling.value=this.value;previewBannerAtacado()" style="width:40px;height:36px;border:none;cursor:pointer;background:none">
-                  <input type="text" id="cfg-at-cor-titulo-hex" value="#F5EDD8" maxlength="7" placeholder="#F5EDD8" oninput="document.getElementById('cfg-at-cor-titulo').value=this.value;previewBannerAtacado()">
-                </div>
-              </div>
-              <div>
-                <label style="font-size:11px;color:var(--muted)">Cor da Descrição</label>
-                <div style="display:flex;gap:6px;align-items:center">
-                  <input type="color" id="cfg-at-cor-desc" value="#9A8E7A" oninput="this.nextElementSibling.value=this.value;previewBannerAtacado()" style="width:40px;height:36px;border:none;cursor:pointer;background:none">
-                  <input type="text" id="cfg-at-cor-desc-hex" value="#9A8E7A" maxlength="7" placeholder="#9A8E7A" oninput="document.getElementById('cfg-at-cor-desc').value=this.value;previewBannerAtacado()">
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <button class="btn-save" style="margin-top:12px" onclick="salvarBannerAtacado()">✓ Salvar Banner Atacado</button>
-      </div>
-      <!-- NOTIFICAÇÕES -->
+            <!-- NOTIFICAÇÕES -->
 
       <!-- NOTIFICAÇÕES -->
       <div class="config-block">
@@ -3617,35 +3538,66 @@
         </div>
 
         <div class="config-block">
-          <h3>✏️ Textos do Hero</h3>
-          <p>Personalize o título, subtítulo e tag do banner principal.</p>
+          <h3>📣 Banner Principal (Hero)</h3>
+          <p>Personalize os textos e imagem do banner de topo da página.</p>
           <div class="admin-form">
             <div class="afield">
-              <label>Tag (linha pequena acima)</label>
-              <input type="text" id="cfg-hero-tag" placeholder="✦ Luxo Acessível ✦">
+              <label>Tag acima do título</label>
+              <input type="text" id="cfg-anuncio-tag" placeholder="✦ Luxo Acessível ✦">
             </div>
             <div class="afield">
-              <label>Título (linha 1)</label>
-              <input type="text" id="cfg-hero-titulo1" placeholder="Semi Joias">
+              <label>Texto do botão principal</label>
+              <input type="text" id="cfg-btn-ver" placeholder="Ver Coleção">
             </div>
             <div class="afield">
-              <label>Título (linha 2 — dourada)</label>
-              <input type="text" id="cfg-hero-titulo2" placeholder="de Luxo">
+              <label>Cor do botão principal</label>
+              <div class="color-input-wrap">
+                <input type="color" id="cor-btn-hero" value="#C9A84C" oninput="previewBtnHero(this.value)">
+                <input type="text"  id="cor-btn-hero-hex" value="#C9A84C" oninput="syncColorHex('cor-btn-hero',this.value)" placeholder="#C9A84C">
+              </div>
+            </div>
+            <div class="afield">
+              <label>Cor do texto do botão</label>
+              <div class="color-input-wrap">
+                <input type="color" id="cor-btn-hero-txt" value="#1A1610" oninput="previewBtnHero(this.value)">
+                <input type="text"  id="cor-btn-hero-txt-hex" value="#1A1610" oninput="syncColorHex('cor-btn-hero-txt',this.value)" placeholder="#1A1610">
+              </div>
             </div>
             <div class="afield full">
-              <label>Subtítulo</label>
-              <input type="text" id="cfg-hero-sub" placeholder="Peças exclusivas banhadas a ouro 18k...">
+              <label>Frase do Banner do Rodapé</label>
+              <input type="text" id="cfg-banner-frase" placeholder="Cada peça é banhada a ouro 18k...">
+            </div>
+            <div class="afield full">
+              <label>Legenda do Banner</label>
+              <input type="text" id="cfg-banner-legenda" placeholder="✦ Garantia de 12 meses · Frete grátis...">
             </div>
           </div>
-          <button class="btn-save" onclick="salvarConfig()">✓ Salvar Textos</button>
+          <button class="btn-save" style="margin-top:8px" onclick="salvarConfig()">✓ Salvar Anúncios</button>
         </div>
+
+
       </div>
 
       <!-- CORES -->
       <div class="cfg-content" id="cfg-cores" style="display:none">
         <div class="config-block">
           <h3>🎨 Paleta de Cores do Site</h3>
-          <p>Altere as cores principais. As mudanças são aplicadas em tempo real na página.</p>
+          <p>Altere as cores e textos principais do site.</p>
+
+          <!-- Sub-abas -->
+          <div style="display:flex;gap:0;border:1px solid var(--border,#3A3020);border-radius:6px;overflow:hidden;width:fit-content;margin-bottom:16px">
+            <button id="paleta-tab-cores" onclick="switchPaletaTab('cores')"
+              style="padding:7px 16px;font-size:11px;letter-spacing:1px;border:none;cursor:pointer;background:var(--gold);color:#1A1610;font-weight:600;transition:all .2s">
+              🎨 Cores
+            </button>
+            <button id="paleta-tab-textos" onclick="switchPaletaTab('textos')"
+              style="padding:7px 16px;font-size:11px;letter-spacing:1px;border:none;cursor:pointer;background:transparent;color:var(--muted,#9A8E7A);font-weight:400;transition:all .2s">
+              ✏️ Textos
+            </button>
+          </div>
+
+          <!-- Painel Cores -->
+          <div id="paleta-panel-cores">
 
           <div class="color-presets">
             <p style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Temas prontos</p>
@@ -3722,42 +3674,106 @@
             <button class="btn-save" onclick="salvarConfig()">✓ Salvar Cores</button>
             <button class="btn-outline" style="padding:10px 20px" onclick="resetarCores()">↺ Restaurar Padrão</button>
           </div>
+          </div><!-- fim paleta-panel-cores -->
+
+          <!-- Painel Textos -->
+          <div id="paleta-panel-textos" style="display:none">
+            <div class="admin-form">
+              <div class="afield full">
+                <label>Nome do Site</label>
+                <input type="text" id="cfg-logo-texto-v2" placeholder="Claudino Joias"
+                  oninput="document.getElementById('cfg-logo-texto').value=this.value">
+                <p style="font-size:11px;color:var(--muted);margin-top:4px">Aparece no logo do cabeçalho.</p>
+              </div>
+              <div class="afield full">
+                <label>Texto do Botão Pagar</label>
+                <input type="text" id="cfg-btn-pagar-txt-v2" placeholder="🔒 Pagar Agora"
+                  oninput="document.getElementById('cfg-btn-pagar-txt').value=this.value">
+              </div>
+              <div class="afield full">
+                <label>Mensagem de Sucesso (após pagamento aprovado)</label>
+                <input type="text" id="cfg-msg-sucesso-v2" placeholder="✅ Pagamento aprovado! Você receberá a confirmação por WhatsApp."
+                  oninput="document.getElementById('cfg-msg-sucesso').value=this.value">
+              </div>
+            </div>
+          </div><!-- fim paleta-panel-textos -->
+
+          <button class="btn-save" style="margin-top:12px" onclick="salvarConfig()">✓ Salvar</button>
         </div>
 
         <div class="config-block">
-          <h3>🖼️ Cores dos Textos do Banner Principal (Hero)</h3>
-          <p>Altere as cores dos textos exibidos no banner de destaque no topo da página.</p>
-          <div class="color-grid">
-            <div class="color-row">
-              <label>Título principal</label>
-              <div class="color-input-wrap">
-                <input type="color" id="cor-hero-titulo" oninput="aplicarCorHero('hero-titulo',this.value)" value="#F5EDD8">
-                <input type="text"  id="cor-hero-titulo-hex" oninput="syncColorHexHero('cor-hero-titulo','hero-titulo',this.value)" value="#F5EDD8" placeholder="#F5EDD8">
+          <h3>🖼️ Hero — Cores e Textos</h3>
+          <p>Personalize as cores e os textos exibidos no banner de destaque no topo da página.</p>
+
+          <!-- Sub-abas -->
+          <div style="display:flex;gap:0;border:1px solid var(--border,#3A3020);border-radius:6px;overflow:hidden;width:fit-content;margin-bottom:16px">
+            <button id="hero-txt-tab-cores" onclick="switchHeroTxtTab('cores')"
+              style="padding:7px 16px;font-size:11px;letter-spacing:1px;border:none;cursor:pointer;background:var(--gold);color:#1A1610;font-weight:600;transition:all .2s">
+              🎨 Cores
+            </button>
+            <button id="hero-txt-tab-textos" onclick="switchHeroTxtTab('textos')"
+              style="padding:7px 16px;font-size:11px;letter-spacing:1px;border:none;cursor:pointer;background:transparent;color:var(--muted,#9A8E7A);font-weight:400;transition:all .2s">
+              ✏️ Textos
+            </button>
+          </div>
+
+          <!-- Painel Cores -->
+          <div id="hero-txt-panel-cores">
+            <div class="color-grid">
+              <div class="color-row">
+                <label>Título principal</label>
+                <div class="color-input-wrap">
+                  <input type="color" id="cor-hero-titulo" oninput="aplicarCorHero('hero-titulo',this.value)" value="#F5EDD8">
+                  <input type="text"  id="cor-hero-titulo-hex" oninput="syncColorHexHero('cor-hero-titulo','hero-titulo',this.value)" value="#F5EDD8" placeholder="#F5EDD8">
+                </div>
               </div>
-            </div>
-            <div class="color-row">
-              <label>Título em itálico (destaque dourado)</label>
-              <div class="color-input-wrap">
-                <input type="color" id="cor-hero-em" oninput="aplicarCorHero('hero-em',this.value)" value="#C9A84C">
-                <input type="text"  id="cor-hero-em-hex" oninput="syncColorHexHero('cor-hero-em','hero-em',this.value)" value="#C9A84C" placeholder="#C9A84C">
+              <div class="color-row">
+                <label>Título em itálico (destaque dourado)</label>
+                <div class="color-input-wrap">
+                  <input type="color" id="cor-hero-em" oninput="aplicarCorHero('hero-em',this.value)" value="#C9A84C">
+                  <input type="text"  id="cor-hero-em-hex" oninput="syncColorHexHero('cor-hero-em','hero-em',this.value)" value="#C9A84C" placeholder="#C9A84C">
+                </div>
               </div>
-            </div>
-            <div class="color-row">
-              <label>Subtítulo / Descrição</label>
-              <div class="color-input-wrap">
-                <input type="color" id="cor-hero-sub" oninput="aplicarCorHero('hero-sub',this.value)" value="#9A8E7A">
-                <input type="text"  id="cor-hero-sub-hex" oninput="syncColorHexHero('cor-hero-sub','hero-sub',this.value)" value="#9A8E7A" placeholder="#9A8E7A">
+              <div class="color-row">
+                <label>Subtítulo / Descrição</label>
+                <div class="color-input-wrap">
+                  <input type="color" id="cor-hero-sub" oninput="aplicarCorHero('hero-sub',this.value)" value="#9A8E7A">
+                  <input type="text"  id="cor-hero-sub-hex" oninput="syncColorHexHero('cor-hero-sub','hero-sub',this.value)" value="#9A8E7A" placeholder="#9A8E7A">
+                </div>
               </div>
-            </div>
-            <div class="color-row">
-              <label>Tag decorativa (linha acima do título)</label>
-              <div class="color-input-wrap">
-                <input type="color" id="cor-hero-tag" oninput="aplicarCorHero('hero-tag',this.value)" value="#C9A84C">
-                <input type="text"  id="cor-hero-tag-hex" oninput="syncColorHexHero('cor-hero-tag','hero-tag',this.value)" value="#C9A84C" placeholder="#C9A84C">
+              <div class="color-row">
+                <label>Tag decorativa (linha acima do título)</label>
+                <div class="color-input-wrap">
+                  <input type="color" id="cor-hero-tag" oninput="aplicarCorHero('hero-tag',this.value)" value="#C9A84C">
+                  <input type="text"  id="cor-hero-tag-hex" oninput="syncColorHexHero('cor-hero-tag','hero-tag',this.value)" value="#C9A84C" placeholder="#C9A84C">
+                </div>
               </div>
             </div>
           </div>
-          <button class="btn-save" style="margin-top:12px" onclick="salvarConfig()">✓ Salvar Cores do Hero</button>
+
+          <!-- Painel Textos -->
+          <div id="hero-txt-panel-textos" style="display:none">
+            <div class="admin-form">
+              <div class="afield">
+                <label>Tag (linha pequena acima)</label>
+                <input type="text" id="cfg-hero-tag" placeholder="✦ Luxo Acessível ✦">
+              </div>
+              <div class="afield">
+                <label>Título (linha 1)</label>
+                <input type="text" id="cfg-hero-titulo1" placeholder="Semi Joias">
+              </div>
+              <div class="afield">
+                <label>Título (linha 2 — dourada)</label>
+                <input type="text" id="cfg-hero-titulo2" placeholder="de Luxo">
+              </div>
+              <div class="afield full">
+                <label>Subtítulo</label>
+                <input type="text" id="cfg-hero-sub" placeholder="Peças exclusivas banhadas a ouro 18k...">
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-save" style="margin-top:12px" onclick="salvarConfig()">✓ Salvar Hero</button>
         </div>
 
         <div class="config-block">
@@ -3956,9 +3972,70 @@
           </div>
           <button class="btn-save" style="margin-top:4px" onclick="salvarConfig()">✓ Salvar Rodapé</button>
         </div>
+      <!-- BANNER ATACADO -->
+      <div class="config-block">
+        <h3>🏭 Banner de Atacado — Textos e Cores</h3>
+        <p>Personalize o banner de revendedores exibido na página principal.</p>
+
+        <!-- Sub-abas -->
+        <div style="display:flex;gap:0;border:1px solid var(--border,#3A3020);border-radius:6px;overflow:hidden;width:fit-content;margin-bottom:16px">
+          <button id="at-tab-cores" onclick="switchAtacadoTab('cores')"
+            style="padding:7px 16px;font-size:11px;letter-spacing:1px;border:none;cursor:pointer;background:var(--gold);color:#1A1610;font-weight:600;transition:all .2s">
+            🎨 Cores
+          </button>
+          <button id="at-tab-textos" onclick="switchAtacadoTab('textos')"
+            style="padding:7px 16px;font-size:11px;letter-spacing:1px;border:none;cursor:pointer;background:transparent;color:var(--muted,#9A8E7A);font-weight:400;transition:all .2s">
+            ✏️ Textos
+          </button>
+        </div>
+
+        <!-- Painel Cores -->
+        <div id="at-panel-cores">
+          <div class="color-grid">
+            <div class="color-row"><label>Fundo — Cor 1</label><div class="color-input-wrap"><input type="color" id="cfg-at-bg1" value="#1A1610" oninput="this.nextElementSibling.value=this.value;previewBannerAtacado()"><input type="text" id="cfg-at-bg1-hex" value="#1A1610" maxlength="7" placeholder="#1A1610" oninput="document.getElementById('cfg-at-bg1').value=this.value;previewBannerAtacado()"></div></div>
+            <div class="color-row"><label>Fundo — Cor 2</label><div class="color-input-wrap"><input type="color" id="cfg-at-bg2" value="#2C2619" oninput="this.nextElementSibling.value=this.value;previewBannerAtacado()"><input type="text" id="cfg-at-bg2-hex" value="#2C2619" maxlength="7" placeholder="#2C2619" oninput="document.getElementById('cfg-at-bg2').value=this.value;previewBannerAtacado()"></div></div>
+            <div class="color-row"><label>Cor do Título</label><div class="color-input-wrap"><input type="color" id="cfg-at-cor-titulo" value="#F5EDD8" oninput="this.nextElementSibling.value=this.value;previewBannerAtacado()"><input type="text" id="cfg-at-cor-titulo-hex" value="#F5EDD8" maxlength="7" placeholder="#F5EDD8" oninput="document.getElementById('cfg-at-cor-titulo').value=this.value;previewBannerAtacado()"></div></div>
+            <div class="color-row"><label>Cor da Descrição</label><div class="color-input-wrap"><input type="color" id="cfg-at-cor-desc" value="#9A8E7A" oninput="this.nextElementSibling.value=this.value;previewBannerAtacado()"><input type="text" id="cfg-at-cor-desc-hex" value="#9A8E7A" maxlength="7" placeholder="#9A8E7A" oninput="document.getElementById('cfg-at-cor-desc').value=this.value;previewBannerAtacado()"></div></div>
+          </div>
+          <div style="margin-top:14px;margin-bottom:6px">
+            <p style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Temas Rápidos</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="preset-btn" onclick="aplicarTemaAt('#1A1610','#2C2619','#F5EDD8','#9A8E7A')" style="background:linear-gradient(135deg,#1A1610,#2C2619)">Ouro Clássico</button>
+              <button class="preset-btn" onclick="aplicarTemaAt('#2C1A1A','#3D2020','#F5D5C0','#AA8070')" style="background:linear-gradient(135deg,#2C1A1A,#C4845C)">Rose Gold</button>
+              <button class="preset-btn" onclick="aplicarTemaAt('#1A1A2E','#252540','#D0D8F0','#6A7A9A')" style="background:linear-gradient(135deg,#1A1A2E,#8898AA)">Prata Luxo</button>
+              <button class="preset-btn" onclick="aplicarTemaAt('#0D1F1A','#142818','#C8F0D8','#4A9B6F')" style="background:linear-gradient(135deg,#0D1F1A,#4A9B6F)">Esmeralda</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel Textos -->
+        <div id="at-panel-textos" style="display:none">
+          <div class="admin-form">
+            <div class="afield"><label>Título — Parte 1</label><input type="text" id="cfg-at-titulo1" placeholder="Compre no" oninput="previewBannerAtacado()"></div>
+            <div class="afield"><label>Título — Parte 2 (itálico dourado)</label><input type="text" id="cfg-at-titulo2" placeholder="Atacado" oninput="previewBannerAtacado()"></div>
+            <div class="afield full"><label>Descrição / Subtítulo</label><input type="text" id="cfg-at-desc" placeholder="Condições especiais para revendedores..." oninput="previewBannerAtacado()"></div>
+            <div class="afield full"><label>Texto do Botão</label><input type="text" id="cfg-at-btn" placeholder="🏭 Quero Ser Revendedor" oninput="previewBannerAtacado()"></div>
+            <div class="afield full" style="margin-top:4px">
+              <label style="margin-bottom:8px;display:block">Ícones e Textos dos Destaques (4 itens)</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div style="display:flex;gap:6px"><input type="text" id="cfg-at-feat1-emoji" placeholder="💰" style="width:50px;text-align:center" oninput="previewBannerAtacado()"><input type="text" id="cfg-at-feat1-txt" placeholder="Preços de atacado" oninput="previewBannerAtacado()"></div>
+                <div style="display:flex;gap:6px"><input type="text" id="cfg-at-feat2-emoji" placeholder="📦" style="width:50px;text-align:center" oninput="previewBannerAtacado()"><input type="text" id="cfg-at-feat2-txt" placeholder="Pedido mínimo" oninput="previewBannerAtacado()"></div>
+                <div style="display:flex;gap:6px"><input type="text" id="cfg-at-feat3-emoji" placeholder="🔄" style="width:50px;text-align:center" oninput="previewBannerAtacado()"><input type="text" id="cfg-at-feat3-txt" placeholder="Reposição rápida" oninput="previewBannerAtacado()"></div>
+                <div style="display:flex;gap:6px"><input type="text" id="cfg-at-feat4-emoji" placeholder="🤝" style="width:50px;text-align:center" oninput="previewBannerAtacado()"><input type="text" id="cfg-at-feat4-txt" placeholder="Suporte dedicado" oninput="previewBannerAtacado()"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-save" style="margin-top:12px" onclick="salvarBannerAtacado()">✓ Salvar Banner Atacado</button>
       </div>
 
-      <!-- TIPOGRAFIA -->
+
+      </div>
+
+
+
+
       <div class="cfg-content" id="cfg-tipografia" style="display:none">
         <div class="config-block">
           <h3>🔤 Fonte dos Títulos</h3>
@@ -4121,44 +4198,6 @@
 
       <!-- ANÚNCIOS -->
       <div class="cfg-content" id="cfg-anuncios" style="display:none">
-        <div class="config-block">
-          <h3>📣 Banner Principal (Hero)</h3>
-          <p>Personalize os textos e imagem do banner de topo da página.</p>
-          <div class="admin-form">
-            <div class="afield">
-              <label>Tag acima do título</label>
-              <input type="text" id="cfg-anuncio-tag" placeholder="✦ Luxo Acessível ✦">
-            </div>
-            <div class="afield">
-              <label>Texto do botão principal</label>
-              <input type="text" id="cfg-btn-ver" placeholder="Ver Coleção">
-            </div>
-            <div class="afield">
-              <label>Cor do botão principal</label>
-              <div class="color-input-wrap">
-                <input type="color" id="cor-btn-hero" value="#C9A84C" oninput="previewBtnHero(this.value)">
-                <input type="text"  id="cor-btn-hero-hex" value="#C9A84C" oninput="syncColorHex('cor-btn-hero',this.value)" placeholder="#C9A84C">
-              </div>
-            </div>
-            <div class="afield">
-              <label>Cor do texto do botão</label>
-              <div class="color-input-wrap">
-                <input type="color" id="cor-btn-hero-txt" value="#1A1610" oninput="previewBtnHero(this.value)">
-                <input type="text"  id="cor-btn-hero-txt-hex" value="#1A1610" oninput="syncColorHex('cor-btn-hero-txt',this.value)" placeholder="#1A1610">
-              </div>
-            </div>
-            <div class="afield full">
-              <label>Frase do Banner do Rodapé</label>
-              <input type="text" id="cfg-banner-frase" placeholder="Cada peça é banhada a ouro 18k...">
-            </div>
-            <div class="afield full">
-              <label>Legenda do Banner</label>
-              <input type="text" id="cfg-banner-legenda" placeholder="✦ Garantia de 12 meses · Frete grátis...">
-            </div>
-          </div>
-          <button class="btn-save" style="margin-top:8px" onclick="salvarConfig()">✓ Salvar Anúncios</button>
-        </div>
-
         <div class="config-block">
           <h3>🏷️ Badge dos Cards</h3>
           <p>Personalize os textos e cores dos badges "Novo" e "Promoção".</p>
@@ -5555,6 +5594,7 @@ function switchAdminTab(tab, btn) {
   if(tab === 'sobre')       { loadSobre(); }
   if(tab === 'config')      {
     loadConfig();
+    carregarCamposBannerAtacado();
     const primeiroBtn = document.querySelector('.cfg-tab');
     const primeiroEl  = document.getElementById('cfg-identidade');
     document.querySelectorAll('.cfg-tab').forEach(b => b.classList.remove('active'));
@@ -6308,6 +6348,13 @@ function aplicarCoresCarregadas() {
   if(config.maxParcelas)  document.getElementById('cfg-max-parcelas').value = config.maxParcelas;
   if(config.btnPagarTxt)  document.getElementById('cfg-btn-pagar-txt').value = config.btnPagarTxt;
   if(config.msgSucesso)   document.getElementById('cfg-msg-sucesso').value   = config.msgSucesso;
+  // Sincronizar campos v2 da Paleta
+  const v2logo = document.getElementById('cfg-logo-texto-v2');
+  const v2btn  = document.getElementById('cfg-btn-pagar-txt-v2');
+  const v2msg  = document.getElementById('cfg-msg-sucesso-v2');
+  if(v2logo && config.logoTexto)    v2logo.value = config.logoTexto;
+  if(v2btn  && config.btnPagarTxt)  v2btn.value  = config.btnPagarTxt;
+  if(v2msg  && config.msgSucesso)   v2msg.value  = config.msgSucesso;
   // Cores badges
   if(config.badgeNovoBg) { document.querySelectorAll('.badge-new').forEach(el => el.style.background = config.badgeNovoBg); document.getElementById('cor-badge-novo').value = config.badgeNovoBg; document.getElementById('cor-badge-novo-hex').value = config.badgeNovoBg; }
   if(config.badgeOffBg)  { document.querySelectorAll('.badge-off').forEach(el => el.style.background = config.badgeOffBg); document.getElementById('cor-badge-off').value = config.badgeOffBg; document.getElementById('cor-badge-off-hex').value = config.badgeOffBg; }
@@ -6335,6 +6382,45 @@ function aplicarCoresCarregadas() {
 }
 
 /* ── BANNER INFERIOR: cores e textos ── */
+function switchPaletaTab(tab) {
+  const isCores = tab === 'cores';
+  document.getElementById('paleta-panel-cores').style.display   = isCores ? '' : 'none';
+  document.getElementById('paleta-panel-textos').style.display  = isCores ? 'none' : '';
+  document.getElementById('paleta-tab-cores').style.background  = isCores ? 'var(--gold)' : 'transparent';
+  document.getElementById('paleta-tab-cores').style.color       = isCores ? '#1A1610' : 'var(--muted)';
+  document.getElementById('paleta-tab-textos').style.background = isCores ? 'transparent' : 'var(--gold)';
+  document.getElementById('paleta-tab-textos').style.color      = isCores ? 'var(--muted)' : '#1A1610';
+}
+
+function switchHeroTxtTab(tab) {
+  const isCores = tab === 'cores';
+  document.getElementById('hero-txt-panel-cores').style.display  = isCores ? '' : 'none';
+  document.getElementById('hero-txt-panel-textos').style.display = isCores ? 'none' : '';
+  document.getElementById('hero-txt-tab-cores').style.background  = isCores ? 'var(--gold)' : 'transparent';
+  document.getElementById('hero-txt-tab-cores').style.color       = isCores ? '#1A1610' : 'var(--muted)';
+  document.getElementById('hero-txt-tab-textos').style.background = isCores ? 'transparent' : 'var(--gold)';
+  document.getElementById('hero-txt-tab-textos').style.color      = isCores ? 'var(--muted)' : '#1A1610';
+}
+
+function switchAtacadoTab(tab) {
+  const isCores = tab === 'cores';
+  document.getElementById('at-panel-cores').style.display  = isCores ? '' : 'none';
+  document.getElementById('at-panel-textos').style.display = isCores ? 'none' : '';
+  document.getElementById('at-tab-cores').style.background  = isCores ? 'var(--gold)' : 'transparent';
+  document.getElementById('at-tab-cores').style.color       = isCores ? '#1A1610' : 'var(--muted)';
+  document.getElementById('at-tab-textos').style.background = isCores ? 'transparent' : 'var(--gold)';
+  document.getElementById('at-tab-textos').style.color      = isCores ? 'var(--muted)' : '#1A1610';
+}
+
+function aplicarTemaAt(bg1, bg2, corTitulo, corDesc) {
+  const set = (id, val) => { const el = document.getElementById(id); if(el) { el.value = val; el.dispatchEvent(new Event('input')); } };
+  set('cfg-at-bg1', bg1); set('cfg-at-bg1-hex', bg1);
+  set('cfg-at-bg2', bg2); set('cfg-at-bg2-hex', bg2);
+  set('cfg-at-cor-titulo', corTitulo); set('cfg-at-cor-titulo-hex', corTitulo);
+  set('cfg-at-cor-desc', corDesc);     set('cfg-at-cor-desc-hex', corDesc);
+  previewBannerAtacado();
+}
+
 function switchBannerTab(tab) {
   const panelCores  = document.getElementById('bi-panel-cores');
   const panelTextos = document.getElementById('bi-panel-textos');
