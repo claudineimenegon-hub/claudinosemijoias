@@ -1,150 +1,146 @@
 @media (max-width: 768px) {
-  html { font-size: 16px; -webkit-text-size-adjust: 100%; }
-  body { font-size: 16px; line-height: 1.55; }
+  html { font-size: 18px !important; -webkit-text-size-adjust: 100%; scroll-padding-bottom: 88px; }
+  body { font-size: 18px !important; line-height: 1.65 !important; padding-bottom: 82px !important; overflow-x: hidden; }
 
-  header { padding: 0 14px; }
-  .header-inner { min-height: 68px; height: auto; gap: 12px; }
-  .logo { font-size: 20px; letter-spacing: 1.5px; }
-  .logo img { height: 44px; }
-  nav { gap: 10px; }
-  nav a, .nav-link { font-size: 15px !important; letter-spacing: .5px !important; }
+  header { padding: 0 12px !important; min-height: 76px !important; }
+  .header-inner { min-height: 76px !important; height: auto !important; gap: 10px !important; }
+  .logo { font-size: 22px !important; letter-spacing: 1px !important; }
+  .logo img { height: 50px !important; max-width: 180px !important; }
+  nav { gap: 8px !important; }
+  nav a, .nav-link, .nav-admin { font-size: 16px !important; letter-spacing: 0 !important; padding: 12px !important; }
 
-  button,
-  .btn,
-  .buy-btn,
-  .checkout-btn,
-  .payment-method,
-  input[type="button"],
-  input[type="submit"] {
-    min-height: 52px;
-    font-size: 17px !important;
-    line-height: 1.25;
-    padding: 14px 18px !important;
+  .hero { min-height: 58vh !important; padding: 48px 18px !important; background-position: center !important; }
+  .hero h1, h1 { font-size: clamp(34px, 10vw, 46px) !important; line-height: 1.08 !important; }
+  .hero p, h1 + p { font-size: 19px !important; line-height: 1.55 !important; }
+  h2 { font-size: clamp(28px, 8vw, 38px) !important; line-height: 1.15 !important; }
+  h3 { font-size: 24px !important; line-height: 1.25 !important; }
+  p, li, label, small, span, .muted, .description { font-size: 17px !important; }
+
+  main, section, .container, .section, .content { padding-left: 18px !important; padding-right: 18px !important; }
+  section { margin-bottom: 34px !important; }
+
+  button, .btn, [class*="btn"], a[class*="btn"], input[type="button"], input[type="submit"] {
+    min-height: 58px !important;
+    min-width: 52px !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    padding: 16px 20px !important;
+    border-radius: 10px !important;
     touch-action: manipulation;
   }
 
-  input,
-  select,
-  textarea {
-    min-height: 50px;
-    font-size: 16px !important;
-    padding: 12px 14px !important;
-  }
-
-  .icon,
-  .cart-icon,
-  .menu-icon,
-  .header-icon,
-  [class*="icon"] {
-    font-size: 26px;
-  }
-
-  main,
-  .container,
-  .section,
-  .content {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  h1 { font-size: clamp(28px, 8vw, 38px) !important; line-height: 1.15; }
-  h2 { font-size: clamp(24px, 7vw, 32px) !important; line-height: 1.2; }
-  h3 { font-size: 21px !important; line-height: 1.25; }
-  p, li, label, small, .muted, .description { font-size: 16px !important; }
-
-  .products-grid,
-  .product-grid,
-  .catalog-grid {
-    grid-template-columns: 1fr !important;
-    gap: 20px !important;
-  }
-
-  .product-card,
-  .card {
-    padding: 16px !important;
+  input, select, textarea {
+    min-height: 56px !important;
+    font-size: 18px !important;
+    line-height: 1.3 !important;
+    padding: 14px 16px !important;
     border-radius: 10px !important;
   }
 
-  .product-card img,
-  .product-image,
-  .card img {
-    width: 100%;
-    height: auto;
-    max-height: none;
-    object-fit: cover;
+  .products-grid, .product-grid, .catalog-grid, [class*="product"][class*="grid"], [class*="catalog"][class*="grid"] {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
   }
 
-  .product-name,
-  .card-title,
-  .product-title { font-size: 20px !important; line-height: 1.3; }
-  .price,
-  .product-price,
-  .total-price { font-size: 26px !important; font-weight: 600; }
-
-  .modal,
-  .modal-content,
-  .checkout-modal,
-  .checkout-content {
-    width: calc(100vw - 20px) !important;
-    max-width: none !important;
-    max-height: calc(100vh - 20px) !important;
-    margin: 10px !important;
+  .product-card, [class*="product-card"], .card {
+    width: 100% !important;
     padding: 18px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 30px rgba(26,22,16,.14) !important;
+  }
+
+  .product-card img, [class*="product-card"] img, .product-image, .card img {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 300px !important;
+    max-height: 520px !important;
+    object-fit: cover !important;
     border-radius: 12px !important;
+  }
+
+  .product-name, .card-title, .product-title, [class*="product"][class*="title"] {
+    font-size: 24px !important;
+    line-height: 1.25 !important;
+    margin-top: 14px !important;
+  }
+  .price, .product-price, .total-price, [class*="price"] {
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+  }
+
+  .modal, .modal-content, .checkout-modal, .checkout-content, [class*="checkout"][class*="modal"] {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    padding: 22px 18px 32px !important;
+    border-radius: 0 !important;
     overflow-y: auto !important;
   }
 
-  .modal h2,
-  .checkout-modal h2,
-  .checkout-title { font-size: 24px !important; }
-
-  .payment-options,
-  .payment-tabs,
-  .payment-methods {
+  .modal h2, .checkout-modal h2, .checkout-title { font-size: 30px !important; }
+  .payment-options, .payment-tabs, .payment-methods, [class*="payment"][class*="option"] {
     display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .payment-method, .payment-tab, [class*="payment-method"], [class*="payment-tab"] {
+    min-height: 64px !important;
+    font-size: 20px !important;
+    border-radius: 12px !important;
   }
 
-  .payment-method,
-  .payment-tab {
-    font-size: 17px !important;
-    min-height: 54px;
+  .checkout-summary, .order-summary, .cart-summary, [class*="summary"] {
+    font-size: 18px !important;
+    line-height: 1.7 !important;
+  }
+  .checkout-summary > *, .order-summary > *, .cart-summary > * { margin-bottom: 12px !important; }
+
+  .close, .modal-close, .close-btn, [class*="close"] {
+    min-width: 52px !important;
+    min-height: 52px !important;
+    font-size: 34px !important;
+    line-height: 1 !important;
   }
 
-  .checkout-summary,
-  .order-summary,
-  .cart-summary {
-    font-size: 16px !important;
-    line-height: 1.6;
+  .icon, .cart-icon, .menu-icon, .header-icon, [class*="icon"] { font-size: 30px !important; }
+  .whatsapp, .whatsapp-button, .floating-whatsapp, [class*="whatsapp"] {
+    width: 66px !important;
+    height: 66px !important;
+    font-size: 34px !important;
+    bottom: 92px !important;
+    right: 16px !important;
   }
 
-  .checkout-summary > *,
-  .order-summary > *,
-  .cart-summary > * { margin-bottom: 10px; }
-
-  .close,
-  .modal-close,
-  .close-btn {
-    min-width: 44px;
-    min-height: 44px;
-    font-size: 28px !important;
-  }
-
-  .whatsapp,
-  .whatsapp-button,
-  .floating-whatsapp {
-    width: 58px !important;
-    height: 58px !important;
-    font-size: 30px !important;
+  body::after {
+    content: "Início   •   Produtos   •   Carrinho   •   WhatsApp";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 72px;
+    padding: 12px 8px;
+    background: #1A1610;
+    color: #E8D5A3;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: .2px;
+    border-top: 1px solid rgba(201,168,76,.55);
+    box-shadow: 0 -8px 24px rgba(0,0,0,.22);
   }
 }
 
 @media (max-width: 420px) {
-  .payment-options,
-  .payment-tabs,
-  .payment-methods { grid-template-columns: 1fr !important; }
-
-  .logo { font-size: 18px; }
-  .product-card, .card { padding: 14px !important; }
+  html, body { font-size: 18px !important; }
+  .logo { font-size: 20px !important; }
+  .product-card, [class*="product-card"], .card { padding: 16px !important; }
+  .product-card img, [class*="product-card"] img, .card img { min-height: 260px !important; }
 }
