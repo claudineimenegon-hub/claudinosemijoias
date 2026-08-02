@@ -14,6 +14,7 @@ const correctedHead = `<head>
 <link rel="canonical" href="https://www.claudinosemijoias.com.br/">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/assets/css/mobile.css">
+<script src="/assets/js/runtime-config.js"></script>
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="Claudino Semijoias">
 <meta property="og:title" content="Claudino Semijoias — Semijoias Banhadas a Ouro 18k">
@@ -39,6 +40,7 @@ for (const required of [
   'rel="canonical"',
   'rel="manifest"',
   'href="/assets/css/mobile.css"',
+  'src="/assets/js/runtime-config.js"',
   'property="og:title"',
   'name="twitter:card"'
 ]) {
@@ -52,4 +54,4 @@ if (html.includes('<head>f')) {
 }
 
 await writeFile(indexPath, html, 'utf8');
-console.log('index.html preparado com SEO, metadados e melhorias mobile.');
+console.log('index.html preparado com SEO, metadados, melhorias mobile e configuração do Supabase.');
