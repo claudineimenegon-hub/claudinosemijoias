@@ -44,13 +44,9 @@
   async function isAdmin() {
     const session = await getSession();
     if (!session?.user?.id) return false;
-    const { data, error } = await getClient()
-      .from('admin_users')
-      .select('role')
-      .eq('user_id', session.user.id)
-      .maybeSingle();
+    const { data, error } = await getClient().rpc('is_admin');
     if (error) throw error;
-    return data?.role === 'admin' || data?.role === 'editor';
+    return data === true;
   }
 
   async function listProducts({ includeInactive = false } = {}) {
