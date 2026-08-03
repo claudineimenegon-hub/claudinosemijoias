@@ -2,6 +2,7 @@
   'use strict';
 
   const LEGACY_TEXT = ['Acesso Restrito', 'Senha de Administrador', 'Entrar no Painel'];
+  let redirecting = false;
 
   function isLegacyAdminModal(node) {
     if (!(node instanceof HTMLElement)) return false;
@@ -21,6 +22,12 @@
     return node;
   }
 
+  function openSupabaseAdmin() {
+    if (redirecting || location.pathname.startsWith('/admin')) return;
+    redirecting = true;
+    location.assign('/admin/');
+  }
+
   function suppressLegacyModal(root) {
     if (!root || root.dataset.supabaseReplaced === 'true') return;
     root.dataset.supabaseReplaced = 'true';
@@ -28,6 +35,7 @@
     root.setAttribute('aria-hidden', 'true');
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
+    requestAnimationFrame(openSupabaseAdmin);
   }
 
   function scan(scope = document) {
