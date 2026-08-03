@@ -1,7 +1,10 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 
-const supabaseUrl = process.env.SUPABASE_URL?.trim() ?? '';
-const supabasePublishableKey = process.env.SUPABASE_PUBLISHABLE_KEY?.trim() ?? '';
+const FALLBACK_SUPABASE_URL = 'https://pooqfaeefsdzykxiijvt.supabase.co';
+const FALLBACK_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_6RZ6hcxhtPjCDaj4e_zfSw_q0SEXK4c';
+
+const supabaseUrl = process.env.SUPABASE_URL?.trim() || FALLBACK_SUPABASE_URL;
+const supabasePublishableKey = process.env.SUPABASE_PUBLISHABLE_KEY?.trim() || FALLBACK_SUPABASE_PUBLISHABLE_KEY;
 
 const missing = [];
 if (!supabaseUrl) missing.push('SUPABASE_URL');
