@@ -21,10 +21,6 @@
     return node;
   }
 
-  function redirectToAdmin() {
-    window.location.assign('/admin/');
-  }
-
   function suppressLegacyModal(root) {
     if (!root || root.dataset.supabaseReplaced === 'true') return;
     root.dataset.supabaseReplaced = 'true';
@@ -32,11 +28,13 @@
     root.setAttribute('aria-hidden', 'true');
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
-    redirectToAdmin();
   }
 
   function scan(scope = document) {
-    const elements = scope instanceof HTMLElement ? [scope, ...scope.querySelectorAll('*')] : [...document.querySelectorAll('body *')];
+    const elements = scope instanceof HTMLElement
+      ? [scope, ...scope.querySelectorAll('*')]
+      : [...document.querySelectorAll('body *')];
+
     for (const element of elements) {
       if (isLegacyAdminModal(element)) {
         suppressLegacyModal(findModalRoot(element));
