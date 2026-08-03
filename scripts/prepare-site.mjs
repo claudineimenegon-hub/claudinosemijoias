@@ -14,11 +14,13 @@ const correctedHead = `<head>
 <link rel="canonical" href="https://www.claudinosemijoias.com.br/">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/assets/css/mobile.css">
+<link rel="stylesheet" href="/assets/css/category-cards-mobile.css">
 <script src="/assets/js/runtime-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/assets/js/supabase-data.js"></script>
 <script src="/assets/js/disable-legacy-admin.js"></script>
 <script src="/assets/js/supabase-admin-entry.js"></script>
+<script defer src="/assets/js/category-cards-mobile.js"></script>
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="Claudino Semijoias">
 <meta property="og:title" content="Claudino Semijoias — Semijoias Banhadas a Ouro 18k">
@@ -37,13 +39,15 @@ html = html.replace(headPattern, correctedHead);
 for (const required of [
   'name="viewport"',
   'href="/assets/css/mobile.css"',
+  'href="/assets/css/category-cards-mobile.css"',
   'src="/assets/js/runtime-config.js"',
   'src="/assets/js/supabase-data.js"',
   'src="/assets/js/disable-legacy-admin.js"',
-  'src="/assets/js/supabase-admin-entry.js"'
+  'src="/assets/js/supabase-admin-entry.js"',
+  'src="/assets/js/category-cards-mobile.js"'
 ]) {
   if (!html.includes(required)) throw new Error(`Recurso obrigatório ausente: ${required}`);
 }
 
 await writeFile(indexPath, html, 'utf8');
-console.log('index.html preparado com vitrine e painel administrativo original autenticado pelo Supabase.');
+console.log('index.html preparado com vitrine, painel original e cards de categorias no mobile.');
