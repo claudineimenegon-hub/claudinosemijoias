@@ -14,7 +14,11 @@ const correctedHead = `<head>
 <link rel="canonical" href="https://www.claudinosemijoias.com.br/">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/assets/css/mobile.css">
+<script src="/assets/js/runtime-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/assets/js/supabase-data.js"></script>
 <script src="/assets/js/disable-legacy-admin.js"></script>
+<script src="/assets/js/supabase-admin-entry.js"></script>
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="Claudino Semijoias">
 <meta property="og:title" content="Claudino Semijoias — Semijoias Banhadas a Ouro 18k">
@@ -27,31 +31,19 @@ const correctedHead = `<head>
 <title>Claudino Semijoias | Semijoias Banhadas a Ouro 18k</title>`;
 
 const headPattern = /<head>f?\s*[\s\S]*?<title>[\s\S]*?<\/title>/i;
-
-if (!headPattern.test(html)) {
-  throw new Error('Cabeçalho HTML não encontrado; build interrompido para evitar publicação incorreta.');
-}
-
+if (!headPattern.test(html)) throw new Error('Cabeçalho HTML não encontrado.');
 html = html.replace(headPattern, correctedHead);
 
 for (const required of [
   'name="viewport"',
-  'name="google-site-verification"',
-  'rel="canonical"',
-  'rel="manifest"',
   'href="/assets/css/mobile.css"',
+  'src="/assets/js/runtime-config.js"',
+  'src="/assets/js/supabase-data.js"',
   'src="/assets/js/disable-legacy-admin.js"',
-  'property="og:title"',
-  'name="twitter:card"'
+  'src="/assets/js/supabase-admin-entry.js"'
 ]) {
-  if (!html.includes(required)) {
-    throw new Error(`Metadado obrigatório ausente: ${required}`);
-  }
-}
-
-if (html.includes('<head>f')) {
-  throw new Error('Caractere inválido após <head> ainda presente.');
+  if (!html.includes(required)) throw new Error(`Recurso obrigatório ausente: ${required}`);
 }
 
 await writeFile(indexPath, html, 'utf8');
-console.log('index.html preparado com SEO, mobile e área administrativa separada em /admin.');
+console.log('index.html preparado com vitrine e painel administrativo original autenticado pelo Supabase.');
