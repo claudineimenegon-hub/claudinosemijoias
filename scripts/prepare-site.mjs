@@ -23,6 +23,7 @@ const correctedHead = `<head>
 <script src="/assets/js/supabase-admin-entry.js"></script>
 <script defer src="/assets/js/category-cards-mobile.js"></script>
 <script defer src="/assets/js/social-footer-mobile.js"></script>
+<script defer src="/assets/js/mobile-cart-position.js"></script>
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="Claudino Semijoias">
 <meta property="og:title" content="Claudino Semijoias — Semijoias Banhadas a Ouro 18k">
@@ -48,10 +49,11 @@ for (const required of [
   'src="/assets/js/disable-legacy-admin.js"',
   'src="/assets/js/supabase-admin-entry.js"',
   'src="/assets/js/category-cards-mobile.js"',
-  'src="/assets/js/social-footer-mobile.js"'
+  'src="/assets/js/social-footer-mobile.js"',
+  'src="/assets/js/mobile-cart-position.js"'
 ]) {
   if (!html.includes(required)) throw new Error(`Recurso obrigatório ausente: ${required}`);
 }
 
 await writeFile(indexPath, html, 'utf8');
-console.log('index.html preparado com vitrine, painel original, cards de categorias e rodapé social no mobile.');
+console.log('index.html preparado com vitrine, painel original, cards, rodapé social e carrinhos alinhados no mobile.');
