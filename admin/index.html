@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#1a1610">
-  <title>Painel Administrativo | Claudino Semijoias</title>
+  <title>Acesso administrativo | Claudino Semijoias</title>
   <link rel="stylesheet" href="/admin/styles.css">
   <script src="/assets/js/runtime-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -15,7 +15,7 @@
 <body>
   <main class="shell">
     <header class="topbar">
-      <div><strong>Claudino Semijoias</strong><span>Painel administrativo</span></div>
+      <div><strong>Claudino Semijoias</strong><span>Acesso administrativo</span></div>
       <a href="/">Ver loja</a>
     </header>
 
@@ -25,45 +25,9 @@
       <form id="loginForm">
         <label>E-mail<input id="email" type="email" autocomplete="username" required></label>
         <label>Senha<input id="password" type="password" autocomplete="current-password" required></label>
-        <button type="submit">Entrar</button>
+        <button type="submit">Entrar no painel completo</button>
       </form>
       <div id="loginStatus" class="status" aria-live="polite"></div>
-    </section>
-
-    <section id="dashboardView" hidden>
-      <div class="dashboard-head">
-        <div><h1>Painel da loja</h1><p id="sessionLabel"></p></div>
-        <button id="logoutBtn" class="secondary">Sair</button>
-      </div>
-
-      <div class="metrics">
-        <article><strong id="productCount">0</strong><span>Produtos</span></article>
-        <article><strong id="categoryCount">0</strong><span>Categorias</span></article>
-        <article><strong id="stockCount">0</strong><span>Itens em estoque</span></article>
-      </div>
-
-      <section class="card">
-        <div class="section-head"><h2>Produtos</h2><button id="newProductBtn">Novo produto</button></div>
-        <div id="productsList" class="products-list"></div>
-      </section>
-
-      <dialog id="productDialog">
-        <form id="productForm" method="dialog">
-          <div class="section-head"><h2 id="formTitle">Novo produto</h2><button type="button" id="closeDialog" class="icon-btn">×</button></div>
-          <input id="productId" type="hidden">
-          <label>Nome<input id="productName" required></label>
-          <label>Slug<input id="productSlug" required></label>
-          <div class="form-grid">
-            <label>Preço<input id="productPrice" type="number" min="0" step="0.01" required></label>
-            <label>Estoque<input id="productStock" type="number" min="0" step="1" required></label>
-          </div>
-          <label>Imagem (URL)<input id="productImage" type="url"></label>
-          <label>Descrição<textarea id="productDescription" rows="4"></textarea></label>
-          <label class="check"><input id="productActive" type="checkbox" checked> Produto ativo</label>
-          <button type="submit">Salvar produto</button>
-          <div id="formStatus" class="status" aria-live="polite"></div>
-        </form>
-      </dialog>
     </section>
   </main>
 </body>
