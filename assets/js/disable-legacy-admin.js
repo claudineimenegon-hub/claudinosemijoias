@@ -2,7 +2,13 @@
   'use strict';
 
   const LEGACY_TEXT = ['Acesso Restrito', 'Senha de Administrador', 'Entrar no Painel'];
+  const params = new URLSearchParams(location.search);
+  const openingAuthenticatedPanel = params.get('admin') === 'supabase';
   let redirecting = false;
+
+  // Durante a abertura autenticada do painel completo, este script não deve
+  // interceptar o modal antigo nem redirecionar novamente para /admin/.
+  if (location.pathname.startsWith('/admin') || openingAuthenticatedPanel) return;
 
   function isLegacyAdminModal(node) {
     if (!(node instanceof HTMLElement)) return false;
@@ -35,7 +41,7 @@
   }
 
   function openSupabaseAdmin() {
-    if (redirecting || location.pathname.startsWith('/admin')) return;
+    if (redirecting) return;
     redirecting = true;
     location.assign('/admin/');
   }
