@@ -22,6 +22,18 @@
     return node;
   }
 
+  function isActuallyVisible(element) {
+    if (!(element instanceof HTMLElement)) return false;
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return style.display !== 'none'
+      && style.visibility !== 'hidden'
+      && Number(style.opacity || 1) > 0
+      && rect.width > 0
+      && rect.height > 0
+      && element.getAttribute('aria-hidden') !== 'true';
+  }
+
   function openSupabaseAdmin() {
     if (redirecting || location.pathname.startsWith('/admin')) return;
     redirecting = true;
@@ -29,7 +41,7 @@
   }
 
   function suppressLegacyModal(root) {
-    if (!root || root.dataset.supabaseReplaced === 'true') return;
+    if (!root || root.dataset.supabaseReplaced === 'true' || !isActuallyVisible(root)) return;
     root.dataset.supabaseReplaced = 'true';
     root.style.setProperty('display', 'none', 'important');
     root.setAttribute('aria-hidden', 'true');
@@ -44,8 +56,10 @@
       : [...document.querySelectorAll('body *')];
 
     for (const element of elements) {
-      if (isLegacyAdminModal(element)) {
-        suppressLegacyModal(findModalRoot(element));
+      if (!isLegacyAdminModal(element)) continue;
+      const root = findModalRoot(element);
+      if (isActuallyVisible(root)) {
+        suppressLegacyModal(root);
         break;
       }
     }
@@ -53,6 +67,10 @@
 
   const observer = new MutationObserver(mutations => {
     for (const mutation of mutations) {
+      if (mutation.type === 'attributes') {
+        scan(mutation.target);
+        continue;
+      }
       mutation.addedNodes.forEach(node => {
         if (node instanceof HTMLElement) scan(node);
       });
@@ -60,7 +78,11 @@
   });
 
   window.addEventListener('DOMContentLoaded', () => {
-    scan();
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'style', 'aria-hidden']
+    });
   }, { once: true });
 })();
