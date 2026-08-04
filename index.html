@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>f
+<head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Claudino SemiJoias — Semijoias banhadas a ouro 18k. Colares, anéis, pulseiras e brincos com qualidade e elegância. Compre online com entrega para todo o Brasil.">
 <meta name="keywords" content="semijoias, joias banhadas a ouro, colares, anéis, pulseiras, brincos, semijoias online, Claudino Joias">
 <meta name="robots" content="index, follow">
@@ -94,6 +95,75 @@
     display: inline-block;
   }
   .nav-admin:hover { background: var(--gold) !important; color: var(--dark) !important; }
+
+  /* Hamburger + mobile nav */
+  .hamburger-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 210;
+  }
+  .hamburger-btn span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--gold);
+    transition: transform .25s ease, opacity .25s ease;
+  }
+  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
+  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .mobile-nav-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 190;
+    opacity: 0;
+    transition: opacity .25s ease;
+  }
+  .mobile-nav-overlay.open { display: block; opacity: 1; }
+
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 240px;
+    max-width: 78vw;
+    background: var(--dark, #141414);
+    z-index: 200;
+    flex-direction: column;
+    padding: 80px 24px 24px;
+    gap: 22px;
+    transform: translateX(100%);
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+    box-shadow: -8px 0 24px rgba(0,0,0,.35);
+  }
+  .mobile-nav.open { display: flex; transform: translateX(0); }
+  .mobile-nav a {
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #C8BDA8;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .mobile-nav a:hover, .mobile-nav a:active { color: var(--gold); }
+
+  @media (max-width: 600px) {
+    .hamburger-btn { display: flex; }
+  }
 
   /* ─── HERO ─── */
   .hero {
@@ -198,13 +268,11 @@
   }
   @media (max-width: 600px) {
     .cats {
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      flex-wrap: wrap;
+      justify-content: center;
+      overflow-x: visible;
+      gap: 8px;
     }
-    .cats::-webkit-scrollbar { display: none; }
   }
   .cat-btn {
     font-family: 'Jost', sans-serif;
@@ -1308,7 +1376,7 @@
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   }
   .cart-fab:hover { background: var(--gold); transform: scale(1.08); }
-  .cart-fab.atacado-cart { bottom: 96px; border-color: #C9A84C88; }
+  .cart-fab.atacado-cart { bottom: 28px; border-color: #C9A84C88; }
   .cart-badge {
     position: absolute;
     top: -6px; right: -6px;
@@ -1353,10 +1421,11 @@
     z-index: 250;
     display: flex;
     flex-direction: column;
-    transition: right .3s cubic-bezier(.4,0,.2,1);
+    visibility: hidden;
+    transition: right .3s cubic-bezier(.4,0,.2,1), visibility 0s linear .3s;
     box-shadow: -8px 0 40px rgba(0,0,0,0.18);
   }
-  .cart-drawer.open { right: 0; }
+  .cart-drawer.open { right: 0; visibility: visible; transition: right .3s cubic-bezier(.4,0,.2,1), visibility 0s linear 0s; }
   .cart-overlay {
     display: none;
     position: fixed;
@@ -2037,8 +2106,8 @@
     .btn-pix { font-size: 10px; padding: 9px 10px; }
 
     /* Categorias */
-    .cats { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-    .cats::-webkit-scrollbar { display: none; }
+    .cats { flex-wrap: wrap; justify-content: center; overflow-x: visible; gap: 8px; }
+    .cat-btn { font-size: 10px; padding: 6px 12px; }
 
     /* Banner */
     .banner { padding: 32px 1rem; }
@@ -2077,10 +2146,10 @@
     .opcao-info span { font-size: 11px; }
 
     /* Carrinho drawer */
-    .cart-drawer { width: 100%; border-radius: 16px 16px 0 0; top: auto; bottom: -100%; right: 0; transition: bottom .3s cubic-bezier(.4,0,.2,1); }
-    .cart-drawer.open { bottom: 0; right: 0; }
+    .cart-drawer { width: 100%; border-radius: 16px 16px 0 0; top: auto; bottom: 0; right: 0; transform: translateY(100%); transition: transform .3s cubic-bezier(.4,0,.2,1), visibility 0s linear .3s; }
+    .cart-drawer.open { transform: translateY(0); right: 0; visibility: visible; transition: transform .3s cubic-bezier(.4,0,.2,1), visibility 0s linear 0s; }
     .cart-fab { bottom: 20px; right: 16px; width: 50px; height: 50px; font-size: 20px; }
-    .cart-fab.atacado-cart { bottom: 80px; }
+    .cart-fab.atacado-cart { bottom: 20px; }
     .cart-label { display: none; }
     .cart-head { padding: 14px 16px; }
     .cart-items { padding: 12px; }
@@ -2127,12 +2196,21 @@
 <header>
   <div class="header-inner">
     <div class="logo" id="logo-header">Claudino <span>SemiJoias</span></div>
-    <nav>
+    <nav id="main-nav">
       <a class="hide-mob" onclick="voltarParaVitrine();rolarPara('#vitrine')">Vitrine</a>
       <a class="hide-mob" onclick="abrirCatalogoPorNav()">Atacado</a>
       <a class="hide-mob" onclick="abrirSobre()">Sobre</a>
     </nav>
+    <button class="hamburger-btn" id="hamburger-btn" onclick="toggleMobileNav()" aria-label="Abrir menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </div>
+  <div class="mobile-nav-overlay" id="mobile-nav-overlay" onclick="closeMobileNav()"></div>
+  <nav class="mobile-nav" id="mobile-nav">
+    <a onclick="voltarParaVitrine();rolarPara('#vitrine');closeMobileNav()">Vitrine</a>
+    <a onclick="abrirCatalogoPorNav();closeMobileNav()">Atacado</a>
+    <a onclick="abrirSobre();closeMobileNav()">Sobre</a>
+  </nav>
 </header>
 
 <!-- HERO -->
@@ -2164,6 +2242,12 @@
     <button class="cat-btn" onclick="filterCat('piercing',this)">Piercing</button>
   </div>
   <div class="products-grid" id="products-grid"></div>
+  <!-- FAB CARRINHO VAREJO — vive dentro da aba loja, nunca aparece nas outras abas -->
+  <div class="cart-fab" onclick="openCart('varejo')" title="Carrinho Varejo">
+    🛒
+    <span class="cart-badge" id="badge-varejo"></span>
+    <span class="cart-label">Carrinho</span>
+  </div>
 </div>
 
 <!-- BANNER INFERIOR -->
@@ -2174,6 +2258,7 @@
 
 <!-- BANNER ATACADO -->
 <div class="atacado-banner" id="atacado">
+  <button class="btn-outline" id="atacado-banner-voltar" onclick="voltarParaVitrine()" style="display:none;margin-bottom:20px;padding:8px 20px;font-size:11px;letter-spacing:2px">← Voltar</button>
   <h2>Compre no <em>Atacado</em></h2>
   <p>Condições especiais para revendedores · Preços exclusivos · Pedido mínimo</p>
   <div class="atacado-feats">
@@ -2205,6 +2290,12 @@
       <button class="cat-btn" onclick="filterCatAtacado('piercing',this)">Piercing</button>
     </div>
     <div class="products-grid" id="grid-atacado"></div>
+  </div>
+  <!-- FAB CARRINHO ATACADO — vive dentro da própria aba, nunca aparece fora dela -->
+  <div class="cart-fab atacado-cart" id="fab-cart-atacado" onclick="openCart('atacado')" style="display:none">
+    📦
+    <span class="cart-badge" id="badge-atacado"></span>
+    <span class="cart-label">Carrinho Atacado</span>
   </div>
 </div>
 
@@ -2282,20 +2373,6 @@
   </div>
 </footer>
 
-
-<!-- FAB CARRINHO VAREJO -->
-<div class="cart-fab" onclick="openCart('varejo')" title="Carrinho Varejo">
-  🛒
-  <span class="cart-badge" id="badge-varejo"></span>
-  <span class="cart-label">Carrinho</span>
-</div>
-
-<!-- FAB CARRINHO ATACADO (oculto até aprovação) -->
-<div class="cart-fab atacado-cart" id="fab-cart-atacado" onclick="openCart('atacado')" style="display:none">
-  📦
-  <span class="cart-badge" id="badge-atacado"></span>
-  <span class="cart-label">Carrinho Atacado</span>
-</div>
 
 <!-- OVERLAY -->
 <div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
@@ -5828,13 +5905,15 @@ function renderLogo() {
 
 // ─── SEÇÃO SOBRE ──────────────────────────────────────
 function abrirSobre() {
-  // Ocultar tudo exceto o Sobre
+  // Ocultar tudo exceto o Sobre (aba totalmente separada)
   document.getElementById('vitrine').style.display          = 'none';
+  document.getElementById('banner-inferior').style.display  = 'none';
   document.getElementById('atacado').style.display          = 'none';
   document.getElementById('catalogo-atacado').classList.remove('visivel');
   // Mostrar Sobre
   const sec = document.getElementById('sobre');
   if(sec) { sec.style.display = ''; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  atualizarFabAtacado();
 }
 
 function fecharSobre() {
@@ -5842,38 +5921,50 @@ function fecharSobre() {
   const sec = document.getElementById('sobre');
   if(sec) sec.style.display = 'none';
   // Restaurar vitrine
-  document.getElementById('vitrine').style.display = '';
-  document.getElementById('atacado').style.display = '';
+  document.getElementById('vitrine').style.display         = '';
+  document.getElementById('banner-inferior').style.display = '';
+  document.getElementById('atacado').style.display         = '';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  atualizarFabAtacado();
 }
 
 function abrirCatalogoPorNav() {
+  // "Atacado" agora é sempre uma aba isolada, desvinculada da "Nossa Coleção" —
+  // nunca aparece como rolagem dentro da vitrine, aprovado ou não.
   const meu = getMeuCadastro();
+  document.getElementById('vitrine').style.display         = 'none';
+  document.getElementById('banner-inferior').style.display = 'none';
+  const sobre = document.getElementById('sobre');
+  if(sobre) sobre.style.display = 'none';
+
   if(meu && meu.status === 'aprovado') {
-    // Ocultar vitrine e banner atacado
-    document.getElementById('vitrine').style.display  = 'none';
-    document.getElementById('atacado').style.display  = 'none';
-    // Mostrar catálogo exclusivo
+    // Mostrar catálogo exclusivo de produtos
+    document.getElementById('atacado').style.display = 'none';
     const cat = document.getElementById('catalogo-atacado');
     cat.classList.add('visivel');
     renderCatalogoAtacado();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
-    // Não aprovado: mostrar banner de cadastro
-    document.getElementById('vitrine').style.display  = '';
-    document.getElementById('atacado').style.display  = '';
+    // Não aprovado: mostrar a tela de "seja um revendedor" como aba própria (não como parte da vitrine)
     document.getElementById('catalogo-atacado').classList.remove('visivel');
-    rolarPara('#atacado');
+    document.getElementById('atacado').style.display = '';
+    const voltarBtn = document.getElementById('atacado-banner-voltar');
+    if(voltarBtn) voltarBtn.style.display = '';
   }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  atualizarFabAtacado();
 }
 
 function voltarParaVitrine() {
   document.getElementById('vitrine').style.display          = '';
+  document.getElementById('banner-inferior').style.display  = '';
   document.getElementById('atacado').style.display          = '';
   document.getElementById('catalogo-atacado').classList.remove('visivel');
+  const voltarBtn = document.getElementById('atacado-banner-voltar');
+  if(voltarBtn) voltarBtn.style.display = 'none';
   const sobre = document.getElementById('sobre');
   if(sobre) sobre.style.display = 'none';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  atualizarFabAtacado();
 }
 function salvarSobre() {
   config.sobreTitulo    = document.getElementById('sobre-titulo')?.value.trim()    || '';
@@ -6669,10 +6760,8 @@ function importarConfig(input) {
 
 function irParaCatalogo() {
   closeAtacado();
-  const sec = document.getElementById('catalogo-atacado');
-  sec.classList.add('visivel');
-  renderCatalogoAtacado();
-  setTimeout(() => sec.scrollIntoView({ behavior: 'smooth' }), 100);
+  // Usa o mesmo caminho de "aba isolada" do menu Atacado — nunca mais empilha com a vitrine
+  abrirCatalogoPorNav();
 }
 
 function verificarAcessoAtacado() {
@@ -7120,6 +7209,25 @@ function rolarPara(sel) {
   if(el) el.scrollIntoView({ behavior:'smooth' });
 }
 
+function toggleMobileNav() {
+  const nav = document.getElementById('mobile-nav');
+  const overlay = document.getElementById('mobile-nav-overlay');
+  const btn = document.getElementById('hamburger-btn');
+  const isOpen = nav.classList.toggle('open');
+  overlay.classList.toggle('open', isOpen);
+  btn.classList.toggle('open', isOpen);
+  btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+
+function closeMobileNav() {
+  document.getElementById('mobile-nav').classList.remove('open');
+  document.getElementById('mobile-nav-overlay').classList.remove('open');
+  document.getElementById('hamburger-btn').classList.remove('open');
+  document.getElementById('hamburger-btn').setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+}
+
 function abrirOpcoes(id) {
   currentProduct = products.find(p => p.id===id);
   if(!currentProduct) return;
@@ -7529,6 +7637,17 @@ function changeQty(id, tipo, delta) {
   if(tipo === 'atacado') _atualizarBotoesResumoAtacado();
 }
 
+function estaNaAbaAtacado() {
+  const cat = document.getElementById('catalogo-atacado');
+  return !!(cat && cat.classList.contains('visivel'));
+}
+
+function atualizarFabAtacado() {
+  const ta = cartAtacado.reduce((s,i) => s + i.qty, 0);
+  const fabAt = document.getElementById('fab-cart-atacado');
+  if(fabAt) fabAt.style.display = (ta > 0 && estaNaAbaAtacado()) ? '' : 'none';
+}
+
 function atualizarBadges() {
   const tv = cartVarejo.reduce((s,i) => s + i.qty, 0);
   const ta = cartAtacado.reduce((s,i) => s + i.qty, 0);
@@ -7536,9 +7655,8 @@ function atualizarBadges() {
   const ba = document.getElementById('badge-atacado');
   bv.textContent = tv; bv.classList.toggle('show', tv > 0);
   ba.textContent = ta; ba.classList.toggle('show', ta > 0);
-  // Mostrar/ocultar FAB atacado conforme carrinho
-  const fabAt = document.getElementById('fab-cart-atacado');
-  if(fabAt) fabAt.style.display = ta > 0 ? '' : 'none';
+  // Mostrar/ocultar FAB atacado: só quando a aba Atacado estiver aberta
+  atualizarFabAtacado();
 }
 
 function renderDrawer(tipo) {
