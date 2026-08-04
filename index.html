@@ -966,7 +966,8 @@
     gap: 8px;
   }
   .btn-atacado:hover { border-color: var(--gold); color: var(--gold); }
-  .btn-atacado.disabled-btn {
+  .btn-atacado.disabled-btn,
+  .disabled-btn {
     opacity: .35;
     cursor: not-allowed;
     pointer-events: none;
@@ -2851,6 +2852,16 @@
 
     <!-- LISTA PRODUTOS -->
     <div class="atab-content active" id="tab-produtos">
+      <div class="toggle-atacado">
+        <div>
+          <strong>Seção "Coleção" da Loja</strong>
+          <p>Ative ou desative a exibição da Coleção (vitrine de produtos) visível aos clientes na página.</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="cfg-vitrine-ativa" onchange="toggleVitrine()">
+          <span class="slider"></span>
+        </label>
+      </div>
       <div class="products-list" id="admin-list"></div>
     </div>
 
@@ -5662,6 +5673,7 @@ function switchAdminTab(tab, btn) {
   if(el) { el.classList.add('active'); el.style.display = ''; }
   if(tab === 'produtos')     renderAdminList();
   if(tab === 'atacado')      { renderCnpjList(); aplicarEstadoBotaoAtacado(); loadConfigNotif(); carregarCamposBannerAtacado(); }
+  if(tab === 'produtos')     { aplicarEstadoVitrine(); }
   if(tab === 'prod-atacado') renderAdminListAtacado();
   if(tab === 'links')        popularSelectProdutos();
   if(tab === 'ferramentas')  carregarRedes();
@@ -7168,6 +7180,23 @@ function aplicarEstadoBotaoAtacado() {
     if(btn) btn.classList.toggle('disabled-btn', !ativo);
   });
   const chk = document.getElementById('cfg-atacado-ativo');
+  if(chk) chk.checked = ativo;
+}
+
+function toggleVitrine() {
+  const ativo = document.getElementById('cfg-vitrine-ativa').checked;
+  config.vitrineAtiva = ativo;
+  localStorage.setItem('cj_config', JSON.stringify(config));
+  aplicarEstadoVitrine();
+}
+
+function aplicarEstadoVitrine() {
+  const ativo = config.vitrineAtiva !== false; // padrão: ativo
+  const secao = document.getElementById('vitrine');
+  if(secao) secao.style.display = ativo ? '' : 'none';
+  const btnVer = document.querySelector('.btn-primary[onclick*="rolarPara(\'#vitrine\')"]');
+  if(btnVer) btnVer.classList.toggle('disabled-btn', !ativo);
+  const chk = document.getElementById('cfg-vitrine-ativa');
   if(chk) chk.checked = ativo;
 }
 
@@ -8721,6 +8750,7 @@ function preencherUploadComBase64(b64, areaId, previewId) {
 renderProducts();
 renderLogo();
 aplicarEstadoBotaoAtacado();
+aplicarEstadoVitrine();
 verificarAcessoAtacado();
 atualizarBadges();
 processarQueryString();
