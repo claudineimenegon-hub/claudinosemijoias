@@ -4741,6 +4741,7 @@ function openModal(id) {
   document.getElementById('pix-key-display').textContent = config.pixKey || 'Defina sua chave Pix no Painel Admin';
   gerarParcelas(currentProduct.preco);
   document.getElementById('mp-success').classList.remove('show');
+  window._pedidoIdPendente = Date.now();
   document.getElementById('modal-compra').classList.add('open');
   switchPay('mp', document.querySelector('#modal-compra .pay-tab'));
   document.body.style.overflow = 'hidden';
@@ -4876,8 +4877,9 @@ function finalizarPagamentoCartao(formData) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        accessToken: config.mpToken || '',
-        description: checkoutTitulo || 'Claudino Joias',
+        accessToken:        config.mpToken || '',
+        description:        checkoutTitulo || 'Claudino Joias',
+        external_reference: String(window._pedidoIdPendente || Date.now()),
         ...formData,
       }),
     })
@@ -5025,7 +5027,7 @@ function salvarPedido(status) {
   const frete      = typeof freteAtual !== 'undefined' && freteAtual ? freteAtual : null;
   const valorFrete = frete ? frete.valor : 0;
   const pedido = {
-    id:      Date.now(),
+    id:      window._pedidoIdPendente || Date.now(),
     status:  status || 'pendente',
     data:    new Date().toLocaleString('pt-BR'),
     itens,
@@ -7752,6 +7754,7 @@ function selecionarOpcaoCarrinho(metodo, tipo) {
   document.getElementById('modal-img').innerHTML = '🛒';
   gerarParcelas(total);
   document.getElementById('mp-success').classList.remove('show');
+  window._pedidoIdPendente = Date.now();
   document.getElementById('modal-compra').classList.add('open');
   // Salvar pedido atacado como pendente
   if(tipo === 'atacado') salvarPedidoAtacado('pendente');
@@ -8556,6 +8559,7 @@ function pagarComEndereco(metodo) {
   document.getElementById('modal-img').innerHTML = emoji;
   gerarParcelas(total);
   document.getElementById('mp-success').classList.remove('show');
+  window._pedidoIdPendente = Date.now();
   document.getElementById('modal-compra').classList.add('open');
   document.body.style.overflow = 'hidden';
   // Salvar pedido no contexto correto
