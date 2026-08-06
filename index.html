@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
+<head>f
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Claudino SemiJoias — Semijoias banhadas a ouro 18k. Colares, anéis, pulseiras e brincos com qualidade e elegância. Compre online com entrega para todo o Brasil.">
 <meta name="keywords" content="semijoias, joias banhadas a ouro, colares, anéis, pulseiras, brincos, semijoias online, Claudino Joias">
 <meta name="robots" content="index, follow">
@@ -95,75 +94,6 @@
     display: inline-block;
   }
   .nav-admin:hover { background: var(--gold) !important; color: var(--dark) !important; }
-
-  /* Hamburger + mobile nav */
-  .hamburger-btn {
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    width: 36px;
-    height: 36px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    z-index: 210;
-  }
-  .hamburger-btn span {
-    display: block;
-    width: 22px;
-    height: 2px;
-    background: var(--gold);
-    transition: transform .25s ease, opacity .25s ease;
-  }
-  .hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-  .hamburger-btn.open span:nth-child(2) { opacity: 0; }
-  .hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-  .mobile-nav-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.5);
-    z-index: 190;
-    opacity: 0;
-    transition: opacity .25s ease;
-  }
-  .mobile-nav-overlay.open { display: block; opacity: 1; }
-
-  .mobile-nav {
-    display: none;
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100vh;
-    width: 240px;
-    max-width: 78vw;
-    background: var(--dark, #141414);
-    z-index: 200;
-    flex-direction: column;
-    padding: 80px 24px 24px;
-    gap: 22px;
-    transform: translateX(100%);
-    transition: transform .3s cubic-bezier(.4,0,.2,1);
-    box-shadow: -8px 0 24px rgba(0,0,0,.35);
-  }
-  .mobile-nav.open { display: flex; transform: translateX(0); }
-  .mobile-nav a {
-    font-size: 13px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: #C8BDA8;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  .mobile-nav a:hover, .mobile-nav a:active { color: var(--gold); }
-
-  @media (max-width: 600px) {
-    .hamburger-btn { display: flex; }
-  }
 
   /* ─── HERO ─── */
   .hero {
@@ -268,11 +198,13 @@
   }
   @media (max-width: 600px) {
     .cats {
-      flex-wrap: wrap;
-      justify-content: center;
-      overflow-x: visible;
-      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    .cats::-webkit-scrollbar { display: none; }
   }
   .cat-btn {
     font-family: 'Jost', sans-serif;
@@ -966,8 +898,7 @@
     gap: 8px;
   }
   .btn-atacado:hover { border-color: var(--gold); color: var(--gold); }
-  .btn-atacado.disabled-btn,
-  .disabled-btn {
+  .btn-atacado.disabled-btn {
     opacity: .35;
     cursor: not-allowed;
     pointer-events: none;
@@ -1377,7 +1308,7 @@
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   }
   .cart-fab:hover { background: var(--gold); transform: scale(1.08); }
-  .cart-fab.atacado-cart { bottom: 28px; border-color: #C9A84C88; }
+  .cart-fab.atacado-cart { bottom: 96px; border-color: #C9A84C88; }
   .cart-badge {
     position: absolute;
     top: -6px; right: -6px;
@@ -1422,11 +1353,10 @@
     z-index: 250;
     display: flex;
     flex-direction: column;
-    visibility: hidden;
-    transition: right .3s cubic-bezier(.4,0,.2,1), visibility 0s linear .3s;
+    transition: right .3s cubic-bezier(.4,0,.2,1);
     box-shadow: -8px 0 40px rgba(0,0,0,0.18);
   }
-  .cart-drawer.open { right: 0; visibility: visible; transition: right .3s cubic-bezier(.4,0,.2,1), visibility 0s linear 0s; }
+  .cart-drawer.open { right: 0; }
   .cart-overlay {
     display: none;
     position: fixed;
@@ -2107,8 +2037,8 @@
     .btn-pix { font-size: 10px; padding: 9px 10px; }
 
     /* Categorias */
-    .cats { flex-wrap: wrap; justify-content: center; overflow-x: visible; gap: 8px; }
-    .cat-btn { font-size: 10px; padding: 6px 12px; }
+    .cats { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .cats::-webkit-scrollbar { display: none; }
 
     /* Banner */
     .banner { padding: 32px 1rem; }
@@ -2147,10 +2077,10 @@
     .opcao-info span { font-size: 11px; }
 
     /* Carrinho drawer */
-    .cart-drawer { width: 100%; border-radius: 16px 16px 0 0; top: auto; bottom: 0; right: 0; transform: translateY(100%); transition: transform .3s cubic-bezier(.4,0,.2,1), visibility 0s linear .3s; }
-    .cart-drawer.open { transform: translateY(0); right: 0; visibility: visible; transition: transform .3s cubic-bezier(.4,0,.2,1), visibility 0s linear 0s; }
+    .cart-drawer { width: 100%; border-radius: 16px 16px 0 0; top: auto; bottom: -100%; right: 0; transition: bottom .3s cubic-bezier(.4,0,.2,1); }
+    .cart-drawer.open { bottom: 0; right: 0; }
     .cart-fab { bottom: 20px; right: 16px; width: 50px; height: 50px; font-size: 20px; }
-    .cart-fab.atacado-cart { bottom: 20px; }
+    .cart-fab.atacado-cart { bottom: 80px; }
     .cart-label { display: none; }
     .cart-head { padding: 14px 16px; }
     .cart-items { padding: 12px; }
@@ -2197,21 +2127,12 @@
 <header>
   <div class="header-inner">
     <div class="logo" id="logo-header">Claudino <span>SemiJoias</span></div>
-    <nav id="main-nav">
+    <nav>
       <a class="hide-mob" onclick="voltarParaVitrine();rolarPara('#vitrine')">Vitrine</a>
       <a class="hide-mob" onclick="abrirCatalogoPorNav()">Atacado</a>
       <a class="hide-mob" onclick="abrirSobre()">Sobre</a>
     </nav>
-    <button class="hamburger-btn" id="hamburger-btn" onclick="toggleMobileNav()" aria-label="Abrir menu" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
   </div>
-  <div class="mobile-nav-overlay" id="mobile-nav-overlay" onclick="closeMobileNav()"></div>
-  <nav class="mobile-nav" id="mobile-nav">
-    <a onclick="voltarParaVitrine();rolarPara('#vitrine');closeMobileNav()">Vitrine</a>
-    <a onclick="abrirCatalogoPorNav();closeMobileNav()">Atacado</a>
-    <a onclick="abrirSobre();closeMobileNav()">Sobre</a>
-  </nav>
 </header>
 
 <!-- HERO -->
@@ -2243,12 +2164,6 @@
     <button class="cat-btn" onclick="filterCat('piercing',this)">Piercing</button>
   </div>
   <div class="products-grid" id="products-grid"></div>
-  <!-- FAB CARRINHO VAREJO — vive dentro da aba loja, nunca aparece nas outras abas -->
-  <div class="cart-fab" onclick="openCart('varejo')" title="Carrinho Varejo">
-    🛒
-    <span class="cart-badge" id="badge-varejo"></span>
-    <span class="cart-label">Carrinho</span>
-  </div>
 </div>
 
 <!-- BANNER INFERIOR -->
@@ -2259,7 +2174,6 @@
 
 <!-- BANNER ATACADO -->
 <div class="atacado-banner" id="atacado">
-  <button class="btn-outline" id="atacado-banner-voltar" onclick="voltarParaVitrine()" style="display:none;margin-bottom:20px;padding:8px 20px;font-size:11px;letter-spacing:2px">← Voltar</button>
   <h2>Compre no <em>Atacado</em></h2>
   <p>Condições especiais para revendedores · Preços exclusivos · Pedido mínimo</p>
   <div class="atacado-feats">
@@ -2291,12 +2205,6 @@
       <button class="cat-btn" onclick="filterCatAtacado('piercing',this)">Piercing</button>
     </div>
     <div class="products-grid" id="grid-atacado"></div>
-  </div>
-  <!-- FAB CARRINHO ATACADO — vive dentro da própria aba, nunca aparece fora dela -->
-  <div class="cart-fab atacado-cart" id="fab-cart-atacado" onclick="openCart('atacado')" style="display:none">
-    📦
-    <span class="cart-badge" id="badge-atacado"></span>
-    <span class="cart-label">Carrinho Atacado</span>
   </div>
 </div>
 
@@ -2374,6 +2282,20 @@
   </div>
 </footer>
 
+
+<!-- FAB CARRINHO VAREJO -->
+<div class="cart-fab" onclick="openCart('varejo')" title="Carrinho Varejo">
+  🛒
+  <span class="cart-badge" id="badge-varejo"></span>
+  <span class="cart-label">Carrinho</span>
+</div>
+
+<!-- FAB CARRINHO ATACADO (oculto até aprovação) -->
+<div class="cart-fab atacado-cart" id="fab-cart-atacado" onclick="openCart('atacado')" style="display:none">
+  📦
+  <span class="cart-badge" id="badge-atacado"></span>
+  <span class="cart-label">Carrinho Atacado</span>
+</div>
 
 <!-- OVERLAY -->
 <div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
@@ -2852,16 +2774,6 @@
 
     <!-- LISTA PRODUTOS -->
     <div class="atab-content active" id="tab-produtos">
-      <div class="toggle-atacado">
-        <div>
-          <strong>Seção "Coleção" da Loja</strong>
-          <p>Ative ou desative a exibição da Coleção (vitrine de produtos) visível aos clientes na página.</p>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="cfg-vitrine-ativa" onchange="toggleVitrine()">
-          <span class="slider"></span>
-        </label>
-      </div>
       <div class="products-list" id="admin-list"></div>
     </div>
 
@@ -2871,6 +2783,14 @@
         <div class="afield">
           <label>Nome do Produto</label>
           <input type="text" id="n-nome" placeholder="Ex: Colar Infinito Dourado">
+          </div>
+          <div class="afield">
+            <label>Código (SKU)</label>
+            <div style="display:flex;gap:6px">
+              <input type="text" id="n-sku" placeholder="Ex: COL-001" style="flex:1;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+              <button type="button" class="btn-outline" style="padding:6px 12px;font-size:12px;white-space:nowrap" onclick="gerarSKU()">⚡ Gerar</button>
+            </div>
+            <p style="font-size:11px;color:var(--muted);margin-top:4px">Código único do produto. Clique em ⚡ Gerar para criar automaticamente.</p>
         </div>
         <div class="afield">
           <label>Categoria</label>
@@ -5005,12 +4925,101 @@ function traduzErroCartao(detail) {
 
 // ─── PEDIDOS ─────────────────────────────────────────────────────────────────
 
+// ─── ETIQUETA MELHOR ENVIO ───────────────────────────────────────────────────
+
+function _getEtiquetaBase() {
+  return (window.location.hostname === 'localhost' || window.location.protocol === 'file:')
+    ? '' : window.location.origin;
+}
+
+async function reservarEtiqueta(pedidoId) {
+  const pedidos = JSON.parse(localStorage.getItem('cj_pedidos') || '[]');
+  const p = pedidos.find(x => x.id === pedidoId);
+  if(!p || !p.servicoME) return;
+  const cfg = getMEConfig();
+  try {
+    const resp = await fetch(`${_getEtiquetaBase()}/.netlify/functions/etiqueta`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        acao: 'reservar', token: cfg.token, ambiente: cfg.ambiente,
+        peso: cfg.peso, altura: cfg.altura, largura: cfg.largura, comprimento: cfg.comprimento,
+        pedido: p,
+      }),
+    });
+    const data = await resp.json();
+    if(data.ok && data.orderId) {
+      const idx = pedidos.findIndex(x => x.id === pedidoId);
+      if(idx > -1) { pedidos[idx].meOrderId = data.orderId; pedidos[idx].status = 'aprovado'; }
+      localStorage.setItem('cj_pedidos', JSON.stringify(pedidos));
+      salvarNoServidor({ pedidos });
+    }
+  } catch(e) { console.warn('Reserva ME:', e.message); }
+}
+
+async function gerarEtiqueta(pedidoId) {
+  const btn = document.getElementById(`btn-etiqueta-${pedidoId}`);
+  if(btn) { btn.textContent = '⏳ Gerando...'; btn.disabled = true; }
+
+  const pedidos = JSON.parse(localStorage.getItem('cj_pedidos') || '[]');
+  const p = pedidos.find(x => x.id === pedidoId);
+  if(!p) { if(btn) { btn.textContent = '📮 Gerar Etiqueta'; btn.disabled = false; } return; }
+
+  const cfg = getMEConfig();
+  let orderId = p.meOrderId;
+
+  // Se não foi reservado ainda, reserva agora
+  if(!orderId) {
+    try {
+      const rResp = await fetch(`${_getEtiquetaBase()}/.netlify/functions/etiqueta`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ acao: 'reservar', token: cfg.token, ambiente: cfg.ambiente,
+          peso: cfg.peso, altura: cfg.altura, largura: cfg.largura, comprimento: cfg.comprimento, pedido: p }),
+      });
+      const rData = await rResp.json();
+      if(rData.ok) orderId = rData.orderId;
+      else { alert('❌ Erro ao reservar: ' + (rData.error || 'Tente novamente')); if(btn) { btn.textContent = '📮 Gerar Etiqueta'; btn.disabled = false; } return; }
+    } catch(e) { alert('❌ Erro de conexão: ' + e.message); if(btn) { btn.textContent = '📮 Gerar Etiqueta'; btn.disabled = false; } return; }
+  }
+
+  // Comprar etiqueta
+  try {
+    const cResp = await fetch(`${_getEtiquetaBase()}/.netlify/functions/etiqueta`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ acao: 'comprar', token: cfg.token, ambiente: cfg.ambiente, orderIds: [orderId] }),
+    });
+    const cData = await cResp.json();
+    if(!cData.ok) { alert('❌ Erro ao gerar etiqueta: ' + (cData.error || 'Verifique seu saldo no Melhor Envio')); if(btn) { btn.textContent = '📮 Gerar Etiqueta'; btn.disabled = false; } return; }
+
+    // Buscar link de impressão
+    const iResp = await fetch(`${_getEtiquetaBase()}/.netlify/functions/etiqueta`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ acao: 'imprimir', token: cfg.token, ambiente: cfg.ambiente, orderIds: [orderId] }),
+    });
+    const iData = await iResp.json();
+
+    // Salvar rastreio e URL
+    const idx = pedidos.findIndex(x => x.id === pedidoId);
+    if(idx > -1) {
+      pedidos[idx].meOrderId   = orderId;
+      pedidos[idx].rastreio    = cData.rastreio || '';
+      pedidos[idx].etiquetaUrl = iData.url || '';
+      pedidos[idx].status      = 'aprovado';
+    }
+    localStorage.setItem('cj_pedidos', JSON.stringify(pedidos));
+    salvarNoServidor({ pedidos });
+    renderPedidos();
+  } catch(e) { alert('❌ Erro: ' + e.message); if(btn) { btn.textContent = '📮 Gerar Etiqueta'; btn.disabled = false; } }
+}
+
+// ─── FIM ETIQUETA ────────────────────────────────────────────────────────────
+
 function salvarPedido(status) {
   let itens = [];
   if (typeof _enderecoContexto !== 'undefined' && _enderecoContexto === 'produto' && typeof currentProduct !== 'undefined' && currentProduct) {
-    itens = [{ nome: currentProduct.nome, preco: currentProduct.preco, qty: 1, emoji: currentProduct.emoji || '💍' }];
+    itens = [{ sku: currentProduct.sku||'—', nome: currentProduct.nome, preco: currentProduct.preco, qty: 1, emoji: currentProduct.emoji || '💍' }];
   } else if (typeof cartVarejo !== 'undefined') {
-    itens = cartVarejo.map(i => ({ nome: i.nome, preco: i.preco, qty: i.qty, emoji: i.emoji || '💍' }));
+    itens = cartVarejo.map(i => ({ sku: i.sku||'—', nome: i.nome, preco: i.preco, qty: i.qty, emoji: i.emoji || '💍' }));
   }
   const subtotal   = itens.reduce((s, i) => s + i.preco * i.qty, 0);
   const frete      = typeof freteAtual !== 'undefined' && freteAtual ? freteAtual : null;
@@ -5021,9 +5030,13 @@ function salvarPedido(status) {
     data:    new Date().toLocaleString('pt-BR'),
     itens,
     subtotal,
-    frete:   frete ? { valor: valorFrete, nome: frete.nome || '', prazo: frete.prazo || '' } : { valor: 0, nome: 'A combinar', prazo: '' },
-    total:   subtotal + valorFrete,
-    endereco: typeof enderecoAtual !== 'undefined' ? { ...enderecoAtual } : {},
+    frete:      frete ? { valor: valorFrete, nome: frete.nome || '', prazo: frete.prazo || '', serviceId: frete.serviceId || null } : { valor: 0, nome: 'A combinar', prazo: '', serviceId: null },
+    servicoME:  frete ? (frete.serviceId || null) : null,
+    total:      subtotal + valorFrete,
+    endereco:   typeof enderecoAtual !== 'undefined' ? { ...enderecoAtual } : {},
+    meOrderId:  null,
+    rastreio:   null,
+    etiquetaUrl: null,
   };
   const pedidos = JSON.parse(localStorage.getItem('cj_pedidos') || '[]');
   pedidos.unshift(pedido);
@@ -5052,7 +5065,7 @@ function renderPedidos() {
       (end.bairro ? end.bairro + ' · ' : '') + (end.cidade || '') + ' - ' + (end.estado || '') + '\n' +
       'CEP: ' + cepF;
     const itensHtml = (p.itens || []).map(i =>
-      `<span style="display:inline-block;background:var(--gold-pale,#fdf6e3);border-radius:4px;padding:2px 8px;font-size:12px;margin:2px">${i.emoji} ${i.nome} ×${i.qty} — R$ ${(i.preco * i.qty).toFixed(2).replace('.', ',')}</span>`
+      `<span style="display:inline-block;background:var(--gold-pale,#fdf6e3);border-radius:4px;padding:2px 8px;font-size:12px;margin:2px">${i.emoji} <strong style="font-size:10px;opacity:.7">[${i.sku||'—'}]</strong> ${i.nome} ×${i.qty} — R$ ${(i.preco * i.qty).toFixed(2).replace('.', ',')}</span>`
     ).join('');
     const clienteInfo = [
       end.nomeCliente  ? `<strong>${end.nomeCliente}</strong>` : '',
@@ -5082,6 +5095,9 @@ function renderPedidos() {
         <button class="btn-outline" style="font-size:12px;padding:6px 12px"
           onclick="navigator.clipboard.writeText('${endEscapado}').then(()=>alert('✅ Endereço copiado!'))">📋 Copiar Endereço</button>
           <button class="btn-outline" style="font-size:12px;padding:6px 12px" onclick="imprimirPedido(${p.id})">🖨️ PDF</button>
+        ${p.status==='aprovado' && !p.etiquetaUrl ? `<button id="btn-etiqueta-${p.id}" class="btn-save" style="font-size:12px;padding:6px 14px;background:#1A5276;border-color:#1A5276" onclick="gerarEtiqueta(${p.id})">📮 Gerar Etiqueta</button>` : ''}
+        ${p.etiquetaUrl ? `<a href="${p.etiquetaUrl}" target="_blank"><button class="btn-save" style="font-size:12px;padding:6px 14px;background:#1A5276;border-color:#1A5276">🖨️ Imprimir Etiqueta</button></a>` : ''}
+        ${p.rastreio ? `<button class="btn-outline" style="font-size:12px;padding:6px 12px" onclick="navigator.clipboard.writeText('${p.rastreio}').then(()=>alert('✅ Código copiado!'))">📦 ${p.rastreio}</button>` : ''}
         ${p.status!=='enviado'?`<button class="btn-save" style="font-size:12px;padding:6px 14px" onclick="marcarPedido(${p.id},'enviado')">🚚 Marcar como Enviado</button>`:''}
         ${p.status==='pendente'?`<button class="btn-outline" style="font-size:12px;padding:6px 12px" onclick="marcarPedido(${p.id},'aprovado')">✅ Confirmar Pix</button>`:''}
         <button class="btn-outline" style="font-size:12px;padding:6px 12px;color:#c0392b;border-color:#c0392b" onclick="excluirPedido(${p.id})">🗑</button>
@@ -5097,7 +5113,7 @@ function imprimirPedido(id) {
   const end  = p.endereco || {};
   const cepF = (end.cep || '').replace(/(\d{5})(\d{3})/, '$1-$2');
   const itensRows = (p.itens || []).map(i =>
-    `<tr><td>${i.emoji||'💍'} ${i.nome}</td><td style="text-align:center">${i.qty}</td><td style="text-align:right">R$ ${(i.preco*i.qty).toFixed(2).replace('.',',')}</td></tr>`
+    `<tr><td>${i.emoji||'💍'} [${i.sku||'—'}] ${i.nome}</td><td style="text-align:center">${i.qty}</td><td style="text-align:right">R$ ${(i.preco*i.qty).toFixed(2).replace('.',',')}</td></tr>`
   ).join('');
   const statusLabel = { aprovado:'✅ Aprovado', pendente:'⏳ Aguardando Pix', enviado:'🚚 Enviado' };
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
@@ -5286,7 +5302,7 @@ async function testarNotificacoesPedido() {
 // ─── FIM NOTIFICAÇÕES DE PEDIDOS ─────────────────────────────────────────────
 
 function salvarPedidoAtacado(status) {
-  const itens = cartAtacado.map(i => ({ nome: i.nome, preco: i.preco, qty: i.qty, emoji: i.emoji || '📦' }));
+  const itens = cartAtacado.map(i => ({ sku: i.sku||'—', nome: i.nome, preco: i.preco, qty: i.qty, emoji: i.emoji || '📦' }));
   const subtotal   = itens.reduce((s, i) => s + i.preco * i.qty, 0);
   const frete      = typeof freteAtual !== 'undefined' && freteAtual ? freteAtual : null;
   const valorFrete = frete ? frete.valor : 0;
@@ -5329,7 +5345,7 @@ function renderPedidosAtacado() {
       (end.bairro ? end.bairro + ' · ' : '') + (end.cidade || '') + (end.estado ? ' - ' + end.estado : '') + '\n' +
       'CEP: ' + cepF;
     const itensHtml = (p.itens || []).map(i =>
-      `<span style="display:inline-block;background:var(--gold-pale,#fdf6e3);border-radius:4px;padding:2px 8px;font-size:12px;margin:2px">${i.emoji||'📦'} ${i.nome} ×${i.qty} — R$ ${(i.preco*i.qty).toFixed(2).replace('.',',')}</span>`
+      `<span style="display:inline-block;background:var(--gold-pale,#fdf6e3);border-radius:4px;padding:2px 8px;font-size:12px;margin:2px">${i.emoji||'📦'} <strong style="font-size:10px;opacity:.7">[${i.sku||'—'}]</strong> ${i.nome} ×${i.qty} — R$ ${(i.preco*i.qty).toFixed(2).replace('.',',')}</span>`
     ).join('');
     const endEscapado = endFormatado.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');
     const revendedorInfo = rev.razao
@@ -5399,7 +5415,7 @@ function imprimirPedidoAtacado(id) {
   const rev  = p.revendedor || {};
   const cepF = (end.cep || '').replace(/(\d{5})(\d{3})/, '$1-$2');
   const itensRows = (p.itens || []).map(i =>
-    `<tr><td>${i.emoji||'📦'} ${i.nome}</td><td style="text-align:center">${i.qty}</td><td style="text-align:right">R$ ${(i.preco*i.qty).toFixed(2).replace('.',',')}</td></tr>`
+    `<tr><td>${i.emoji||'📦'} [${i.sku||'—'}] ${i.nome}</td><td style="text-align:center">${i.qty}</td><td style="text-align:right">R$ ${(i.preco*i.qty).toFixed(2).replace('.',',')}</td></tr>`
   ).join('');
   const statusLabel = { aprovado:'✅ Aprovado', pendente:'⏳ Aguardando Pix', enviado:'🚚 Enviado' };
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
@@ -5673,7 +5689,6 @@ function switchAdminTab(tab, btn) {
   if(el) { el.classList.add('active'); el.style.display = ''; }
   if(tab === 'produtos')     renderAdminList();
   if(tab === 'atacado')      { renderCnpjList(); aplicarEstadoBotaoAtacado(); loadConfigNotif(); carregarCamposBannerAtacado(); }
-  if(tab === 'produtos')     { aplicarEstadoVitrine(); }
   if(tab === 'prod-atacado') renderAdminListAtacado();
   if(tab === 'links')        popularSelectProdutos();
   if(tab === 'ferramentas')  carregarRedes();
@@ -5693,12 +5708,30 @@ function switchAdminTab(tab, btn) {
   }
 }
 
+function _gerarSKUAuto(nome, cat) {
+  const prefixos = { colar:'COL', anel:'ANE', pulseira:'PUL', brinco:'BRI', conjunto:'CON' };
+  const pref = prefixos[cat] || cat.substring(0,3).toUpperCase();
+  const num  = String(products.length + 1).padStart(3, '0');
+  return pref + '-' + num;
+}
+
+function gerarSKU() {
+  const nome = document.getElementById('n-nome').value.trim();
+  const cat  = document.getElementById('n-cat').value;
+  document.getElementById('n-sku').value = _gerarSKUAuto(nome || 'PROD', cat);
+}
+
 function salvarProduto() {
   const nome = document.getElementById('n-nome').value.trim();
   const preco = parseFloat(document.getElementById('n-preco').value);
   if(!nome||!preco) { alert('Nome e preço são obrigatórios.'); return; }
+  let sku = document.getElementById('n-sku').value.trim().toUpperCase();
+  if(!sku) sku = _gerarSKUAuto(nome, document.getElementById('n-cat').value);
+  const skuExiste = products.some(p => p.sku === sku && p.id !== editId);
+  if(skuExiste) sku = sku + '-' + Date.now().toString(36).slice(-3).toUpperCase();
   const prod = {
     id: editId || Date.now(),
+    sku,
     nome,
     cat:      document.getElementById('n-cat').value,
     preco,
@@ -5707,7 +5740,7 @@ function salvarProduto() {
     badge:    document.getElementById('n-badge').value,
     emoji:    document.getElementById('n-emoji').value||'💍',
     imgs:     slotsVarejo.filter(Boolean),
-    img:      slotsVarejo.find(Boolean)||'', // compat legado
+    img:      slotsVarejo.find(Boolean)||'',
   };
   if(editId) {
     const idx = products.findIndex(p => p.id===editId);
@@ -5728,6 +5761,7 @@ function editarProduto(id) {
   if(!p) return;
   editId = id;
   document.getElementById('n-nome').value     = p.nome;
+  document.getElementById('n-sku').value      = p.sku  || '';
   document.getElementById('n-cat').value      = p.cat;
   document.getElementById('n-preco').value    = p.preco;
   document.getElementById('n-preco-old').value= p.precoOld||'';
@@ -5749,7 +5783,7 @@ function deletarProduto(id) {
 }
 
 function limparForm() {
-  ['n-nome','n-preco','n-preco-old','n-desc'].forEach(id => document.getElementById(id).value='');
+  ['n-nome','n-sku','n-preco','n-preco-old','n-desc'].forEach(id => document.getElementById(id).value='');
   document.getElementById('n-badge').value = '';
   document.getElementById('n-emoji').value = '💍';
   document.getElementById('n-cat').value   = 'colar';
@@ -5917,15 +5951,13 @@ function renderLogo() {
 
 // ─── SEÇÃO SOBRE ──────────────────────────────────────
 function abrirSobre() {
-  // Ocultar tudo exceto o Sobre (aba totalmente separada)
+  // Ocultar tudo exceto o Sobre
   document.getElementById('vitrine').style.display          = 'none';
-  document.getElementById('banner-inferior').style.display  = 'none';
   document.getElementById('atacado').style.display          = 'none';
   document.getElementById('catalogo-atacado').classList.remove('visivel');
   // Mostrar Sobre
   const sec = document.getElementById('sobre');
   if(sec) { sec.style.display = ''; window.scrollTo({ top: 0, behavior: 'smooth' }); }
-  atualizarFabAtacado();
 }
 
 function fecharSobre() {
@@ -5933,50 +5965,38 @@ function fecharSobre() {
   const sec = document.getElementById('sobre');
   if(sec) sec.style.display = 'none';
   // Restaurar vitrine
-  document.getElementById('vitrine').style.display         = '';
-  document.getElementById('banner-inferior').style.display = '';
-  document.getElementById('atacado').style.display         = '';
+  document.getElementById('vitrine').style.display = '';
+  document.getElementById('atacado').style.display = '';
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  atualizarFabAtacado();
 }
 
 function abrirCatalogoPorNav() {
-  // "Atacado" agora é sempre uma aba isolada, desvinculada da "Nossa Coleção" —
-  // nunca aparece como rolagem dentro da vitrine, aprovado ou não.
   const meu = getMeuCadastro();
-  document.getElementById('vitrine').style.display         = 'none';
-  document.getElementById('banner-inferior').style.display = 'none';
-  const sobre = document.getElementById('sobre');
-  if(sobre) sobre.style.display = 'none';
-
   if(meu && meu.status === 'aprovado') {
-    // Mostrar catálogo exclusivo de produtos
-    document.getElementById('atacado').style.display = 'none';
+    // Ocultar vitrine e banner atacado
+    document.getElementById('vitrine').style.display  = 'none';
+    document.getElementById('atacado').style.display  = 'none';
+    // Mostrar catálogo exclusivo
     const cat = document.getElementById('catalogo-atacado');
     cat.classList.add('visivel');
     renderCatalogoAtacado();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
-    // Não aprovado: mostrar a tela de "seja um revendedor" como aba própria (não como parte da vitrine)
+    // Não aprovado: mostrar banner de cadastro
+    document.getElementById('vitrine').style.display  = '';
+    document.getElementById('atacado').style.display  = '';
     document.getElementById('catalogo-atacado').classList.remove('visivel');
-    document.getElementById('atacado').style.display = '';
-    const voltarBtn = document.getElementById('atacado-banner-voltar');
-    if(voltarBtn) voltarBtn.style.display = '';
+    rolarPara('#atacado');
   }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  atualizarFabAtacado();
 }
 
 function voltarParaVitrine() {
   document.getElementById('vitrine').style.display          = '';
-  document.getElementById('banner-inferior').style.display  = '';
   document.getElementById('atacado').style.display          = '';
   document.getElementById('catalogo-atacado').classList.remove('visivel');
-  const voltarBtn = document.getElementById('atacado-banner-voltar');
-  if(voltarBtn) voltarBtn.style.display = 'none';
   const sobre = document.getElementById('sobre');
   if(sobre) sobre.style.display = 'none';
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  atualizarFabAtacado();
 }
 function salvarSobre() {
   config.sobreTitulo    = document.getElementById('sobre-titulo')?.value.trim()    || '';
@@ -6772,8 +6792,10 @@ function importarConfig(input) {
 
 function irParaCatalogo() {
   closeAtacado();
-  // Usa o mesmo caminho de "aba isolada" do menu Atacado — nunca mais empilha com a vitrine
-  abrirCatalogoPorNav();
+  const sec = document.getElementById('catalogo-atacado');
+  sec.classList.add('visivel');
+  renderCatalogoAtacado();
+  setTimeout(() => sec.scrollIntoView({ behavior: 'smooth' }), 100);
 }
 
 function verificarAcessoAtacado() {
@@ -7183,23 +7205,6 @@ function aplicarEstadoBotaoAtacado() {
   if(chk) chk.checked = ativo;
 }
 
-function toggleVitrine() {
-  const ativo = document.getElementById('cfg-vitrine-ativa').checked;
-  config.vitrineAtiva = ativo;
-  localStorage.setItem('cj_config', JSON.stringify(config));
-  aplicarEstadoVitrine();
-}
-
-function aplicarEstadoVitrine() {
-  const ativo = config.vitrineAtiva !== false; // padrão: ativo
-  const secao = document.getElementById('vitrine');
-  if(secao) secao.style.display = ativo ? '' : 'none';
-  const btnVer = document.querySelector('.btn-primary[onclick*="rolarPara(\'#vitrine\')"]');
-  if(btnVer) btnVer.classList.toggle('disabled-btn', !ativo);
-  const chk = document.getElementById('cfg-vitrine-ativa');
-  if(chk) chk.checked = ativo;
-}
-
 // ─── MÁSCARAS ─────────────────────────────────────────
 function maskCNPJ(el) {
   let v = el.value.replace(/\D/g,'').substring(0,14);
@@ -7236,25 +7241,6 @@ function maskExp(el) {
 function rolarPara(sel) {
   const el = document.querySelector(sel);
   if(el) el.scrollIntoView({ behavior:'smooth' });
-}
-
-function toggleMobileNav() {
-  const nav = document.getElementById('mobile-nav');
-  const overlay = document.getElementById('mobile-nav-overlay');
-  const btn = document.getElementById('hamburger-btn');
-  const isOpen = nav.classList.toggle('open');
-  overlay.classList.toggle('open', isOpen);
-  btn.classList.toggle('open', isOpen);
-  btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-  document.body.style.overflow = isOpen ? 'hidden' : '';
-}
-
-function closeMobileNav() {
-  document.getElementById('mobile-nav').classList.remove('open');
-  document.getElementById('mobile-nav-overlay').classList.remove('open');
-  document.getElementById('hamburger-btn').classList.remove('open');
-  document.getElementById('hamburger-btn').setAttribute('aria-expanded', 'false');
-  document.body.style.overflow = '';
 }
 
 function abrirOpcoes(id) {
@@ -7666,17 +7652,6 @@ function changeQty(id, tipo, delta) {
   if(tipo === 'atacado') _atualizarBotoesResumoAtacado();
 }
 
-function estaNaAbaAtacado() {
-  const cat = document.getElementById('catalogo-atacado');
-  return !!(cat && cat.classList.contains('visivel'));
-}
-
-function atualizarFabAtacado() {
-  const ta = cartAtacado.reduce((s,i) => s + i.qty, 0);
-  const fabAt = document.getElementById('fab-cart-atacado');
-  if(fabAt) fabAt.style.display = (ta > 0 && estaNaAbaAtacado()) ? '' : 'none';
-}
-
 function atualizarBadges() {
   const tv = cartVarejo.reduce((s,i) => s + i.qty, 0);
   const ta = cartAtacado.reduce((s,i) => s + i.qty, 0);
@@ -7684,8 +7659,9 @@ function atualizarBadges() {
   const ba = document.getElementById('badge-atacado');
   bv.textContent = tv; bv.classList.toggle('show', tv > 0);
   ba.textContent = ta; ba.classList.toggle('show', ta > 0);
-  // Mostrar/ocultar FAB atacado: só quando a aba Atacado estiver aberta
-  atualizarFabAtacado();
+  // Mostrar/ocultar FAB atacado conforme carrinho
+  const fabAt = document.getElementById('fab-cart-atacado');
+  if(fabAt) fabAt.style.display = ta > 0 ? '' : 'none';
 }
 
 function renderDrawer(tipo) {
@@ -8750,7 +8726,6 @@ function preencherUploadComBase64(b64, areaId, previewId) {
 renderProducts();
 renderLogo();
 aplicarEstadoBotaoAtacado();
-aplicarEstadoVitrine();
 verificarAcessoAtacado();
 atualizarBadges();
 processarQueryString();
