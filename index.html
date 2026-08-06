@@ -4637,7 +4637,11 @@ let checkoutTitulo = ''; // descrição do pedido para o Mercado Pago
 
 let _savingProducts = false;
 function save() {
-  localStorage.setItem('cj_products', JSON.stringify(products));
+  try {
+    localStorage.setItem('cj_products', JSON.stringify(products));
+  } catch(e) {
+    console.warn('localStorage cheio, salvando apenas no servidor:', e.message);
+  }
   _savingProducts = true;
   salvarNoServidor({ products }).finally(() => { _savingProducts = false; });
 }
