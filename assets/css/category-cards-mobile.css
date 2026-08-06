@@ -1,0 +1,85 @@
+@media (max-width: 768px) {
+  .cj-category-source-mobile-hidden {
+    display: none !important;
+  }
+
+  .cj-category-cards {
+    width: 100%;
+    margin: 22px auto 34px;
+    padding: 0 14px;
+  }
+
+  .cj-category-cards__title {
+    margin: 0 0 14px;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 30px !important;
+    line-height: 1.1;
+    color: #3a3020;
+  }
+
+  .cj-category-cards__list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .cj-category-card {
+    width: 100%;
+    min-height: 112px;
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr) 24px;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border: 1px solid rgba(201, 168, 76, .34);
+    border-radius: 12px;
+    background: #fff;
+    color: #3a3020;
+    text-align: left;
+    box-shadow: 0 5px 18px rgba(26, 22, 16, .07);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .cj-category-card:active {
+    transform: scale(.99);
+  }
+
+  .cj-category-card__image {
+    width: 92px;
+    height: 92px;
+    display: block;
+    object-fit: cover;
+    border-radius: 10px;
+    background: #f7f0e0;
+  }
+
+  .cj-category-card__body {
+    min-width: 0;
+  }
+
+  .cj-category-card__title {
+    display: block;
+    margin: 0 0 6px;
+    font-size: 20px !important;
+    font-weight: 600;
+    line-height: 1.18;
+    color: #3a3020;
+  }
+
+  .cj-category-card__description {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: 15px !important;
+    line-height: 1.35;
+    color: #8a7a60;
+  }
+
+  .cj-category-card__arrow {
+    font-size: 25px !important;
+    line-height: 1;
+    color: #c9a84c;
+  }
+}
