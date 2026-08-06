@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>f
+<head>
 <meta charset="UTF-8">
 <meta name="description" content="Claudino SemiJoias — Semijoias banhadas a ouro 18k. Colares, anéis, pulseiras e brincos com qualidade e elegância. Compre online com entrega para todo o Brasil.">
 <meta name="keywords" content="semijoias, joias banhadas a ouro, colares, anéis, pulseiras, brincos, semijoias online, Claudino Joias">
@@ -5754,8 +5754,13 @@ function salvarProduto() {
   save();
   renderProducts();
   limparForm();
-  alert('✅ Produto salvo com sucesso!');
   switchAdminTab('produtos', document.querySelectorAll('.atab')[0]);
+  // Toast de sucesso sem bloquear a UI
+  const toast = document.createElement('div');
+  toast.textContent = '✅ Produto salvo!';
+  toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2D7A4A;color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2500);
 }
 
 function editarProduto(id) {
@@ -5782,6 +5787,11 @@ function deletarProduto(id) {
   save();
   renderAdminList();
   renderProducts();
+  const toast = document.createElement('div');
+  toast.textContent = '🗑 Produto excluído';
+  toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#c0392b;color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2000);
 }
 
 function limparForm() {
