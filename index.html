@@ -4561,7 +4561,7 @@ async function syncConfigDoServidor() {
       config = { ...config, ...d.config };
       localStorage.setItem('cj_config', JSON.stringify(config));
     }
-    if (Array.isArray(d.products) && d.products.length > 0) {
+    if (Array.isArray(d.products) && d.products.length > 0 && !_savingProducts) {
       products = d.products;
       localStorage.setItem('cj_products', JSON.stringify(products));
     }
@@ -4635,7 +4635,12 @@ let editIdAtacado = null;
 let checkoutTotal  = 0;  // valor final (com frete) a ser cobrado no checkout
 let checkoutTitulo = ''; // descrição do pedido para o Mercado Pago
 
-function save() { localStorage.setItem('cj_products', JSON.stringify(products)); salvarNoServidor({ products }); }
+let _savingProducts = false;
+function save() {
+  localStorage.setItem('cj_products', JSON.stringify(products));
+  _savingProducts = true;
+  salvarNoServidor({ products }).finally(() => { _savingProducts = false; });
+}
 function saveAtacado() { localStorage.setItem('cj_atacado', JSON.stringify(cadastrosAtacado)); }
 function saveProdAtacado() { localStorage.setItem('cj_prod_atacado', JSON.stringify(produtosAtacado)); }
 
@@ -5782,16 +5787,37 @@ function editarProduto(id) {
 }
 
 function deletarProduto(id) {
-  if(!confirm('Excluir este produto?')) return;
-  products = products.filter(p => p.id!==id);
-  save();
-  renderAdminList();
-  renderProducts();
-  const toast = document.createElement('div');
-  toast.textContent = '🗑 Produto excluído';
-  toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#c0392b;color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 2000);
+  const p = products.find(x => x.id === id);
+  if(!p) return;
+
+  // Confirmação customizada não-bloqueante
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99999;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:12px;padding:24px;max-width:320px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.2)">
+      <div style="font-size:32px;margin-bottom:8px">🗑️</div>
+      <h3 style="margin:0 0 8px;font-size:16px">Excluir produto?</h3>
+      <p style="font-size:13px;color:#888;margin:0 0 20px">${p.emoji||'💍'} ${p.nome}</p>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button id="del-cancelar" style="padding:10px 20px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;font-size:14px">Cancelar</button>
+        <button id="del-confirmar" style="padding:10px 20px;border:none;border-radius:8px;background:#c0392b;color:#fff;cursor:pointer;font-size:14px">Excluir</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  overlay.querySelector('#del-cancelar').onclick = () => overlay.remove();
+  overlay.querySelector('#del-confirmar').onclick = () => {
+    overlay.remove();
+    products = products.filter(x => x.id !== id);
+    save();
+    renderAdminList();
+    renderProducts();
+    const toast = document.createElement('div');
+    toast.textContent = '🗑 Produto excluído';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#c0392b;color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+  };
 }
 
 function limparForm() {
