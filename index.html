@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta name="description" content="Claudino SemiJoias — Semijoias banhadas a ouro 18k. Colares, anéis, pulseiras e brincos com qualidade e elegância. Compre online com entrega para todo o Brasil.">
 <meta name="keywords" content="semijoias, joias banhadas a ouro, colares, anéis, pulseiras, brincos, semijoias online, Claudino Joias">
 <meta name="robots" content="index, follow">
@@ -2770,6 +2771,7 @@
       <button class="atab" onclick="switchAdminTab('pedidos-atacado',this)">📦 Pedidos Atacado</button>
       <button class="atab" onclick="switchAdminTab('config',this)" style="color:var(--gold)">⚙️ Config</button>
       <button class="atab" onclick="switchAdminTab('ferramentas',this)">🔗 Redes</button>
+      <button class="atab" onclick="switchAdminTab('supabase',this)">☁️ Supabase</button>
     </div>
 
     <!-- LISTA PRODUTOS -->
@@ -4430,7 +4432,18 @@
         </div>
       </div>
     </div><!-- fim tab-ferramentas -->
-    
+
+    <!-- ── ABA SUPABASE ─────────────────────────────── -->
+    <div class="atab-content" id="tab-supabase">
+      <div style="padding:0 4px">
+        <h3 style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.4rem;margin-bottom:6px;">☁️ Migração para Supabase</h3>
+        <p style="color:#aaa;font-size:.82rem;margin-bottom:20px;">Envia todos os produtos cadastrados (com fotos) para o banco Supabase, resolvendo o limite de espaço do navegador.</p>
+        <button class="btn-save" id="sb-btn-check" onclick="sbVerificarProdutos()" style="padding:10px 26px">1) Verificar produtos</button>
+        <button class="btn-save" id="sb-btn-migrar" onclick="sbIniciarMigracao()" disabled style="padding:10px 26px;margin-left:8px">2) Iniciar migração</button>
+        <div id="sb-log" style="background:#000;border:1px solid #2a2a2a;border-radius:8px;padding:14px;margin-top:18px;font-family:monospace;font-size:.78rem;white-space:pre-wrap;max-height:360px;overflow-y:auto;color:#ccc"></div>
+      </div>
+    </div><!-- fim tab-supabase -->
+
     <!-- ── ABA PEDIDOS ─────────────────────────────── -->
     <div class="atab-content" id="tab-pedidos">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px">
@@ -4644,6 +4657,104 @@ function save() {
   }
   _savingProducts = true;
   salvarNoServidor({ products }).finally(() => { _savingProducts = false; });
+}
+
+// ─── MIGRAÇÃO PARA SUPABASE ───────────────────────────
+const SB_URL = 'https://pooqfaeefsdzykxiijvt.supabase.co';
+const SB_KEY = 'sb_publishable_6RZ6hcxhtPjCDaj4e_zfSw_q0SEXK4c';
+let _sbClient = null;
+function sbGetClient() {
+  if (!_sbClient && window.supabase) _sbClient = window.supabase.createClient(SB_URL, SB_KEY);
+  return _sbClient;
+}
+
+function sbLog(msg, cls) {
+  const el = document.getElementById('sb-log');
+  if (!el) return;
+  const line = document.createElement('div');
+  if (cls) line.style.color = cls === 'ok' ? '#4CAF50' : cls === 'err' ? '#e74c3c' : '#f1c40f';
+  line.textContent = msg;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+function sbVerificarProdutos() {
+  document.getElementById('sb-log').innerHTML = '';
+  if (!products.length) {
+    sbLog('Nenhum produto cadastrado neste site.', 'err');
+    return;
+  }
+  sbLog(`✅ ${products.length} produto(s) encontrado(s):`, 'ok');
+  products.forEach(p => sbLog(`  • ${p.nome} (${p.sku || 'sem SKU'})`));
+  document.getElementById('sb-btn-migrar').disabled = false;
+}
+
+function sbBase64ParaBlob(base64) {
+  const [meta, data] = base64.split(',');
+  const mime = meta.match(/data:(.*?);/)?.[1] || 'image/jpeg';
+  const bin = atob(data);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
+async function sbMigrarProduto(p) {
+  const sb = sbGetClient();
+  const imgsOriginais = Array.isArray(p.imgs) ? p.imgs : (p.img ? [p.img] : []);
+  const urlsFinais = [];
+
+  for (let i = 0; i < imgsOriginais.length; i++) {
+    const img = imgsOriginais[i];
+    if (!img) continue;
+    if (img.startsWith('http')) { urlsFinais.push(img); continue; }
+    if (!img.startsWith('data:')) continue;
+
+    const blob = sbBase64ParaBlob(img);
+    const ext = blob.type.split('/')[1] || 'jpg';
+    const path = `${p.id}/${Date.now()}-${i}.${ext}`;
+
+    const { error: upErr } = await sb.storage.from('produtos-fotos').upload(path, blob, { upsert: true });
+    if (upErr) {
+      sbLog(`  ⚠️ Falha ao subir foto ${i + 1} de "${p.nome}": ${upErr.message}`, 'warn');
+      continue;
+    }
+    const { data: pub } = sb.storage.from('produtos-fotos').getPublicUrl(path);
+    urlsFinais.push(pub.publicUrl);
+  }
+
+  const row = {
+    id: p.id,
+    sku: p.sku || null,
+    nome: p.nome,
+    cat: p.cat || null,
+    preco: p.preco || 0,
+    preco_old: p.precoOld || null,
+    descricao: p.desc || '',
+    badge: p.badge || null,
+    emoji: p.emoji || '💍',
+    imgs: urlsFinais,
+  };
+
+  const { error: insErr } = await sb.from('produtos').upsert(row, { onConflict: 'id' });
+  if (insErr) throw insErr;
+  return urlsFinais.length;
+}
+
+async function sbIniciarMigracao() {
+  document.getElementById('sb-btn-migrar').disabled = true;
+  sbLog('— Iniciando migração —', 'ok');
+  let sucesso = 0, falhas = 0;
+  for (const p of products) {
+    try {
+      const nFotos = await sbMigrarProduto(p);
+      sbLog(`✅ ${p.nome} — ${nFotos} foto(s) migrada(s)`, 'ok');
+      sucesso++;
+    } catch (e) {
+      sbLog(`❌ Erro em "${p.nome}": ${e.message}`, 'err');
+      falhas++;
+    }
+  }
+  sbLog(`🏁 Concluído: ${sucesso} produto(s) migrado(s), ${falhas} falha(s).`, sucesso ? 'ok' : 'err');
 }
 function saveAtacado() { localStorage.setItem('cj_atacado', JSON.stringify(cadastrosAtacado)); }
 function saveProdAtacado() { localStorage.setItem('cj_prod_atacado', JSON.stringify(produtosAtacado)); }
@@ -5717,6 +5828,7 @@ function switchAdminTab(tab, btn) {
   if(tab === 'prod-atacado') renderAdminListAtacado();
   if(tab === 'links')        popularSelectProdutos();
   if(tab === 'ferramentas')  carregarRedes();
+  if(tab === 'supabase')     { document.getElementById('sb-log').innerHTML=''; document.getElementById('sb-btn-migrar').disabled = true; }
   if(tab === 'frete')        { renderZonasFrete(); loadConfigMelhorEnvio(); if(config.freteGratis !== undefined) { const fg = document.getElementById('cfg-frete-gratis'); if(fg) fg.value = config.freteGratis; } }
   if(tab === 'pedidos')         { renderPedidos(); loadConfigNotifPedido(); }
   if(tab === 'pedidos-atacado') renderPedidosAtacado();
