@@ -4702,25 +4702,39 @@ function renderProducts(filter='todos') {
 
 function renderAdminList() {
   const el = document.getElementById('admin-list');
-  if(!products.length) { el.innerHTML = '<p style="color:var(--muted)">Nenhum produto cadastrado.</p>'; return; }
-  el.innerHTML = products.map(p => {
-    const thumb = (Array.isArray(p.imgs) ? p.imgs[0] : p.img) || '';
-    return `
-    <div class="prod-item">
-      <div class="prod-item-img">
-        ${thumb ? `<img src="${thumb}" alt="${p.nome}" onerror="this.style.display='none'">` : (p.emoji||'💍')}
-      </div>
-      <div class="prod-item-info">
-        <strong>${p.nome}</strong>
-        <small>${p.cat} · ${p.desc.substring(0,50)}... ${Array.isArray(p.imgs)&&p.imgs.length>1?`· 📷 ${p.imgs.length} fotos`:''}</small>
-      </div>
-      <div class="prod-item-price">R$ ${p.preco.toFixed(2).replace('.',',')}</div>
-      <div class="prod-item-actions">
-        <button class="btn-edit" onclick="editarProduto(${p.id})">Editar</button>
-        <button class="btn-del" onclick="deletarProduto(${p.id})">Excluir</button>
-      </div>
-    </div>`;
-  }).join('');
+  try {
+    if(!products.length) { el.innerHTML = '<p style="color:var(--muted)">Nenhum produto cadastrado.</p>'; return; }
+    el.innerHTML = products.map(p => {
+      try {
+        const thumb = (Array.isArray(p.imgs) ? p.imgs[0] : p.img) || '';
+        const nome  = p.nome || '(sem nome)';
+        const cat   = p.cat || '';
+        const desc  = (p.desc || '').substring(0,50);
+        const preco = (typeof p.preco === 'number' ? p.preco : parseFloat(p.preco) || 0).toFixed(2).replace('.',',');
+        return `
+        <div class="prod-item">
+          <div class="prod-item-img">
+            ${thumb ? `<img src="${thumb}" alt="${nome}" onerror="this.style.display='none'">` : (p.emoji||'💍')}
+          </div>
+          <div class="prod-item-info">
+            <strong>${nome}</strong>
+            <small>${cat} · ${desc}... ${Array.isArray(p.imgs)&&p.imgs.length>1?`· 📷 ${p.imgs.length} fotos`:''}</small>
+          </div>
+          <div class="prod-item-price">R$ ${preco}</div>
+          <div class="prod-item-actions">
+            <button class="btn-edit" onclick="editarProduto(${p.id})">Editar</button>
+            <button class="btn-del" onclick="deletarProduto(${p.id})">Excluir</button>
+          </div>
+        </div>`;
+      } catch(errItem) {
+        console.error('Erro ao renderizar produto', p && p.id, errItem);
+        return '';
+      }
+    }).join('');
+  } catch(err) {
+    console.error('Erro em renderAdminList:', err);
+    if(el) el.innerHTML = '<p style="color:var(--muted)">Erro ao carregar lista de produtos. Veja o console.</p>';
+  }
 }
 
 // ─── FILTRO ───────────────────────────────────────────
