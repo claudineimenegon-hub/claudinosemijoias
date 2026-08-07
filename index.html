@@ -4697,7 +4697,64 @@ function sbLog(msg, cls) {
   el.scrollTop = el.scrollHeight;
 }
 
-function sbVerificarProdutos() {
+async function sbPrepararImagens(id, imgsArray, pastaAtacado) {
+  const urls = [];
+  for (let i = 0; i < imgsArray.length; i++) {
+    const img = imgsArray[i];
+    if (!img) continue;
+    if (img.startsWith('http')) { urls.push(img); continue; }
+    if (!img.startsWith('data:')) continue;
+    const [meta, base64] = img.split(',');
+    const mime = meta.match(/data:(.*?);/)?.[1] || 'image/jpeg';
+    const ext = mime.split('/')[1] || 'jpg';
+    const path = `${pastaAtacado ? 'atacado/' : ''}${id}/${Date.now()}-${i}.${ext}`;
+    const { publicUrl } = await sbChamarFunction('uploadFoto', { path, base64, mime });
+    urls.push(publicUrl);
+  }
+  return urls;
+}
+
+async function sbCarregarProdutos() {
+  try {
+    const sb = sbGetClient();
+    const { data, error } = await sb.from('produtos').select('*').order('id');
+    if (error) throw error;
+    if (Array.isArray(data) && data.length) {
+      products = data.map(r => ({
+        id: r.id, sku: r.sku, nome: r.nome, cat: r.cat,
+        preco: Number(r.preco) || 0,
+        precoOld: r.preco_old !== null ? Number(r.preco_old) : null,
+        desc: r.descricao || '', badge: r.badge || '', emoji: r.emoji || '💍',
+        estoque: (r.estoque === null || r.estoque === undefined) ? null : r.estoque,
+        imgs: Array.isArray(r.imgs) ? r.imgs : [],
+        img: (Array.isArray(r.imgs) && r.imgs[0]) || '',
+      }));
+    }
+  } catch (e) {
+    console.warn('Falha ao carregar produtos do Supabase, usando dados locais:', e.message);
+  }
+}
+
+async function sbCarregarProdutosAtacado() {
+  try {
+    const sb = sbGetClient();
+    const { data, error } = await sb.from('produtos_atacado').select('*').order('id');
+    if (error) throw error;
+    if (Array.isArray(data) && data.length) {
+      produtosAtacado = data.map(r => ({
+        id: r.id, sku: r.sku, nome: r.nome, cat: r.cat,
+        preco: Number(r.preco) || 0,
+        minimo: r.minimo || 1,
+        desc: r.descricao || '', emoji: r.emoji || '💍',
+        estoque: (r.estoque === null || r.estoque === undefined) ? null : r.estoque,
+        imgs: Array.isArray(r.imgs) ? r.imgs : [],
+        img: (Array.isArray(r.imgs) && r.imgs[0]) || '',
+      }));
+    }
+  } catch (e) {
+    console.warn('Falha ao carregar produtos de atacado do Supabase, usando dados locais:', e.message);
+  }
+}
   document.getElementById('sb-log').innerHTML = '';
   if (!products.length) {
     sbLog('Nenhum produto cadastrado neste site.', 'err');
@@ -5982,7 +6039,7 @@ function gerarSKUAtacado() {
   document.getElementById('atk-p-sku').value = _gerarSKUAutoAtacado(nome || 'PROD', cat);
 }
 
-function salvarProduto() {
+async function salvarProduto() {
   const nome = document.getElementById('n-nome').value.trim();
   const preco = parseFloat(document.getElementById('n-preco').value);
   if(!nome||!preco) { alert('Nome e preço são obrigatórios.'); return; }
@@ -5991,8 +6048,22 @@ function salvarProduto() {
   const skuExiste = products.some(p => p.sku === sku && p.id !== editId);
   if(skuExiste) sku = sku + '-' + Date.now().toString(36).slice(-3).toUpperCase();
   const estoqueVal = document.getElementById('n-estoque').value;
+  const id = editId || Date.now();
+
+  const btnSalvar = document.querySelector('#tab-novo .btn-save');
+  if(btnSalvar) { btnSalvar.disabled = true; btnSalvar.textContent = 'Salvando...'; }
+
+  let imgsFinais;
+  try {
+    imgsFinais = await sbPrepararImagens(id, slotsVarejo.filter(Boolean), false);
+  } catch(e) {
+    alert('Erro ao subir fotos: ' + e.message);
+    if(btnSalvar) { btnSalvar.disabled = false; btnSalvar.textContent = '✓ Salvar Produto'; }
+    return;
+  }
+
   const prod = {
-    id: editId || Date.now(),
+    id,
     sku,
     nome,
     cat:      document.getElementById('n-cat').value,
@@ -6002,9 +6073,25 @@ function salvarProduto() {
     badge:    document.getElementById('n-badge').value,
     emoji:    document.getElementById('n-emoji').value||'💍',
     estoque:  estoqueVal === '' ? null : parseInt(estoqueVal),
-    imgs:     slotsVarejo.filter(Boolean),
-    img:      slotsVarejo.find(Boolean)||'',
+    imgs:     imgsFinais,
+    img:      imgsFinais[0]||'',
   };
+
+  try {
+    const row = {
+      id: prod.id, sku: prod.sku, nome: prod.nome, cat: prod.cat, preco: prod.preco,
+      preco_old: prod.precoOld, descricao: prod.desc, badge: prod.badge, emoji: prod.emoji,
+      estoque: prod.estoque, imgs: prod.imgs,
+    };
+    await sbChamarFunction('upsertProduto', { tabela: 'varejo', row });
+  } catch(e) {
+    alert('Erro ao salvar no banco de dados: ' + e.message);
+    if(btnSalvar) { btnSalvar.disabled = false; btnSalvar.textContent = '✓ Salvar Produto'; }
+    return;
+  }
+
+  if(btnSalvar) { btnSalvar.disabled = false; btnSalvar.textContent = '✓ Salvar Produto'; }
+
   if(editId) {
     const idx = products.findIndex(p => p.id===editId);
     if(idx>-1) products[idx] = prod;
@@ -6063,8 +6150,14 @@ function deletarProduto(id) {
   document.body.appendChild(overlay);
 
   overlay.querySelector('#del-cancelar').onclick = () => overlay.remove();
-  overlay.querySelector('#del-confirmar').onclick = () => {
+  overlay.querySelector('#del-confirmar').onclick = async () => {
     overlay.remove();
+    try {
+      await sbChamarFunction('deleteProduto', { tabela: 'varejo', id });
+    } catch(e) {
+      alert('Erro ao excluir no banco de dados: ' + e.message);
+      return;
+    }
     products = products.filter(x => x.id !== id);
     save();
     renderAdminList();
@@ -7222,7 +7315,7 @@ function abrirFormAtacado(id) {
   }
 }
 
-function salvarProdutoAtacado() {
+async function salvarProdutoAtacado() {
   const nome   = document.getElementById('atk-p-nome').value.trim();
   const preco  = parseFloat(document.getElementById('atk-p-preco').value);
   const minimo = parseInt(document.getElementById('atk-p-minimo').value)||1;
@@ -7232,8 +7325,22 @@ function salvarProdutoAtacado() {
   const skuExisteAtk = produtosAtacado.some(p => p.sku === sku && p.id !== editIdAtacado);
   if(skuExisteAtk) sku = sku + '-' + Date.now().toString(36).slice(-3).toUpperCase();
   const estoqueValAtk = document.getElementById('atk-p-estoque').value;
+  const id = editIdAtacado || Date.now();
+
+  const btnSalvarAtk = document.querySelector('#tab-novo-atacado .btn-save');
+  if(btnSalvarAtk) { btnSalvarAtk.disabled = true; btnSalvarAtk.textContent = 'Salvando...'; }
+
+  let imgsFinaisAtk;
+  try {
+    imgsFinaisAtk = await sbPrepararImagens(id, slotsAtacado.filter(Boolean), true);
+  } catch(e) {
+    alert('Erro ao subir fotos: ' + e.message);
+    if(btnSalvarAtk) { btnSalvarAtk.disabled = false; btnSalvarAtk.textContent = '✓ Salvar Produto'; }
+    return;
+  }
+
   const prod = {
-    id: editIdAtacado || Date.now(),
+    id,
     sku,
     nome,
     cat:     document.getElementById('atk-p-cat').value,
@@ -7242,9 +7349,25 @@ function salvarProdutoAtacado() {
     desc:    document.getElementById('atk-p-desc').value.trim()||'',
     emoji:   document.getElementById('atk-p-emoji').value||'💍',
     estoque: estoqueValAtk === '' ? null : parseInt(estoqueValAtk),
-    imgs:    slotsAtacado.filter(Boolean),
-    img:     slotsAtacado.find(Boolean)||'',
+    imgs:    imgsFinaisAtk,
+    img:     imgsFinaisAtk[0]||'',
   };
+
+  try {
+    const row = {
+      id: prod.id, sku: prod.sku, nome: prod.nome, cat: prod.cat, preco: prod.preco,
+      minimo: prod.minimo, descricao: prod.desc, emoji: prod.emoji,
+      estoque: prod.estoque, imgs: prod.imgs,
+    };
+    await sbChamarFunction('upsertProduto', { tabela: 'atacado', row });
+  } catch(e) {
+    alert('Erro ao salvar no banco de dados: ' + e.message);
+    if(btnSalvarAtk) { btnSalvarAtk.disabled = false; btnSalvarAtk.textContent = '✓ Salvar Produto'; }
+    return;
+  }
+
+  if(btnSalvarAtk) { btnSalvarAtk.disabled = false; btnSalvarAtk.textContent = '✓ Salvar Produto'; }
+
   if(editIdAtacado) {
     const idx = produtosAtacado.findIndex(p => p.id===editIdAtacado);
     if(idx>-1) produtosAtacado[idx] = prod;
@@ -7283,8 +7406,14 @@ function renderAdminListAtacado() {
   }).join('');
 }
 
-function deletarProdutoAtacado(id) {
+async function deletarProdutoAtacado(id) {
   if(!confirm('Excluir este produto do catálogo de atacado?')) return;
+  try {
+    await sbChamarFunction('deleteProduto', { tabela: 'atacado', id });
+  } catch(e) {
+    alert('Erro ao excluir no banco de dados: ' + e.message);
+    return;
+  }
   produtosAtacado = produtosAtacado.filter(p => p.id!==id);
   saveProdAtacado();
   renderAdminListAtacado();
@@ -9517,6 +9646,9 @@ function initCarouselTouch(id) {
 (async () => {
   await syncConfigDoServidor();
   loadConfig();
+  await Promise.all([sbCarregarProdutos(), sbCarregarProdutosAtacado()]);
+  renderProducts();
+  renderCatalogoAtacado();
 })();
 // ────────────────────────────────────────────────────────────────────
 </script>
