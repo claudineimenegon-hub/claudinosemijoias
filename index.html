@@ -3062,6 +3062,14 @@
           <input type="text" id="atk-p-nome" placeholder="Ex: Colar Infinito Dourado">
         </div>
         <div class="afield">
+          <label>Código (SKU)</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="atk-p-sku" placeholder="Ex: ATK-COL-001" style="flex:1;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+            <button type="button" class="btn-outline" style="padding:0 16px;white-space:nowrap" onclick="gerarSKUAtacado()">⚡ Gerar</button>
+          </div>
+          <small style="color:#888;font-size:.75rem">Código único do produto. Clique em ⚡ Gerar para criar automaticamente.</small>
+        </div>
+        <div class="afield">
           <label>Categoria</label>
           <select id="atk-p-cat">
             <option value="colar">Colar</option>
@@ -4436,11 +4444,17 @@
     <!-- ── ABA SUPABASE ─────────────────────────────── -->
     <div class="atab-content" id="tab-supabase">
       <div style="padding:0 4px">
-        <h3 style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.4rem;margin-bottom:6px;">☁️ Migração para Supabase</h3>
-        <p style="color:#aaa;font-size:.82rem;margin-bottom:20px;">Envia todos os produtos cadastrados (com fotos) para o banco Supabase, resolvendo o limite de espaço do navegador.</p>
+        <h3 style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.4rem;margin-bottom:6px;">☁️ Migração para Supabase — Varejo</h3>
+        <p style="color:#aaa;font-size:.82rem;margin-bottom:20px;">Envia todos os produtos do varejo (com fotos) para o banco Supabase.</p>
         <button class="btn-save" id="sb-btn-check" onclick="sbVerificarProdutos()" style="padding:10px 26px">1) Verificar produtos</button>
         <button class="btn-save" id="sb-btn-migrar" onclick="sbIniciarMigracao()" disabled style="padding:10px 26px;margin-left:8px">2) Iniciar migração</button>
-        <div id="sb-log" style="background:#000;border:1px solid #2a2a2a;border-radius:8px;padding:14px;margin-top:18px;font-family:monospace;font-size:.78rem;white-space:pre-wrap;max-height:360px;overflow-y:auto;color:#ccc"></div>
+        <div id="sb-log" style="background:#000;border:1px solid #2a2a2a;border-radius:8px;padding:14px;margin-top:18px;font-family:monospace;font-size:.78rem;white-space:pre-wrap;max-height:280px;overflow-y:auto;color:#ccc"></div>
+
+        <h3 style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.4rem;margin:28px 0 6px;">☁️ Migração para Supabase — Atacado</h3>
+        <p style="color:#aaa;font-size:.82rem;margin-bottom:20px;">Envia todos os produtos do catálogo de atacado (com fotos) para o banco Supabase.</p>
+        <button class="btn-save" id="sb-btn-check-atacado" onclick="sbVerificarProdutosAtacado()" style="padding:10px 26px">1) Verificar produtos</button>
+        <button class="btn-save" id="sb-btn-migrar-atacado" onclick="sbIniciarMigracaoAtacado()" disabled style="padding:10px 26px;margin-left:8px">2) Iniciar migração</button>
+        <div id="sb-log-atacado" style="background:#000;border:1px solid #2a2a2a;border-radius:8px;padding:14px;margin-top:18px;font-family:monospace;font-size:.78rem;white-space:pre-wrap;max-height:280px;overflow-y:auto;color:#ccc"></div>
       </div>
     </div><!-- fim tab-supabase -->
 
@@ -4689,17 +4703,20 @@ function sbVerificarProdutos() {
   document.getElementById('sb-btn-migrar').disabled = false;
 }
 
-function sbBase64ParaBlob(base64) {
-  const [meta, data] = base64.split(',');
-  const mime = meta.match(/data:(.*?);/)?.[1] || 'image/jpeg';
-  const bin = atob(data);
-  const arr = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-  return new Blob([arr], { type: mime });
+async function sbChamarFunction(action, payload) {
+  const senha = sessionStorage.getItem('cj_admin_senha');
+  if (!senha) throw new Error('Sessão expirada — saia e entre no admin novamente.');
+  const resp = await fetch('/.netlify/functions/produtos-admin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ senha, action, payload }),
+  });
+  const data = await resp.json();
+  if (!resp.ok) throw new Error(data.error || 'Erro na operação.');
+  return data;
 }
 
 async function sbMigrarProduto(p) {
-  const sb = sbGetClient();
   const imgsOriginais = Array.isArray(p.imgs) ? p.imgs : (p.img ? [p.img] : []);
   const urlsFinais = [];
 
@@ -4709,17 +4726,17 @@ async function sbMigrarProduto(p) {
     if (img.startsWith('http')) { urlsFinais.push(img); continue; }
     if (!img.startsWith('data:')) continue;
 
-    const blob = sbBase64ParaBlob(img);
-    const ext = blob.type.split('/')[1] || 'jpg';
+    const [meta, base64] = img.split(',');
+    const mime = meta.match(/data:(.*?);/)?.[1] || 'image/jpeg';
+    const ext = mime.split('/')[1] || 'jpg';
     const path = `${p.id}/${Date.now()}-${i}.${ext}`;
 
-    const { error: upErr } = await sb.storage.from('produtos-fotos').upload(path, blob, { upsert: true });
-    if (upErr) {
-      sbLog(`  ⚠️ Falha ao subir foto ${i + 1} de "${p.nome}": ${upErr.message}`, 'warn');
-      continue;
+    try {
+      const { publicUrl } = await sbChamarFunction('uploadFoto', { path, base64, mime });
+      urlsFinais.push(publicUrl);
+    } catch (e) {
+      sbLog(`  ⚠️ Falha ao subir foto ${i + 1} de "${p.nome}": ${e.message}`, 'warn');
     }
-    const { data: pub } = sb.storage.from('produtos-fotos').getPublicUrl(path);
-    urlsFinais.push(pub.publicUrl);
   }
 
   const row = {
@@ -4735,14 +4752,53 @@ async function sbMigrarProduto(p) {
     imgs: urlsFinais,
   };
 
-  const { error: insErr } = await sb.from('produtos').upsert(row, { onConflict: 'id' });
-  if (insErr) throw insErr;
+  await sbChamarFunction('upsertProduto', { tabela: 'varejo', row });
+  return urlsFinais.length;
+}
+
+async function sbMigrarProdutoAtacado(p) {
+  const imgsOriginais = Array.isArray(p.imgs) ? p.imgs : (p.img ? [p.img] : []);
+  const urlsFinais = [];
+
+  for (let i = 0; i < imgsOriginais.length; i++) {
+    const img = imgsOriginais[i];
+    if (!img) continue;
+    if (img.startsWith('http')) { urlsFinais.push(img); continue; }
+    if (!img.startsWith('data:')) continue;
+
+    const [meta, base64] = img.split(',');
+    const mime = meta.match(/data:(.*?);/)?.[1] || 'image/jpeg';
+    const ext = mime.split('/')[1] || 'jpg';
+    const path = `atacado/${p.id}/${Date.now()}-${i}.${ext}`;
+
+    try {
+      const { publicUrl } = await sbChamarFunction('uploadFoto', { path, base64, mime });
+      urlsFinais.push(publicUrl);
+    } catch (e) {
+      sbLog(`  ⚠️ Falha ao subir foto ${i + 1} de "${p.nome}": ${e.message}`, 'warn');
+    }
+  }
+
+  const row = {
+    id: p.id,
+    sku: p.sku || null,
+    nome: p.nome,
+    cat: p.cat || null,
+    preco: p.preco || 0,
+    minimo: p.minimo || 1,
+    descricao: p.desc || '',
+    emoji: p.emoji || '💍',
+    estoque: p.estoque || 0,
+    imgs: urlsFinais,
+  };
+
+  await sbChamarFunction('upsertProduto', { tabela: 'atacado', row });
   return urlsFinais.length;
 }
 
 async function sbIniciarMigracao() {
   document.getElementById('sb-btn-migrar').disabled = true;
-  sbLog('— Iniciando migração —', 'ok');
+  sbLog('— Iniciando migração (varejo) —', 'ok');
   let sucesso = 0, falhas = 0;
   for (const p of products) {
     try {
@@ -4756,8 +4812,52 @@ async function sbIniciarMigracao() {
   }
   sbLog(`🏁 Concluído: ${sucesso} produto(s) migrado(s), ${falhas} falha(s).`, sucesso ? 'ok' : 'err');
 }
+
+function sbVerificarProdutosAtacado() {
+  document.getElementById('sb-log-atacado').innerHTML = '';
+  if (!produtosAtacado.length) {
+    sbLog2('Nenhum produto de atacado cadastrado neste site.', 'err');
+    return;
+  }
+  sbLog2(`✅ ${produtosAtacado.length} produto(s) de atacado encontrado(s):`, 'ok');
+  produtosAtacado.forEach(p => sbLog2(`  • ${p.nome} (${p.sku || 'sem SKU'})`));
+  document.getElementById('sb-btn-migrar-atacado').disabled = false;
+}
+
+function sbLog2(msg, cls) {
+  const el = document.getElementById('sb-log-atacado');
+  if (!el) return;
+  const line = document.createElement('div');
+  if (cls) line.style.color = cls === 'ok' ? '#4CAF50' : cls === 'err' ? '#e74c3c' : '#f1c40f';
+  line.textContent = msg;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+async function sbIniciarMigracaoAtacado() {
+  document.getElementById('sb-btn-migrar-atacado').disabled = true;
+  sbLog2('— Iniciando migração (atacado) —', 'ok');
+  let sucesso = 0, falhas = 0;
+  for (const p of produtosAtacado) {
+    try {
+      const nFotos = await sbMigrarProdutoAtacado(p);
+      sbLog2(`✅ ${p.nome} — ${nFotos} foto(s) migrada(s)`, 'ok');
+      sucesso++;
+    } catch (e) {
+      sbLog2(`❌ Erro em "${p.nome}": ${e.message}`, 'err');
+      falhas++;
+    }
+  }
+  sbLog2(`🏁 Concluído: ${sucesso} produto(s) migrado(s), ${falhas} falha(s).`, sucesso ? 'ok' : 'err');
+}
 function saveAtacado() { localStorage.setItem('cj_atacado', JSON.stringify(cadastrosAtacado)); }
-function saveProdAtacado() { localStorage.setItem('cj_prod_atacado', JSON.stringify(produtosAtacado)); }
+function saveProdAtacado() {
+  try {
+    localStorage.setItem('cj_prod_atacado', JSON.stringify(produtosAtacado));
+  } catch(e) {
+    console.warn('localStorage cheio (atacado):', e.message);
+  }
+}
 
 // ─── RENDER ───────────────────────────────────────────
 function renderProducts(filter='todos') {
@@ -5828,7 +5928,7 @@ function switchAdminTab(tab, btn) {
   if(tab === 'prod-atacado') renderAdminListAtacado();
   if(tab === 'links')        popularSelectProdutos();
   if(tab === 'ferramentas')  carregarRedes();
-  if(tab === 'supabase')     { document.getElementById('sb-log').innerHTML=''; document.getElementById('sb-btn-migrar').disabled = true; }
+  if(tab === 'supabase')     { document.getElementById('sb-log').innerHTML=''; document.getElementById('sb-btn-migrar').disabled = true; document.getElementById('sb-log-atacado').innerHTML=''; document.getElementById('sb-btn-migrar-atacado').disabled = true; }
   if(tab === 'frete')        { renderZonasFrete(); loadConfigMelhorEnvio(); if(config.freteGratis !== undefined) { const fg = document.getElementById('cfg-frete-gratis'); if(fg) fg.value = config.freteGratis; } }
   if(tab === 'pedidos')         { renderPedidos(); loadConfigNotifPedido(); }
   if(tab === 'pedidos-atacado') renderPedidosAtacado();
@@ -5856,6 +5956,19 @@ function gerarSKU() {
   const nome = document.getElementById('n-nome').value.trim();
   const cat  = document.getElementById('n-cat').value;
   document.getElementById('n-sku').value = _gerarSKUAuto(nome || 'PROD', cat);
+}
+
+function _gerarSKUAutoAtacado(nome, cat) {
+  const prefixos = { colar:'ATK-COL', anel:'ATK-ANE', pulseira:'ATK-PUL', brinco:'ATK-BRI' };
+  const pref = prefixos[cat] || ('ATK-' + cat.substring(0,3).toUpperCase());
+  const num  = String(produtosAtacado.length + 1).padStart(3, '0');
+  return pref + '-' + num;
+}
+
+function gerarSKUAtacado() {
+  const nome = document.getElementById('atk-p-nome').value.trim();
+  const cat  = document.getElementById('atk-p-cat').value;
+  document.getElementById('atk-p-sku').value = _gerarSKUAutoAtacado(nome || 'PROD', cat);
 }
 
 function salvarProduto() {
@@ -7071,6 +7184,7 @@ function abrirFormAtacado(id) {
     editIdAtacado = id;
     document.getElementById('atk-form-titulo').textContent = 'Editar Produto — Atacado';
     document.getElementById('atk-p-nome').value    = p.nome;
+    document.getElementById('atk-p-sku').value     = p.sku || '';
     document.getElementById('atk-p-cat').value     = p.cat;
     document.getElementById('atk-p-preco').value   = p.preco;
     document.getElementById('atk-p-minimo').value  = p.minimo;
@@ -7083,7 +7197,7 @@ function abrirFormAtacado(id) {
   } else {
     editIdAtacado = null;
     document.getElementById('atk-form-titulo').textContent = 'Novo Produto — Atacado';
-    ['atk-p-nome','atk-p-preco','atk-p-minimo','atk-p-desc','atk-p-estoque'].forEach(i => document.getElementById(i).value='');
+    ['atk-p-nome','atk-p-sku','atk-p-preco','atk-p-minimo','atk-p-desc','atk-p-estoque'].forEach(i => document.getElementById(i).value='');
     document.getElementById('atk-p-emoji').value = '💍';
     document.getElementById('atk-p-cat').value   = 'colar';
     document.getElementById('atk-p-img').value   = '';
@@ -7096,8 +7210,13 @@ function salvarProdutoAtacado() {
   const preco  = parseFloat(document.getElementById('atk-p-preco').value);
   const minimo = parseInt(document.getElementById('atk-p-minimo').value)||1;
   if(!nome || !preco) { alert('Nome e preço são obrigatórios.'); return; }
+  let sku = document.getElementById('atk-p-sku').value.trim().toUpperCase();
+  if(!sku) sku = _gerarSKUAutoAtacado(nome, document.getElementById('atk-p-cat').value);
+  const skuExisteAtk = produtosAtacado.some(p => p.sku === sku && p.id !== editIdAtacado);
+  if(skuExisteAtk) sku = sku + '-' + Date.now().toString(36).slice(-3).toUpperCase();
   const prod = {
     id: editIdAtacado || Date.now(),
+    sku,
     nome,
     cat:     document.getElementById('atk-p-cat').value,
     preco,
@@ -7637,6 +7756,7 @@ async function verificarSenhaAdmin() {
   if(hashInput === hashSalvo) {
     setLoginState({ tentativas: 0, bloqueadoAte: 0 });
     sessionStorage.setItem('cj_admin_ok', '1');
+    sessionStorage.setItem('cj_admin_senha', input);
     fecharLoginAdmin();
     openAdmin();
   } else {
