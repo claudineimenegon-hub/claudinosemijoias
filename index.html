@@ -8997,7 +8997,7 @@ function pagarComEndereco(metodo) {
     : '';
 
   document.getElementById('modal-nome').textContent  = nome;
-  document.getElementById('modal-preco').textContent = `R$ ${total.toFixed(2).replace('.',',')}${freteLabel}`;
+  document.getElementById('modal-preco').textContent = `R$ ${subtotal.toFixed(2).replace('.',',')}${freteLabel}`;
   checkoutTotal  = total;
   checkoutTitulo = nome;
   document.getElementById('pix-valor').textContent   = `R$ ${total.toFixed(2).replace('.',',')}`;
