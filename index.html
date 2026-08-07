@@ -175,6 +175,21 @@
     transition: all .2s;
   }
   .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-cep-buscar {
+    background: transparent;
+    color: var(--gold-light);
+    border: 1px solid var(--border2);
+    padding: 8px 14px;
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    letter-spacing: .5px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    transition: all .2s;
+  }
+  .btn-cep-buscar:hover { border-color: var(--gold); color: var(--gold); }
 
   /* ─── CATEGORIAS ─── */
   .section { max-width: 1100px; margin: 0 auto; padding: 60px 2rem; min-height: 400px; }
@@ -2073,8 +2088,8 @@
     .opcao-info span { font-size: 11px; }
 
     /* Carrinho drawer */
-    .cart-drawer { width: 100%; border-radius: 16px 16px 0 0; top: auto; bottom: -100%; right: 0; transition: bottom .3s cubic-bezier(.4,0,.2,1); }
-    .cart-drawer.open { bottom: 0; right: 0; }
+    .cart-drawer { width: 100%; border-radius: 16px 16px 0 0; top: auto; bottom: 0; right: 0; transform: translateY(120%); transition: transform .3s cubic-bezier(.4,0,.2,1); }
+    .cart-drawer.open { transform: translateY(0); }
     .cart-fab { bottom: 20px; right: 16px; width: 50px; height: 50px; font-size: 20px; }
     .cart-fab.atacado-cart { bottom: 80px; }
     .cart-label { display: none; }
@@ -2422,8 +2437,8 @@
             <div style="display:flex;gap:8px">
               <input type="text" id="atk-cep" placeholder="00000-000" maxlength="9"
                 oninput="this.value=this.value.replace(/\D/g,'').replace(/(\d{5})(\d)/,'$1-$2')"
-                style="flex:1">
-              <button class="btn-outline" style="padding:8px 14px;font-size:13px;white-space:nowrap"
+                style="flex:1 1 auto;min-width:0;width:auto">
+              <button class="btn-cep-buscar"
                 onclick="buscarCepAtacado()">🔍 Buscar</button>
             </div>
           </div>
@@ -6339,6 +6354,7 @@ function abrirSobre() {
   // Mostrar Sobre
   const sec = document.getElementById('sobre');
   if(sec) { sec.style.display = ''; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  atualizarBadges();
 }
 
 function fecharSobre() {
@@ -6349,6 +6365,7 @@ function fecharSobre() {
   document.getElementById('vitrine').style.display = '';
   document.getElementById('atacado').style.display = '';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  atualizarBadges();
 }
 
 function abrirCatalogoPorNav() {
@@ -6362,12 +6379,14 @@ function abrirCatalogoPorNav() {
     cat.classList.add('visivel');
     renderCatalogoAtacado();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    atualizarBadges();
   } else {
     // Não aprovado: mostrar banner de cadastro
     document.getElementById('vitrine').style.display  = '';
     document.getElementById('atacado').style.display  = '';
     document.getElementById('catalogo-atacado').classList.remove('visivel');
     rolarPara('#atacado');
+    atualizarBadges();
   }
 }
 
@@ -6378,6 +6397,7 @@ function voltarParaVitrine() {
   const sobre = document.getElementById('sobre');
   if(sobre) sobre.style.display = 'none';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  atualizarBadges();
 }
 function salvarSobre() {
   config.sobreTitulo    = document.getElementById('sobre-titulo')?.value.trim()    || '';
@@ -7177,6 +7197,7 @@ function irParaCatalogo() {
   sec.classList.add('visivel');
   renderCatalogoAtacado();
   setTimeout(() => sec.scrollIntoView({ behavior: 'smooth' }), 100);
+  atualizarBadges();
 }
 
 function verificarAcessoAtacado() {
@@ -7204,6 +7225,7 @@ function verificarAcessoAtacado() {
     // Garantir catálogo oculto
     const sec = document.getElementById('catalogo-atacado');
     if(sec) sec.classList.remove('visivel');
+    atualizarBadges();
   }
 }
 
@@ -8086,9 +8108,10 @@ function atualizarBadges() {
   const ba = document.getElementById('badge-atacado');
   bv.textContent = tv; bv.classList.toggle('show', tv > 0);
   ba.textContent = ta; ba.classList.toggle('show', ta > 0);
-  // Mostrar/ocultar FAB atacado conforme carrinho
+  // Mostrar/ocultar FAB atacado: só quando a seção de catálogo atacado está visível e há itens
   const fabAt = document.getElementById('fab-cart-atacado');
-  if(fabAt) fabAt.style.display = ta > 0 ? '' : 'none';
+  const secAtacadoVisivel = document.getElementById('catalogo-atacado')?.classList.contains('visivel');
+  if(fabAt) fabAt.style.display = (ta > 0 && secAtacadoVisivel) ? '' : 'none';
 }
 
 function renderDrawer(tipo) {
