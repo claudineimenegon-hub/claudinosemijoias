@@ -4593,10 +4593,9 @@ async function syncConfigDoServidor() {
       config = { ...config, ...d.config };
       localStorage.setItem('cj_config', JSON.stringify(config));
     }
-    if (Array.isArray(d.products) && d.products.length > 0 && !_savingProducts) {
-      products = d.products;
-      localStorage.setItem('cj_products', JSON.stringify(products));
-    }
+    // Produtos não são mais sincronizados por aqui — o Supabase é a fonte única
+    // (ver sbCarregarProdutos / sbCarregarProdutosAtacado), evitando reintroduzir
+    // produtos antigos/apagados vindos deste sistema legado.
     if (Array.isArray(d.frete_zonas)) {
       zonasFrete = d.frete_zonas;
       localStorage.setItem('cj_frete_zonas', JSON.stringify(zonasFrete));
@@ -4729,6 +4728,7 @@ async function sbCarregarProdutos() {
         imgs: Array.isArray(r.imgs) ? r.imgs : [],
         img: (Array.isArray(r.imgs) && r.imgs[0]) || '',
       }));
+      try { localStorage.setItem('cj_products', JSON.stringify(products)); } catch(e) {}
     }
   } catch (e) {
     console.warn('Falha ao carregar produtos do Supabase, usando dados locais:', e.message);
@@ -4750,6 +4750,7 @@ async function sbCarregarProdutosAtacado() {
         imgs: Array.isArray(r.imgs) ? r.imgs : [],
         img: (Array.isArray(r.imgs) && r.imgs[0]) || '',
       }));
+      try { localStorage.setItem('cj_prod_atacado', JSON.stringify(produtosAtacado)); } catch(e) {}
     }
   } catch (e) {
     console.warn('Falha ao carregar produtos de atacado do Supabase, usando dados locais:', e.message);
