@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta name="description" content="Claudino SemiJoias — Semijoias banhadas a ouro 18k. Colares, anéis, pulseiras e brincos com qualidade e elegância. Compre online com entrega para todo o Brasil.">
 <meta name="keywords" content="semijoias, joias banhadas a ouro, colares, anéis, pulseiras, brincos, semijoias online, Claudino Joias">
@@ -199,13 +200,8 @@
   }
   @media (max-width: 600px) {
     .cats {
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      justify-content: center;
     }
-    .cats::-webkit-scrollbar { display: none; }
   }
   .cat-btn {
     font-family: 'Jost', sans-serif;
@@ -2038,8 +2034,7 @@
     .btn-pix { font-size: 10px; padding: 9px 10px; }
 
     /* Categorias */
-    .cats { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-    .cats::-webkit-scrollbar { display: none; }
+    .cats { justify-content: center; }
 
     /* Banner */
     .banner { padding: 32px 1rem; }
@@ -4641,10 +4636,6 @@ async function salvarNoServidor(dados) {
 }
 
 async function salvarConfigNoServidor(cfg) {
-  await salvarNoServidor({ config: cfg });
-}
-
-async function salvarConfigNoServidor(cfg) {
   try {
     const base = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
       ? '' : window.location.origin;
@@ -6315,16 +6306,16 @@ function renderLogo() {
   const texto  = config.logoTexto || '';
   const imgUrl = config.logoImg   || '';
   const header = document.getElementById('logo-header');
-  const footer = document.getElementById('logo-footer');
+  const footer = document.getElementById('logo-footer'); // pode não existir — footer não tem slot de logo
   if(tipo==='imagem' && imgUrl) {
-    header.innerHTML = `<img src="${imgUrl}" alt="Logo" onerror="this.style.display='none'">`;
-    footer.innerHTML = `<img src="${imgUrl}" alt="Logo" style="height:32px;width:auto;object-fit:contain;opacity:.85;">`;
+    if(header) header.innerHTML = `<img src="${imgUrl}" alt="Logo" onerror="this.style.display='none'">`;
+    if(footer) footer.innerHTML = `<img src="${imgUrl}" alt="Logo" style="height:32px;width:auto;object-fit:contain;opacity:.85;">`;
   } else if(tipo==='texto' && texto) {
     const partes = texto.split(' ');
     const primeiro = partes[0];
     const resto = partes.slice(1).join(' ');
-    header.innerHTML = resto ? `${primeiro} <span>${resto}</span>` : primeiro;
-    footer.textContent = texto;
+    if(header) header.innerHTML = resto ? `${primeiro} <span>${resto}</span>` : primeiro;
+    if(footer) footer.textContent = texto;
   }
   // preview ao digitar URL — agora usa upload-preview-logo
   const imgInput = document.getElementById('cfg-logo-img');
@@ -7958,11 +7949,6 @@ async function trocarSenhaAdmin() {
   document.getElementById('modal-trocar-senha').classList.remove('open');
   document.body.style.overflow = '';
   alert('✅ Senha alterada com sucesso!');
-}
-
-function closeAdmin() {
-  document.getElementById('admin-panel').classList.remove('open');
-  document.body.style.overflow = '';
 }
 
 (function() {
