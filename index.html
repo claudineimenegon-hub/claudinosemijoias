@@ -4276,19 +4276,16 @@
 
         <div class="config-block">
           <h3>💳 Mercado Pago</h3>
-          <p>Insira suas credenciais de <strong>produção</strong> para receber pagamentos com cartão de crédito e débito diretamente no site.</p>
+          <p>Insira sua <strong>Public Key</strong> de produção para receber pagamentos com cartão de crédito e débito diretamente no site.</p>
           <div class="afield">
             <label>Public Key (Produção)</label>
             <input type="text" id="cfg-mp-public-key" placeholder="APP_USR-xxxxxxxx-...">
           </div>
-          <div class="afield">
-            <label>Access Token (Produção)</label>
-            <input type="password" id="cfg-mp-token" placeholder="APP_USR-...">
-          </div>
           <button class="btn-save" style="margin-top:12px" onclick="salvarConfig()">✓ Salvar Credenciais</button>
           <div class="info-note">
             📌 1. Acesse <a href="https://www.mercadopago.com.br/developers/pt/docs/credentials/credentials-management" target="_blank">mercadopago.com.br/developers</a><br>
-            2. Vá em <strong>Credenciais de Produção</strong> e copie a <strong>Public Key</strong> e o <strong>Access Token</strong>
+            2. Vá em <strong>Credenciais de Produção</strong> e copie a <strong>Public Key</strong><br>
+            3. 🔒 O <strong>Access Token</strong> não é mais configurado aqui, por segurança — ele fica só numa variável de ambiente secreta no Netlify (<code>MP_ACCESS_TOKEN</code>), nunca passando pelo navegador. Se ainda não configurou, avise o desenvolvedor do site ou acesse o painel do Netlify → Site settings → Environment variables.
           </div>
         </div>
 
@@ -4788,7 +4785,10 @@ async function sbCarregarConfig() {
 
 async function sbSalvarConfig() {
   try {
-    await sbChamarFunction('upsertConfig', { config });
+    // Remove qualquer credencial secreta remanescente antes de enviar — store_settings
+    // é lido publicamente (qualquer visitante precisa ler cores/textos do site).
+    const { mpToken, ...configPublico } = config;
+    await sbChamarFunction('upsertConfig', { config: configPublico });
   } catch (e) {
     alert('⚠️ Não foi possível sincronizar com o servidor (Supabase): ' + e.message + '\n\nAs alterações foram salvas apenas neste navegador.');
   }
@@ -5218,7 +5218,6 @@ function finalizarPagamentoCartao(formData) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        accessToken:        config.mpToken || '',
         description:        checkoutTitulo || 'Claudino Joias',
         external_reference: String(window._pedidoIdPendente || Date.now()),
         ...formData,
@@ -6222,7 +6221,6 @@ function limparForm() {
 async function salvarConfig() {
   config._savedAt = Date.now();
   config.pixKey      = document.getElementById('cfg-pix')?.value.trim() || config.pixKey || '';
-  config.mpToken     = document.getElementById('cfg-mp-token')?.value.trim() || config.mpToken || '';
   config.mpPublicKey = document.getElementById('cfg-mp-public-key')?.value.trim() || config.mpPublicKey || '';
   config.logoTipo    = document.getElementById('cfg-logo-tipo')?.value || config.logoTipo || 'texto';
   config.logoTexto   = document.getElementById('cfg-logo-texto')?.value.trim() || config.logoTexto || '';
@@ -6272,7 +6270,6 @@ async function salvarConfig() {
 
 function loadConfig() {
   document.getElementById('cfg-pix').value        = config.pixKey||'';
-  document.getElementById('cfg-mp-token').value   = config.mpToken||'';
   const mpPk = document.getElementById('cfg-mp-public-key'); if(mpPk) mpPk.value = config.mpPublicKey||'';
   document.getElementById('cfg-logo-tipo').value  = config.logoTipo||'texto';
   document.getElementById('cfg-logo-texto').value = config.logoTexto||'';
