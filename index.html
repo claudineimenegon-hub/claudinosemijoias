@@ -4769,6 +4769,30 @@ async function sbCarregarProdutosAtacado() {
     console.warn('Falha ao carregar produtos de atacado do Supabase, usando dados locais:', e.message);
   }
 }
+
+// ─── CONFIG (cores/textos/banners) VIA SUPABASE ───────
+async function sbCarregarConfig() {
+  try {
+    const sb = sbGetClient();
+    const { data, error } = await sb.from('store_settings').select('config').eq('id', 1).maybeSingle();
+    if (error) throw error;
+    if (data && data.config && Object.keys(data.config).length > 0) {
+      // Supabase é a fonte principal — mescla por cima do que já tinha localmente
+      config = { ...config, ...data.config };
+      try { localStorage.setItem('cj_config', JSON.stringify(config)); } catch(e) {}
+    }
+  } catch (e) {
+    console.warn('Falha ao carregar configurações do Supabase, usando dados locais:', e.message);
+  }
+}
+
+async function sbSalvarConfig() {
+  try {
+    await sbChamarFunction('upsertConfig', { config });
+  } catch (e) {
+    alert('⚠️ Não foi possível sincronizar com o servidor (Supabase): ' + e.message + '\n\nAs alterações foram salvas apenas neste navegador.');
+  }
+}
 function sbVerificarProdutos() {
   document.getElementById('sb-log').innerHTML = '';
   if (!products.length) {
@@ -6195,7 +6219,7 @@ function limparForm() {
   editId = null;
 }
 
-function salvarConfig() {
+async function salvarConfig() {
   config._savedAt = Date.now();
   config.pixKey      = document.getElementById('cfg-pix')?.value.trim() || config.pixKey || '';
   config.mpToken     = document.getElementById('cfg-mp-token')?.value.trim() || config.mpToken || '';
@@ -6233,7 +6257,8 @@ function salvarConfig() {
   config.btnPagarTxt   = document.getElementById('cfg-btn-pagar-txt')?.value.trim() || config.btnPagarTxt || '';
   config.msgSucesso    = document.getElementById('cfg-msg-sucesso')?.value.trim() || config.msgSucesso || '';
   config._savedAt = Date.now(); localStorage.setItem('cj_config', JSON.stringify(config));
-  salvarConfigNoServidor(config); // ← sincroniza com todos os dispositivos
+  salvarConfigNoServidor(config); // ← sincronização legada (frete/redes/pedidos)
+  await sbSalvarConfig(); // ← fonte principal: Supabase (cores/textos/banners)
   aplicarTextosDinamicos();
   renderLogo();
   // Aplicar botão pagar texto
@@ -9664,6 +9689,7 @@ function initCarouselTouch(id) {
 // ── Inicialização: sincroniza config do servidor ao abrir a página ──
 (async () => {
   await syncConfigDoServidor();
+  await sbCarregarConfig(); // Supabase é a fonte principal para cores/textos/banners
   loadConfig();
   await Promise.all([sbCarregarProdutos(), sbCarregarProdutosAtacado()]);
   renderProducts();
