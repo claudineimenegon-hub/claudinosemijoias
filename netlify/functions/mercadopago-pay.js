@@ -9,9 +9,11 @@ exports.handler = async (event) => {
   try { body = JSON.parse(event.body || '{}'); }
   catch { return { statusCode: 400, body: JSON.stringify({ error: 'JSON inválido' }) }; }
 
-  const accessToken = body.accessToken || process.env.MP_ACCESS_TOKEN || '';
+  // Nunca confiar em token vindo do navegador do cliente — usa só a variável
+  // de ambiente segura, configurada no Netlify (nunca exposta publicamente).
+  const accessToken = process.env.MP_ACCESS_TOKEN || '';
   if (!accessToken) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'Access Token não configurado.' }) };
+    return { statusCode: 401, body: JSON.stringify({ error: 'Access Token não configurado no servidor (variável MP_ACCESS_TOKEN ausente no Netlify).' }) };
   }
 
   const payload = JSON.stringify({
