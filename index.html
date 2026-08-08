@@ -4774,7 +4774,7 @@ async function sbCarregarProdutosAtacado() {
 async function sbCarregarConfig() {
   try {
     const sb = sbGetClient();
-    const { data, error } = await sb.from('store_settings').select('config').eq('id', 1).maybeSingle();
+    const { data, error } = await sb.from('store_settings').select('config').eq('key', 'main').maybeSingle();
     if (error) throw error;
     if (data && data.config && Object.keys(data.config).length > 0) {
       // Supabase é a fonte principal — mescla por cima do que já tinha localmente
