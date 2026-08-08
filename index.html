@@ -4600,8 +4600,15 @@ async function syncConfigDoServidor() {
     const d = json.data;
 
     if (d.config && Object.keys(d.config).length > 0) {
-      config = { ...config, ...d.config };
-      localStorage.setItem('cj_config', JSON.stringify(config));
+      const localSavedAt  = config._savedAt || 0;
+      const serverSavedAt = d.config._savedAt || 0;
+      // Só aceita a versão do servidor se ela for realmente mais recente que a local —
+      // evita que um salvamento ainda não propagado ao servidor seja sobrescrito
+      // por uma versão antiga ao recarregar a página (bug de cores/textos revertendo).
+      if (serverSavedAt >= localSavedAt) {
+        config = { ...config, ...d.config };
+        config._savedAt = Date.now(); localStorage.setItem('cj_config', JSON.stringify(config));
+      }
     }
     // Produtos não são mais sincronizados por aqui — o Supabase é a fonte única
     // (ver sbCarregarProdutos / sbCarregarProdutosAtacado), evitando reintroduzir
@@ -5521,7 +5528,7 @@ function salvarConfigNotifPedido() {
   config.ejsPedidoTemplate   = document.getElementById('cfg-ejs-pedido-template')?.value.trim() || '';
   config.ejsPedidoPubkey     = document.getElementById('cfg-ejs-pedido-pubkey')?.value.trim() || '';
   config.emailPedidoAdmin    = document.getElementById('cfg-email-pedido-admin')?.value.trim() || '';
-  localStorage.setItem('cj_config', JSON.stringify(config));
+  config._savedAt = Date.now(); localStorage.setItem('cj_config', JSON.stringify(config));
   salvarNoServidor({ config });
   alert('✅ Notificações de pedidos salvas!');
 }
@@ -5923,7 +5930,7 @@ function salvarBannerAtacado() {
   config.atFeat3t    = document.getElementById('cfg-at-feat3-txt')?.value      || 'Reposição rápida';
   config.atFeat4e    = document.getElementById('cfg-at-feat4-emoji')?.value    || '🤝';
   config.atFeat4t    = document.getElementById('cfg-at-feat4-txt')?.value      || 'Suporte dedicado';
-  localStorage.setItem('cj_config', JSON.stringify(config));
+  config._savedAt = Date.now(); localStorage.setItem('cj_config', JSON.stringify(config));
   salvarNoServidor({ config });
   aplicarBannerAtacado();
   alert('✅ Banner Atacado salvo!');
@@ -6189,6 +6196,7 @@ function limparForm() {
 }
 
 function salvarConfig() {
+  config._savedAt = Date.now();
   config.pixKey      = document.getElementById('cfg-pix')?.value.trim() || config.pixKey || '';
   config.mpToken     = document.getElementById('cfg-mp-token')?.value.trim() || config.mpToken || '';
   config.mpPublicKey = document.getElementById('cfg-mp-public-key')?.value.trim() || config.mpPublicKey || '';
@@ -6224,7 +6232,7 @@ function salvarConfig() {
   config.maxParcelas   = document.getElementById('cfg-max-parcelas')?.value || config.maxParcelas || '6';
   config.btnPagarTxt   = document.getElementById('cfg-btn-pagar-txt')?.value.trim() || config.btnPagarTxt || '';
   config.msgSucesso    = document.getElementById('cfg-msg-sucesso')?.value.trim() || config.msgSucesso || '';
-  localStorage.setItem('cj_config', JSON.stringify(config));
+  config._savedAt = Date.now(); localStorage.setItem('cj_config', JSON.stringify(config));
   salvarConfigNoServidor(config); // ← sincroniza com todos os dispositivos
   aplicarTextosDinamicos();
   renderLogo();
@@ -6415,7 +6423,7 @@ function salvarSobre() {
   config.dif3Txt        = document.getElementById('dif3-txt')?.value.trim()        || '';
   config.dif4Titulo     = document.getElementById('dif4-titulo')?.value.trim()     || '';
   config.dif4Txt        = document.getElementById('dif4-txt')?.value.trim()        || '';
-  localStorage.setItem('cj_config', JSON.stringify(config));
+  config._savedAt = Date.now(); localStorage.setItem('cj_config', JSON.stringify(config));
   aplicarSobre();
   alert('✅ Seção Sobre salva!');
 }
@@ -7176,7 +7184,7 @@ function importarConfig(input) {
   reader.onload = e => {
     try {
       const data = JSON.parse(e.target.result);
-      if(data.config) { config = data.config; localStorage.setItem('cj_config', JSON.stringify(config)); }
+      if(data.config) { config = data.config; config._savedAt = Date.now(); localStorage.setItem('cj_config', JSON.stringify(config)); }
       if(data.products) { products = data.products; save(); }
       if(data.produtosAtacado) { produtosAtacado = data.produtosAtacado; saveProdAtacado(); }
       if(data.cadastrosAtacado) { cadastrosAtacado = data.cadastrosAtacado; saveAtacado(); }
@@ -7640,7 +7648,7 @@ function imprimirCadastroAtacado(id) {
 function toggleBotaoAtacado() {
   const ativo = document.getElementById('cfg-atacado-ativo').checked;
   config.atacadoAtivo = ativo;
-  localStorage.setItem('cj_config', JSON.stringify(config));
+  config._savedAt = Date.now(); localStorage.setItem('cj_config', JSON.stringify(config));
   aplicarEstadoBotaoAtacado();
 }
 
@@ -7729,7 +7737,7 @@ function salvarConfigNotif() {
   config.ejsTemplate   = document.getElementById('cfg-ejs-template')?.value.trim() || '';
   config.ejsPubkey     = document.getElementById('cfg-ejs-pubkey')?.value.trim()   || '';
   config.emailAdmin    = document.getElementById('cfg-email-admin')?.value.trim()  || '';
-  localStorage.setItem('cj_config', JSON.stringify(config));
+  config._savedAt = Date.now(); localStorage.setItem('cj_config', JSON.stringify(config));
   alert('✅ Configurações de notificação salvas!');
 }
 
@@ -7797,7 +7805,7 @@ async function ativarPushNotification(checkbox) {
     const perm = await Notification.requestPermission();
     if(perm === 'granted') {
       config.notifPush = true;
-      localStorage.setItem('cj_config', JSON.stringify(config));
+      config._savedAt = Date.now(); localStorage.setItem('cj_config', JSON.stringify(config));
       atualizarStatusPush();
     } else {
       alert('Permissão negada. Habilite notificações nas configurações do navegador.');
@@ -7806,7 +7814,7 @@ async function ativarPushNotification(checkbox) {
     }
   } else {
     config.notifPush = false;
-    localStorage.setItem('cj_config', JSON.stringify(config));
+    config._savedAt = Date.now(); localStorage.setItem('cj_config', JSON.stringify(config));
     atualizarStatusPush();
   }
 }
@@ -8518,7 +8526,7 @@ function salvarConfigMelhorEnvio() {
     return el && el.checked;
   });
   config.meServicos = srvs.length ? srvs : (config.meServicos || [1,2,7]);
-  localStorage.setItem('cj_config', JSON.stringify(config));
+  config._savedAt = Date.now(); localStorage.setItem('cj_config', JSON.stringify(config));
   // Feedback visual
   const statusEl = document.getElementById('me-token-status');
   if(statusEl) {
@@ -8699,7 +8707,7 @@ function renderZonasFrete() {
 function salvarFrete() {
   const val = parseFloat(document.getElementById('cfg-frete-gratis').value) || 0;
   config.freteGratis = val;
-  localStorage.setItem('cj_config', JSON.stringify(config));
+  config._savedAt = Date.now(); localStorage.setItem('cj_config', JSON.stringify(config));
   alert('✅ Valor de frete grátis salvo!');
 }
 
