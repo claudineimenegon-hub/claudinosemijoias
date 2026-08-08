@@ -83,6 +83,18 @@ exports.handler = async (event) => {
       return { statusCode: 200, body: JSON.stringify({ ok: true, publicUrl }) };
     }
 
+    if (action === 'upsertConfig') {
+      // payload: { config: {...} }
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/store_settings`, {
+        method: 'POST',
+        headers: { ...headers, Prefer: 'resolution=merge-duplicates,return=representation' },
+        body: JSON.stringify({ id: 1, config: payload.config, updated_at: new Date().toISOString() }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(JSON.stringify(data));
+      return { statusCode: 200, body: JSON.stringify({ ok: true, data }) };
+    }
+
     return { statusCode: 400, body: JSON.stringify({ error: 'Ação desconhecida: ' + action }) };
   } catch (e) {
     return { statusCode: 500, body: JSON.stringify({ error: e.message }) };
