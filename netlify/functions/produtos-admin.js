@@ -88,7 +88,7 @@ exports.handler = async (event) => {
       const resp = await fetch(`${SUPABASE_URL}/rest/v1/store_settings`, {
         method: 'POST',
         headers: { ...headers, Prefer: 'resolution=merge-duplicates,return=representation' },
-        body: JSON.stringify({ id: 1, config: payload.config, updated_at: new Date().toISOString() }),
+        body: JSON.stringify({ key: 'main', config: payload.config, updated_at: new Date().toISOString() }),
       });
       const data = await resp.json();
       if (!resp.ok) throw new Error(JSON.stringify(data));
